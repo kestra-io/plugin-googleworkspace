@@ -7,12 +7,6 @@ import java.util.List;
 
 public interface GcpInterface {
     @Schema(
-        title = "The GCP project id"
-    )
-    @PluginProperty(dynamic = true)
-    String getProjectId();
-
-    @Schema(
         title = "The GCP service account key"
     )
     @PluginProperty(dynamic = true)

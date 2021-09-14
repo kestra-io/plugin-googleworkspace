@@ -33,6 +33,7 @@ public abstract class AbstractRead extends AbstractSheet {
         title = "The spreadsheet unique id"
     )
     @NotNull
+    @PluginProperty(dynamic = true)
     protected String spreadsheetId;
 
     @Schema(
@@ -60,9 +61,17 @@ public abstract class AbstractRead extends AbstractSheet {
     )
     protected final Boolean header = true;
 
+    @Schema(
+        title = "Whether to Fetch the data from the query result to the task output"
+    )
+    @PluginProperty(dynamic = false)
     @Builder.Default
     protected final boolean fetch = false;
 
+    @Schema(
+        title = "Whether to store the data from the query result into an ion serialized data file"
+    )
+    @PluginProperty(dynamic = false)
     @Builder.Default
     protected final boolean store = true;
 

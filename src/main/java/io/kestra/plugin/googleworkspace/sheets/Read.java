@@ -8,6 +8,7 @@ import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.executions.metrics.Counter;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
+import io.kestra.core.utils.ListUtils;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -19,6 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import javax.validation.constraints.NotNull;
+
+import static io.kestra.core.utils.Rethrow.throwFunction;
 
 @SuperBuilder
 @ToString
@@ -40,6 +44,13 @@ import java.util.stream.Collectors;
     }
 )
 public class Read extends AbstractRead implements RunnableTask<Read.Output> {
+    @Schema(
+        title = "The sheet title to be included",
+        description = "If not provided all the sheets will be included."
+    )
+    @NotNull
+    private List<String> selectedSheetsTitle;
+
     @Override
     public Read.Output run(RunContext runContext) throws Exception {
         Sheets service = this.connection(runContext);
@@ -49,11 +60,22 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
             .get(runContext.render(spreadsheetId))
             .execute();
 
+        List<String> includedSheetsTitle = ListUtils.emptyOnNull(this.selectedSheetsTitle)
+            .stream()
+            .map(throwFunction(runContext::render))
+            .collect(Collectors.toList());
+
+
+        List<Sheet> selectedSheets = spreadsheet
+            .getSheets()
+            .stream()
+            .filter(sheet -> includedSheetsTitle.size() == 0 || includedSheetsTitle.contains(sheet.getProperties().getTitle()))
+            .collect(Collectors.toList());
+
         runContext.metric(Counter.of("sheets", spreadsheet.getSheets().size()));
 
         // generate range
-        List<String> ranges = spreadsheet
-            .getSheets()
+        List<String> ranges = selectedSheets
             .stream()
             .map(s -> s.getProperties().getTitle() + "!R1C1:" +
                 "R" + s.getProperties().getGridProperties().getRowCount() +
@@ -62,7 +84,7 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
 
         // batch get all ranges
         BatchGetValuesResponse batchGet = service.spreadsheets().values()
-            .batchGet(spreadsheetId)
+            .batchGet(runContext.render(spreadsheetId))
             .setRanges(ranges)
             .set("valueRenderOption", this.valueRender.name())
             .set("dateTimeRenderOption", this.dateTimeRender.name())
@@ -73,7 +95,7 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
         Map<String, URI> uris = new HashMap<>();
         AtomicInteger rowsCount = new AtomicInteger();
 
-        for(int index = 0; index < spreadsheet.getSheets().size(); index++) {
+        for(int index = 0; index < selectedSheets.size(); index++) {
             ValueRange valueRange = batchGet.getValueRanges().get(index);
             Sheet sheet = spreadsheet.getSheets().get(index);
 

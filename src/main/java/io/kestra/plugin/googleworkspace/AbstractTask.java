@@ -31,8 +31,6 @@ import java.util.Map;
 public abstract class AbstractTask extends Task implements GcpInterface {
     protected static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
-    protected String projectId;
-
     protected String serviceAccount;
 
     protected HttpCredentialsAdapter credentials(RunContext runContext) throws IllegalVariableEvaluationException, IOException {
