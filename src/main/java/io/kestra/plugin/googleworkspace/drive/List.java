@@ -47,6 +47,15 @@ public class List extends AbstractDrive implements RunnableTask<List.Output> {
     @PluginProperty(dynamic = true)
     private String query;
 
+    @Schema(
+        title = "list of bodies of items (files/documents) to which the query applies.",
+        description = "'allTeamDrives' must" +
+            " be combined with 'user'; all other values must be used in isolation. Prefer 'user' or 'teamDrive' " +
+            "to 'allTeamDrives' for efficiency."
+    )
+    @PluginProperty(dynamic = false)
+    private java.util.List<Corpora> corpora;
+
     @Override
     public Output run(RunContext runContext) throws Exception {
         Drive service = this.connection(runContext);
@@ -58,6 +67,14 @@ public class List extends AbstractDrive implements RunnableTask<List.Output> {
             .list()
             .setFields("nextPageToken, files(id, name, size, version, createdTime, parents, trashed)")
             .setQ(query);
+
+        if (this.corpora != null) {
+            list.setCorpora(this.corpora
+                .stream()
+                .map(Enum::name)
+                .collect(Collectors.joining(","))
+            );
+        }
 
         java.util.List<File> files = this.list(list);
 
@@ -87,6 +104,13 @@ public class List extends AbstractDrive implements RunnableTask<List.Output> {
         } while (pageToken != null);
 
         return result;
+    }
+
+    public enum Corpora {
+        user,
+        domain,
+        teamDrive,
+        allTeamDrives
     }
 
     @Builder
