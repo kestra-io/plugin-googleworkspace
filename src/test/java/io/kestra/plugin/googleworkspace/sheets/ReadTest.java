@@ -41,7 +41,6 @@ class ReadTest {
         assertThat(((Map<String, Object>) run.getRows().get("2 Tables").get(25)).size(), is(2));
     }
 
-
     @SuppressWarnings("unchecked")
     @Test
     void selected() throws Exception {
@@ -50,7 +49,7 @@ class ReadTest {
             .type(ReadRange.class.getName())
             .spreadsheetId("1Dkd7W0OQo-wxz9rrORLP7YGSj6EBLEg73fiTdbJUIQE")
             .serviceAccount(UtilsTest.serviceAccount())
-            .selectedSheetsTitle(List.of("Class Data"))
+            .selectedSheetsTitle(List.of("Second One"))
             .fetch(true)
             .build();
 
@@ -58,7 +57,7 @@ class ReadTest {
 
         assertThat(run.getRows().size(), is(1));
         assertThat(run.getSize(), is(31));
-        assertThat(((Map<String, Object>) run.getRows().get("Class Data").get(6)).get("Date"), is("7/11/2012"));
-        assertThat(((Map<String, Object>) run.getRows().get("Class Data").get(6)).get("Date"), is("7/11/2012"));
+        assertThat(((Map<String, Object>) run.getRows().get("Second One").get(0)).get("Formula"), is("Female"));
+        assertThat(((Map<String, Object>) run.getRows().get("Second One").get(0)).size(), is(3));
     }
 }

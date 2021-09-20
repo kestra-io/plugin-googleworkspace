@@ -31,10 +31,11 @@ import javax.validation.constraints.NotNull;
             title = "Upload a csv and convert it to sheet format",
             code = {
                 "from: \"{{ inputs.file }}\"",
-                "to: \"1HuxzpLt1b0111MuKMgy8wAv-m9Myc1E_\"",
+                "parents:",
+                " - \"1HuxzpLt1b0111MuKMgy8wAv-m9Myc1E_\"",
                 "name: \"My awesome CSV\"",
                 "contentType: \"text/csv\"",
-                "mineType: \"application/vnd.google-apps.spreadsheet\""
+                "mimeType: \"application/vnd.google-apps.spreadsheet\""
             }
         )
     }

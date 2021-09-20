@@ -48,7 +48,6 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
         title = "The sheet title to be included",
         description = "If not provided all the sheets will be included."
     )
-    @NotNull
     private List<String> selectedSheetsTitle;
 
     @Override
@@ -64,7 +63,6 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
             .stream()
             .map(throwFunction(runContext::render))
             .collect(Collectors.toList());
-
 
         List<Sheet> selectedSheets = spreadsheet
             .getSheets()
@@ -97,7 +95,7 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
 
         for(int index = 0; index < selectedSheets.size(); index++) {
             ValueRange valueRange = batchGet.getValueRanges().get(index);
-            Sheet sheet = spreadsheet.getSheets().get(index);
+            Sheet sheet = selectedSheets.get(index);
 
             logger.info("Fetch {} rows from range '{}'", valueRange.getValues().size(), valueRange.getRange());
             rowsCount.addAndGet(valueRange.getValues().size());
