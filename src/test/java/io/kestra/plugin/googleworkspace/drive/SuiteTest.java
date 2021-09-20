@@ -14,13 +14,13 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import javax.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @MicronautTest
@@ -40,11 +40,24 @@ class SuiteTest {
                 .toURI()))
         );
 
+        Create create = Create.builder()
+            .id(SuiteTest.class.getSimpleName())
+            .type(Create.class.getName())
+            .name(IdUtils.create())
+            .parents(List.of("1gkUuyf7CmVjEz7QR-Hl9Xx5kdmbk5Lwo"))
+            .mimeType("application/vnd.google-apps.folder")
+            .serviceAccount(UtilsTest.serviceAccount())
+            .build();
+
+        Create.Output createRun = create.run(TestsUtils.mockRunContext(runContextFactory, create, Map.of()));
+
+        assertThat(createRun.getFile().getParents(), contains("1gkUuyf7CmVjEz7QR-Hl9Xx5kdmbk5Lwo"));
+
         Upload upload = Upload.builder()
             .id(SuiteTest.class.getSimpleName())
             .type(Upload.class.getName())
             .from(source.toString())
-            .to("1HuxzpLt1b0111MuKMgy8wAv-m9Myc1E_")
+            .parents(List.of(createRun.getFile().getId()))
             .name(IdUtils.create())
             .contentType("text/csv")
             .mimeType("application/vnd.google-apps.spreadsheet")
@@ -63,7 +76,7 @@ class SuiteTest {
             .serviceAccount(UtilsTest.serviceAccount())
             .build();
 
-        Export.Output exportRun = export.run(TestsUtils.mockRunContext(runContextFactory, upload, Map.of()));
+        Export.Output exportRun = export.run(TestsUtils.mockRunContext(runContextFactory, export, Map.of()));
 
         InputStream get = storageInterface.get(exportRun.getUri());
         String getContent = CharStreams.toString(new InputStreamReader(get));
@@ -78,9 +91,20 @@ class SuiteTest {
             .serviceAccount(UtilsTest.serviceAccount())
             .build();
 
-        Delete.Output deleteRun = delete.run(TestsUtils.mockRunContext(runContextFactory, upload, Map.of()));
+        Delete.Output deleteRun = delete.run(TestsUtils.mockRunContext(runContextFactory, delete, Map.of()));
 
         assertThat(deleteRun.getFileId(), is(exportRun.getFile().getId()));
+
+        Delete deleteFolder = Delete.builder()
+            .id(SuiteTest.class.getSimpleName())
+            .type(Delete.class.getName())
+            .fileId(createRun.getFile().getId())
+            .serviceAccount(UtilsTest.serviceAccount())
+            .build();
+
+        Delete.Output deleteFolderRun = deleteFolder.run(TestsUtils.mockRunContext(runContextFactory, deleteFolder, Map.of()));
+
+        assertThat(deleteFolderRun.getFileId(), is(createRun.getFile().getId()));
 
         assertThrows(Exception.class, () -> {
             export.run(TestsUtils.mockRunContext(runContextFactory, upload, Map.of()));
@@ -102,7 +126,7 @@ class SuiteTest {
             .id(SuiteTest.class.getSimpleName())
             .type(Upload.class.getName())
             .from(source.toString())
-            .to("1HuxzpLt1b0111MuKMgy8wAv-m9Myc1E_")
+            .parents(List.of("1HuxzpLt1b0111MuKMgy8wAv-m9Myc1E_"))
             .name(IdUtils.create())
             .contentType("application/zip")
             .serviceAccount(UtilsTest.serviceAccount())

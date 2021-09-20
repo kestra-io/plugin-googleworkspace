@@ -1,7 +1,7 @@
 package io.kestra.plugin.googleworkspace.drive;
 
 import com.google.api.services.drive.Drive;
-import com.google.api.services.sheets.v4.SheetsScopes;
+import com.google.api.services.drive.DriveScopes;
 import com.google.auth.http.HttpCredentialsAdapter;
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.models.annotations.PluginProperty;
@@ -22,7 +22,7 @@ import java.util.List;
 public abstract class AbstractDrive extends AbstractTask {
     @Builder.Default
     @PluginProperty(dynamic = true)
-    protected List<String> scopes = List.of(SheetsScopes.DRIVE);
+    protected List<String> scopes = List.of(DriveScopes.DRIVE);
 
     Drive connection(RunContext runContext) throws IllegalVariableEvaluationException, IOException, GeneralSecurityException {
         HttpCredentialsAdapter credentials = this.credentials(runContext);
