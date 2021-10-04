@@ -40,6 +40,13 @@ class SuiteTest {
                 .toURI()))
         );
 
+        URI source2 = storageInterface.put(
+            new URI("/" + IdUtils.create()),
+            new FileInputStream(new File(Objects.requireNonNull(SuiteTest.class.getClassLoader()
+                    .getResource("examples/addresses2.csv"))
+                .toURI()))
+        );
+
         Create create = Create.builder()
             .id(SuiteTest.class.getSimpleName())
             .type(Create.class.getName())
@@ -83,6 +90,37 @@ class SuiteTest {
 
         assertThat(getContent, containsString("John,Doe"));
         assertThat(getContent, containsString("Desert City,CO,123"));
+
+        Upload upload2 = Upload.builder()
+            .id(SuiteTest.class.getSimpleName())
+            .type(Upload.class.getName())
+            .from(source2.toString())
+            .fileId(uploadRun.getFile().getId())
+            .name(IdUtils.create())
+            .contentType("text/csv")
+            .mimeType("application/vnd.google-apps.spreadsheet")
+            .serviceAccount(UtilsTest.serviceAccount())
+            .build();
+
+        Upload.Output upload2Run = upload2.run(TestsUtils.mockRunContext(runContextFactory, upload, Map.of()));
+
+        assertThat(upload2Run.getFile().getSize(), is(1024L));
+
+        Export export2 = Export.builder()
+            .id(SuiteTest.class.getSimpleName())
+            .type(Export.class.getName())
+            .fileId(uploadRun.getFile().getId())
+            .contentType("text/csv")
+            .serviceAccount(UtilsTest.serviceAccount())
+            .build();
+
+        Export.Output exportRun2 = export2.run(TestsUtils.mockRunContext(runContextFactory, export, Map.of()));
+
+        InputStream get2 = storageInterface.get(exportRun2.getUri());
+        String getContent2 = CharStreams.toString(new InputStreamReader(get2));
+
+        assertThat(getContent2, containsString("Jane,Doe"));
+        assertThat(getContent2, containsString("Desert City,CO,123"));
 
         Delete delete = Delete.builder()
             .id(SuiteTest.class.getSimpleName())

@@ -52,6 +52,13 @@ public class Upload extends AbstractCreate implements RunnableTask<Upload.Output
     private String from;
 
     @Schema(
+        title = "The file id to update",
+        description = "If not provided, it will create a new file"
+    )
+    @PluginProperty(dynamic = true)
+    private String fileId;
+
+    @Schema(
         title = "The content-type of the file.",
         description = "a valid [RFC2045](https://datatracker.ietf.org/doc/html/rfc2045) like `text/csv`, `application/msword`, ... "
     )
@@ -74,11 +81,20 @@ public class Upload extends AbstractCreate implements RunnableTask<Upload.Output
 
         FileContent fileContent = new FileContent(runContext.render(contentType), tempFile);
 
-        File file = service
-            .files()
-            .create(fileMetadata, fileContent)
-            .setFields("id, name, size, version, createdTime, parents, trashed")
-            .execute();
+        File file;
+        if (this.fileId != null) {
+            file = service
+                .files()
+                .update(runContext.render(this.fileId), fileMetadata, fileContent)
+                .setFields("id, name, size, version, createdTime, parents, trashed")
+                .execute();
+        } else {
+            file = service
+                .files()
+                .create(fileMetadata, fileContent)
+                .setFields("id, name, size, version, createdTime, parents, trashed")
+                .execute();
+        }
 
         runContext.metric(Counter.of("size", file.size()));
         logger.debug("Upload from '{}' to '{}'", from, fileMetadata.getParents());
