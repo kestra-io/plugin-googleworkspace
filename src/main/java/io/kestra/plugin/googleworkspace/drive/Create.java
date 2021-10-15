@@ -41,6 +41,7 @@ public class Create extends AbstractCreate implements RunnableTask<Create.Output
             .files()
             .create(fileMetadata)
             .setFields("id, name, size, version, createdTime, parents, trashed")
+            .setSupportsTeamDrives(true)
             .execute();
 
         logger.debug("Created '{}' in '{}'", file.getName(), file.getParents());

@@ -49,7 +49,7 @@ public abstract class AbstractCreate extends AbstractDrive {
     protected String mimeType;
 
     @Schema(
-        title = "ID of the Team Drive the file resides in.."
+        title = "ID of the Team Drive the file resides in."
     )
     @PluginProperty(dynamic = true)
     protected String teamDriveId;

@@ -60,7 +60,11 @@ public class Export extends AbstractDrive implements RunnableTask<Export.Output>
         File tempFile = runContext.tempFile().toFile();
 
         try (BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(tempFile))) {
-            com.google.api.services.drive.model.File file = service.files().get(fileId).execute();
+            com.google.api.services.drive.model.File file = service
+                .files()
+                .get(fileId)
+                .setSupportsTeamDrives(true)
+                .execute();
             Drive.Files.Export export = service.files().export(fileId, runContext.render(contentType));
 
             export.executeMediaAndDownloadTo(outputStream);

@@ -50,7 +50,9 @@ public class Download extends AbstractDrive implements RunnableTask<Download.Out
         File tempFile = runContext.tempFile().toFile();
         try (BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(tempFile))) {
             Drive.Files.Get get = service.files().get(fileId);
-            com.google.api.services.drive.model.File file = get.execute();
+            com.google.api.services.drive.model.File file = get
+                .setSupportsTeamDrives(true)
+                .execute();
 
             get.executeMediaAndDownloadTo(outputStream);
             outputStream.flush();

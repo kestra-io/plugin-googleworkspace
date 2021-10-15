@@ -87,12 +87,14 @@ public class Upload extends AbstractCreate implements RunnableTask<Upload.Output
                 .files()
                 .update(runContext.render(this.fileId), fileMetadata, fileContent)
                 .setFields("id, name, size, version, createdTime, parents, trashed")
+                .setSupportsTeamDrives(true)
                 .execute();
         } else {
             file = service
                 .files()
                 .create(fileMetadata, fileContent)
                 .setFields("id, name, size, version, createdTime, parents, trashed")
+                .setSupportsTeamDrives(true)
                 .execute();
         }
 
