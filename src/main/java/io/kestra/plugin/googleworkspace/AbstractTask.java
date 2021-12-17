@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
@@ -19,8 +19,6 @@ import org.slf4j.Logger;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 @SuperBuilder
@@ -29,7 +27,7 @@ import java.util.Map;
 @Getter
 @NoArgsConstructor
 public abstract class AbstractTask extends Task implements GcpInterface {
-    protected static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    protected static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 
     protected String serviceAccount;
 

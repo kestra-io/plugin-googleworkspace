@@ -17,7 +17,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -164,7 +164,7 @@ class SuiteTest {
             .id(SuiteTest.class.getSimpleName())
             .type(Upload.class.getName())
             .from(source.toString())
-            .parents(List.of("1HuxzpLt1b0111MuKMgy8wAv-m9Myc1E_"))
+            .parents(List.of("1gkUuyf7CmVjEz7QR-Hl9Xx5kdmbk5Lwo"))
             .name(IdUtils.create())
             .contentType("application/zip")
             .serviceAccount(UtilsTest.serviceAccount())
