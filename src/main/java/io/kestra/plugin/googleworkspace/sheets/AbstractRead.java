@@ -90,8 +90,7 @@ public abstract class AbstractRead extends AbstractSheet {
                     Map<String, Object> resultRows = new LinkedHashMap<>();
 
                     for (int j = 0; j < headers.size(); j++) {
-                        resultRows.put((String) headers.get(j), row.contains(j) ? row.get(j) : null);
-                    }
+                        resultRows.put((String) headers.get(j), j >=0 && j < row.size() ? row.get(j) : null);                    }
                     result.add(resultRows);
             }
         } else {
