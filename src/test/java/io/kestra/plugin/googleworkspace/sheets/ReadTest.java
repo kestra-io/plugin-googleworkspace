@@ -12,6 +12,7 @@ import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 @MicronautTest
 class ReadTest {
@@ -33,13 +34,12 @@ class ReadTest {
 
         assertThat(run.getSize(), is(93));
         assertThat(((Map<String, Object>) run.getRows().get("Class Data").get(6)).get("Date"), is("7/11/2012"));
-        assertThat(((Map<String, Object>) run.getRows().get("Class Data").get(6)).get("Date"), is("7/11/2012"));
         assertThat(((Map<String, Object>) run.getRows().get("Second One").get(0)).get("Formula"), is("Female"));
         assertThat(((Map<String, Object>) run.getRows().get("2 Tables").get(0)).get("Student Name"), is("Alexandra"));
         assertThat(((Map<String, Object>) run.getRows().get("2 Tables").get(0)).size(), is(5));
         assertThat(((Map<String, Object>) run.getRows().get("2 Tables").get(25)).get("Student Name"), is("Robert"));
-        assertThat(((Map<String, Object>) run.getRows().get("2 Tables").get(25)).size(), is(2));
-    }
+        assertThat(((Map<String, Object>) run.getRows().get("2 Tables").get(25)).size(), is(5));
+        assertThat(((Map<String, Object>) run.getRows().get("2 Tables").get(25)).get("Student Name 2"), is(nullValue()));
 
     @SuppressWarnings("unchecked")
     @Test
