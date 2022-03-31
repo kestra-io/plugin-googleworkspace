@@ -73,7 +73,7 @@ class SuiteTest {
 
         Upload.Output uploadRun = upload.run(TestsUtils.mockRunContext(runContextFactory, upload, Map.of()));
 
-        assertThat(uploadRun.getFile().getSize(), is(1024L));
+        assertThat(uploadRun.getFile().getSize(), greaterThan(0L));
 
         Export export = Export.builder()
             .id(SuiteTest.class.getSimpleName())
