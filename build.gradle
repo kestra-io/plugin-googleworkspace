@@ -8,7 +8,7 @@ plugins {
     id 'signing'
     id "io.github.gradle-nexus.publish-plugin" version "1.1.0"
     id "com.github.ben-manes.versions" version "0.42.0"
-    id 'net.researchgate.release' version '3.0.0'
+    id 'net.researchgate.release' version '3.0.1'
 }
 
 def isBuildSnapshot = version.toString().endsWith("-SNAPSHOT")
@@ -47,8 +47,8 @@ dependencies {
 
     // api
     api 'com.google.api-client:google-api-client:2.0.0'
-    api 'com.google.auth:google-auth-library-oauth2-http:1.9.0'
-    api 'com.google.apis:google-api-services-drive:v3-rev20220709-2.0.0'
+    api 'com.google.auth:google-auth-library-oauth2-http:1.10.0'
+    api 'com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0'
     api 'com.google.apis:google-api-services-sheets:v4-rev20220620-2.0.0'
 }
 
