@@ -110,7 +110,8 @@ nexusPublishing {
 jar {
     manifest {
         attributes(
-                "X-Kestra-Title": project.name,
+                "X-Kestra-Name": project.name,
+                "X-Kestra-Title": "Google Workspace",
                 "X-Kestra-Group": project.group + ".googleworkspace",
                 "X-Kestra-Description": project.description,
                 "X-Kestra-Version": project.version
