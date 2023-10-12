@@ -21,7 +21,7 @@ import org.slf4j.Logger;
         @Example(
             code = {
                 "name: \"My Folder\"",
-                "name: \"application/vnd.google-apps.folder\""
+                "mimeType: \"application/vnd.google-apps.folder\""
             }
         )
     }
