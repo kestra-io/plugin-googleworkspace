@@ -34,6 +34,7 @@ class SuiteTest {
     @Test
     void run() throws Exception {
         URI source = storageInterface.put(
+            null,
             new URI("/" + IdUtils.create()),
             new FileInputStream(new File(Objects.requireNonNull(SuiteTest.class.getClassLoader()
                     .getResource("examples/addresses.csv"))
@@ -41,6 +42,7 @@ class SuiteTest {
         );
 
         URI source2 = storageInterface.put(
+            null,
             new URI("/" + IdUtils.create()),
             new FileInputStream(new File(Objects.requireNonNull(SuiteTest.class.getClassLoader()
                     .getResource("examples/addresses2.csv"))
@@ -85,7 +87,7 @@ class SuiteTest {
 
         Export.Output exportRun = export.run(TestsUtils.mockRunContext(runContextFactory, export, Map.of()));
 
-        InputStream get = storageInterface.get(exportRun.getUri());
+        InputStream get = storageInterface.get(null, exportRun.getUri());
         String getContent = CharStreams.toString(new InputStreamReader(get));
 
         assertThat(getContent, containsString("John,Doe"));
@@ -116,7 +118,7 @@ class SuiteTest {
 
         Export.Output exportRun2 = export2.run(TestsUtils.mockRunContext(runContextFactory, export, Map.of()));
 
-        InputStream get2 = storageInterface.get(exportRun2.getUri());
+        InputStream get2 = storageInterface.get(null, exportRun2.getUri());
         String getContent2 = CharStreams.toString(new InputStreamReader(get2));
 
         assertThat(getContent2, containsString("Jane,Doe"));
@@ -156,6 +158,7 @@ class SuiteTest {
             .toURI());
 
         URI source = storageInterface.put(
+            null,
             new URI("/" + IdUtils.create()),
             new FileInputStream(file)
         );
@@ -182,7 +185,7 @@ class SuiteTest {
             .build();
 
         Download.Output downloadRun = download.run(TestsUtils.mockRunContext(runContextFactory, upload, Map.of()));
-        InputStream get = storageInterface.get(downloadRun.getUri());
+        InputStream get = storageInterface.get(null, downloadRun.getUri());
 
         assertThat(
             CharStreams.toString(new InputStreamReader(get)),
