@@ -51,7 +51,7 @@ dependencies {
     compileOnly group: "io.kestra", name: "core", version: kestraVersion
 
     // api
-    api 'com.google.api-client:google-api-client:2.2.0'
+    api 'com.google.api-client:google-api-client:2.3.0'
     api 'com.google.auth:google-auth-library-oauth2-http:1.20.0'
     api 'com.google.apis:google-api-services-drive:v3-rev20231128-2.0.0'
     api 'com.google.apis:google-api-services-sheets:v4-rev20230815-2.0.0'
