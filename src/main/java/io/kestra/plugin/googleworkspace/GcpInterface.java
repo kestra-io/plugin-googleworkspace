@@ -17,4 +17,10 @@ public interface GcpInterface {
     )
     @PluginProperty(dynamic = true)
     List<String> getScopes();
+
+    @Schema(
+        title = "The read timeout for the request (in seconds)"
+    )
+    @PluginProperty(dynamic = true)
+    Integer getReadTimeout();
 }
