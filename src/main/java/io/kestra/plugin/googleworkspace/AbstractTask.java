@@ -2,6 +2,7 @@ package io.kestra.plugin.googleworkspace;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
@@ -31,6 +32,10 @@ public abstract class AbstractTask extends Task implements GcpInterface {
 
     protected String serviceAccount;
 
+    @Builder.Default
+    protected Integer readTimeout = 120;
+
+
     protected HttpCredentialsAdapter credentials(RunContext runContext) throws IllegalVariableEvaluationException, IOException {
         GoogleCredentials credentials;
 
@@ -44,7 +49,7 @@ public abstract class AbstractTask extends Task implements GcpInterface {
                 byteArrayInputStream.reset();
                 Map<String, String> jsonKey = JacksonMapper.ofJson().readValue(byteArrayInputStream, new TypeReference<>() {});
                 if (jsonKey.containsKey("client_email")) {
-                    logger.trace(" • Using service account: {}", jsonKey.get("client_email") );
+                    logger.trace(" • Using service account: {}", jsonKey.get("client_email"));
                 }
             }
         } else {
@@ -55,7 +60,14 @@ public abstract class AbstractTask extends Task implements GcpInterface {
             credentials = credentials.createScoped(runContext.render(this.getScopes()));
         }
 
-        return new HttpCredentialsAdapter(credentials);
+        return new HttpCredentialsAdapter(credentials) {
+            @Override
+            public void initialize(HttpRequest request) throws IOException {
+                super.initialize(request);
+
+                request.setReadTimeout(readTimeout * 1000);
+            }
+        };
     }
 
     protected NetHttpTransport netHttpTransport() throws GeneralSecurityException, IOException {
