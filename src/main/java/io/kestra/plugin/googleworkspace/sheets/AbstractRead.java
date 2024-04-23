@@ -3,7 +3,6 @@ package io.kestra.plugin.googleworkspace.sheets;
 import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.serializers.FileSerde;
-import io.micronaut.core.annotation.Introspected;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -115,14 +114,12 @@ public abstract class AbstractRead extends AbstractSheet {
         return tempFile;
     }
 
-    @Introspected
     public enum ValueRender {
         FORMATTED_VALUE,
         UNFORMATTED_VALUE,
         FORMULA
     }
 
-    @Introspected
     public enum DateTimeRender {
         SERIAL_NUMBER,
         FORMATTED_STRING
