@@ -61,7 +61,6 @@ public class WriteValue extends AbstractWrite implements RunnableTask<AbstractWr
     @PluginProperty()
     protected WriteValue.ArrayDirection arrayDirection = ArrayDirection.ROWS;
 
-    @SneakyThrows
     @Override
     public Output run(RunContext runContext) throws Exception {
         ValueRange valueRange = convertValue(runContext::render);

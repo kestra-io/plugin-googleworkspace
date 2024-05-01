@@ -62,7 +62,6 @@ public class WriteFile extends AbstractWrite implements RunnableTask<AbstractWri
     @Nullable
     private String dataSeparator;
 
-    @SneakyThrows
     @Override
     public Output run(RunContext runContext) throws Exception {
         URI from = URI.create(runContext.render(this.getFrom()));
