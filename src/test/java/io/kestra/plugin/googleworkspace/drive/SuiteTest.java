@@ -53,14 +53,14 @@ class SuiteTest {
             .id(SuiteTest.class.getSimpleName())
             .type(Create.class.getName())
             .name(IdUtils.create())
-            .parents(List.of("1gkUuyf7CmVjEz7QR-Hl9Xx5kdmbk5Lwo"))
+            .parents(List.of("0AMcI1s7ZFzh0Uk9PVA"))
             .mimeType("application/vnd.google-apps.folder")
             .serviceAccount(UtilsTest.serviceAccount())
             .build();
 
         Create.Output createRun = create.run(TestsUtils.mockRunContext(runContextFactory, create, Map.of()));
 
-        assertThat(createRun.getFile().getParents(), contains("1gkUuyf7CmVjEz7QR-Hl9Xx5kdmbk5Lwo"));
+        assertThat(createRun.getFile().getParents(), contains("0AMcI1s7ZFzh0Uk9PVA"));
 
         Upload upload = Upload.builder()
             .id(SuiteTest.class.getSimpleName())
@@ -86,6 +86,14 @@ class SuiteTest {
             .build();
 
         Export.Output exportRun = export.run(TestsUtils.mockRunContext(runContextFactory, export, Map.of()));
+
+        assertThat(exportRun.getFile().getName(), is(uploadRun.getFile().getName()));
+        assertThat(exportRun.getFile().getSize(), greaterThan(0L));
+        assertThat(exportRun.getFile().getVersion(), notNullValue());
+        assertThat(exportRun.getFile().getMimeType(), notNullValue());
+        assertThat(exportRun.getFile().getCreatedTime(), is(uploadRun.getFile().getCreatedTime()));
+        assertThat(exportRun.getFile().getParents().equals(uploadRun.getFile().getParents()), is(true));
+        assertThat(exportRun.getFile().getTrashed(), is(uploadRun.getFile().getTrashed()));
 
         InputStream get = storageInterface.get(null, exportRun.getUri());
         String getContent = CharStreams.toString(new InputStreamReader(get));
@@ -117,6 +125,14 @@ class SuiteTest {
             .build();
 
         Export.Output exportRun2 = export2.run(TestsUtils.mockRunContext(runContextFactory, export, Map.of()));
+
+        assertThat(exportRun2.getFile().getName(), is(upload2Run.getFile().getName()));
+        assertThat(exportRun2.getFile().getSize(), is(upload2Run.getFile().getSize()));
+        assertThat(exportRun2.getFile().getVersion(), is(upload2Run.getFile().getVersion()));
+        assertThat(exportRun2.getFile().getMimeType(), notNullValue());
+        assertThat(exportRun2.getFile().getCreatedTime(), is(upload2Run.getFile().getCreatedTime()));
+        assertThat(exportRun2.getFile().getParents().equals(upload2Run.getFile().getParents()), is(true));
+        assertThat(exportRun2.getFile().getTrashed(), is(upload2Run.getFile().getTrashed()));
 
         InputStream get2 = storageInterface.get(null, exportRun2.getUri());
         String getContent2 = CharStreams.toString(new InputStreamReader(get2));
@@ -167,7 +183,7 @@ class SuiteTest {
             .id(SuiteTest.class.getSimpleName())
             .type(Upload.class.getName())
             .from(source.toString())
-            .parents(List.of("1gkUuyf7CmVjEz7QR-Hl9Xx5kdmbk5Lwo"))
+            .parents(List.of("0AMcI1s7ZFzh0Uk9PVA"))
             .name(IdUtils.create())
             .contentType("application/zip")
             .serviceAccount(UtilsTest.serviceAccount())
@@ -185,6 +201,15 @@ class SuiteTest {
             .build();
 
         Download.Output downloadRun = download.run(TestsUtils.mockRunContext(runContextFactory, upload, Map.of()));
+
+        assertThat(downloadRun.getFile().getName(), is(uploadRun.getFile().getName()));
+        assertThat(downloadRun.getFile().getSize(), is(uploadRun.getFile().getSize()));
+        assertThat(downloadRun.getFile().getVersion(), is(uploadRun.getFile().getVersion()));
+        assertThat(downloadRun.getFile().getMimeType(), notNullValue());
+        assertThat(downloadRun.getFile().getCreatedTime(), is(uploadRun.getFile().getCreatedTime()));
+        assertThat(downloadRun.getFile().getParents().equals(uploadRun.getFile().getParents()), is(true));
+        assertThat(downloadRun.getFile().getTrashed(), is(uploadRun.getFile().getTrashed()));
+
         InputStream get = storageInterface.get(null, downloadRun.getUri());
 
         assertThat(

@@ -63,6 +63,7 @@ public class Export extends AbstractDrive implements RunnableTask<Export.Output>
             com.google.api.services.drive.model.File file = service
                 .files()
                 .get(fileId)
+                .setFields("id, name, size, version, createdTime, parents, trashed, mimeType")
                 .setSupportsTeamDrives(true)
                 .execute();
             Drive.Files.Export export = service.files().export(fileId, runContext.render(contentType));
