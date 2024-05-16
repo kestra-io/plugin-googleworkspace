@@ -100,7 +100,7 @@ public class Upload extends AbstractCreate implements RunnableTask<Upload.Output
         runContext.metric(Counter.of("size", file.size()));
         logger.debug("Upload from '{}' to '{}'", from, fileMetadata.getParents());
 
-        // For Google apps files such as doc, spreadsheet - file.getSize() will return: null, 1 or 1024 (Which is incorrect value)
+        // For Google apps files such as doc, spreadsheet, csv - file.getSize() will return: null, 1 or 1024 (Which is incorrect value)
         // Hardcoding file size from tempFile size in bytes that have been exported/created
         file.setSize(tempFile.length());
 
