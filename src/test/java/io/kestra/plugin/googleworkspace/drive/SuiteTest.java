@@ -87,6 +87,14 @@ class SuiteTest {
 
         Export.Output exportRun = export.run(TestsUtils.mockRunContext(runContextFactory, export, Map.of()));
 
+        assertThat(exportRun.getFile().getName(), is(uploadRun.getFile().getName()));
+        assertThat(exportRun.getFile().getSize(), greaterThan(0L));
+        assertThat(exportRun.getFile().getVersion(), notNullValue());
+        assertThat(exportRun.getFile().getMimeType(), notNullValue());
+        assertThat(exportRun.getFile().getCreatedTime(), is(uploadRun.getFile().getCreatedTime()));
+        assertThat(exportRun.getFile().getParents().equals(uploadRun.getFile().getParents()), is(true));
+        assertThat(exportRun.getFile().getTrashed(), is(uploadRun.getFile().getTrashed()));
+
         InputStream get = storageInterface.get(null, exportRun.getUri());
         String getContent = CharStreams.toString(new InputStreamReader(get));
 
@@ -117,6 +125,14 @@ class SuiteTest {
             .build();
 
         Export.Output exportRun2 = export2.run(TestsUtils.mockRunContext(runContextFactory, export, Map.of()));
+
+        assertThat(exportRun2.getFile().getName(), is(upload2Run.getFile().getName()));
+        assertThat(exportRun2.getFile().getSize(), is(upload2Run.getFile().getSize()));
+        assertThat(exportRun2.getFile().getVersion(), is(upload2Run.getFile().getVersion()));
+        assertThat(exportRun2.getFile().getMimeType(), notNullValue());
+        assertThat(exportRun2.getFile().getCreatedTime(), is(upload2Run.getFile().getCreatedTime()));
+        assertThat(exportRun2.getFile().getParents().equals(upload2Run.getFile().getParents()), is(true));
+        assertThat(exportRun2.getFile().getTrashed(), is(upload2Run.getFile().getTrashed()));
 
         InputStream get2 = storageInterface.get(null, exportRun2.getUri());
         String getContent2 = CharStreams.toString(new InputStreamReader(get2));
@@ -185,6 +201,15 @@ class SuiteTest {
             .build();
 
         Download.Output downloadRun = download.run(TestsUtils.mockRunContext(runContextFactory, upload, Map.of()));
+
+        assertThat(downloadRun.getFile().getName(), is(uploadRun.getFile().getName()));
+        assertThat(downloadRun.getFile().getSize(), is(uploadRun.getFile().getSize()));
+        assertThat(downloadRun.getFile().getVersion(), is(uploadRun.getFile().getVersion()));
+        assertThat(downloadRun.getFile().getMimeType(), notNullValue());
+        assertThat(downloadRun.getFile().getCreatedTime(), is(uploadRun.getFile().getCreatedTime()));
+        assertThat(downloadRun.getFile().getParents().equals(uploadRun.getFile().getParents()), is(true));
+        assertThat(downloadRun.getFile().getTrashed(), is(uploadRun.getFile().getTrashed()));
+
         InputStream get = storageInterface.get(null, downloadRun.getUri());
 
         assertThat(
