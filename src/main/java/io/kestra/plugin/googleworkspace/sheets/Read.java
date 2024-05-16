@@ -105,7 +105,7 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
             if (this.fetch) {
                 rows.put(sheet.getProperties().getTitle(), values);
             } else {
-                uris.put(sheet.getProperties().getTitle(), runContext.putTempFile(this.store(runContext, values)));
+                uris.put(sheet.getProperties().getTitle(), runContext.storage().putFile(this.store(runContext, values)));
             }
         }
 

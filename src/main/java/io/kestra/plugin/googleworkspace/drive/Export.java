@@ -77,7 +77,7 @@ public class Export extends AbstractDrive implements RunnableTask<Export.Output>
 
             return Output
                 .builder()
-                .uri(runContext.putTempFile(tempFile))
+                .uri(runContext.storage().putFile(tempFile))
                 .file(io.kestra.plugin.googleworkspace.drive.models.File.of(file))
                 .build();
         }

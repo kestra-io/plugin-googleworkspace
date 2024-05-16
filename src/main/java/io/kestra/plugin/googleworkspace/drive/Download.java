@@ -64,7 +64,7 @@ public class Download extends AbstractDrive implements RunnableTask<Download.Out
 
             return Output
                 .builder()
-                .uri(runContext.putTempFile(tempFile))
+                .uri(runContext.storage().putFile(tempFile))
                 .file(io.kestra.plugin.googleworkspace.drive.models.File.of(file))
                 .build();
         }
