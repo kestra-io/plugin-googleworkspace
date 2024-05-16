@@ -85,20 +85,24 @@ public class Upload extends AbstractCreate implements RunnableTask<Upload.Output
             file = service
                 .files()
                 .update(runContext.render(this.fileId), fileMetadata, fileContent)
-                .setFields("id, name, size, version, createdTime, parents, trashed")
+                .setFields("id, name, version, createdTime, parents, trashed, mimeType")
                 .setSupportsTeamDrives(true)
                 .execute();
         } else {
             file = service
                 .files()
                 .create(fileMetadata, fileContent)
-                .setFields("id, name, size, version, createdTime, parents, trashed")
+                .setFields("id, name, version, createdTime, parents, trashed, mimeType")
                 .setSupportsTeamDrives(true)
                 .execute();
         }
 
         runContext.metric(Counter.of("size", file.size()));
         logger.debug("Upload from '{}' to '{}'", from, fileMetadata.getParents());
+
+        // For Google apps files such as doc, spreadsheet - file.getSize() will return: null, 1 or 1024 (Which is incorrect value)
+        // Hardcoding file size from tempFile size in bytes that have been exported/created
+        file.setSize(tempFile.length());
 
         return Output
             .builder()

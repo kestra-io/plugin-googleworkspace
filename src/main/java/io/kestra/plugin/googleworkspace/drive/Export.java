@@ -73,6 +73,10 @@ public class Export extends AbstractDrive implements RunnableTask<Export.Output>
 
             runContext.metric(Counter.of("size", file.size()));
 
+            // For Google apps files such as doc, spreadsheet - file.getSize() will return: null, 1 or 1024 (Which is incorrect value)
+            // Hardcoding file size from tempFile size in bytes that have been exported/created
+            file.setSize(tempFile.length());
+
             logger.debug("Download from '{}'", fileId);
 
             return Output
