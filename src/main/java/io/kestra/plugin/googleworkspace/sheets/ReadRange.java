@@ -66,7 +66,7 @@ public class ReadRange extends AbstractRead implements RunnableTask<ReadRange.Ou
         if (this.fetch) {
             builder.rows(values);
         } else {
-            builder.uri(runContext.putTempFile(this.store(runContext, values)));
+            builder.uri(runContext.storage().putFile(this.store(runContext, values)));
         }
 
         runContext.metric(Counter.of("rows", values.size()));
