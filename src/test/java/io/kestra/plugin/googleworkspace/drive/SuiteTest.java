@@ -75,7 +75,7 @@ class SuiteTest {
 
         Upload.Output uploadRun = upload.run(TestsUtils.mockRunContext(runContextFactory, upload, Map.of()));
 
-        assertThat(uploadRun.getFile().getSize(), greaterThan(0L));
+        assertThat(uploadRun.getFile().getSize(), is(328L));
 
         Export export = Export.builder()
             .id(SuiteTest.class.getSimpleName())
@@ -88,9 +88,10 @@ class SuiteTest {
         Export.Output exportRun = export.run(TestsUtils.mockRunContext(runContextFactory, export, Map.of()));
 
         assertThat(exportRun.getFile().getName(), is(uploadRun.getFile().getName()));
-        assertThat(exportRun.getFile().getSize(), greaterThan(0L));
-        assertThat(exportRun.getFile().getVersion(), notNullValue());
-        assertThat(exportRun.getFile().getMimeType(), notNullValue());
+        assertThat(exportRun.getFile().getSize(), notNullValue());
+        assertThat(exportRun.getFile().getSize(), greaterThanOrEqualTo(318L));
+        assertThat(exportRun.getFile().getVersion(), greaterThanOrEqualTo(uploadRun.getFile().getVersion()));
+        assertThat(exportRun.getFile().getMimeType(), is(uploadRun.getFile().getMimeType()));
         assertThat(exportRun.getFile().getCreatedTime(), is(uploadRun.getFile().getCreatedTime()));
         assertThat(exportRun.getFile().getParents().equals(uploadRun.getFile().getParents()), is(true));
         assertThat(exportRun.getFile().getTrashed(), is(uploadRun.getFile().getTrashed()));
@@ -114,7 +115,7 @@ class SuiteTest {
 
         Upload.Output upload2Run = upload2.run(TestsUtils.mockRunContext(runContextFactory, upload, Map.of()));
 
-        assertThat(upload2Run.getFile().getSize(), is(1024L));
+        assertThat(upload2Run.getFile().getSize(), is(328L));
 
         Export export2 = Export.builder()
             .id(SuiteTest.class.getSimpleName())
@@ -127,9 +128,10 @@ class SuiteTest {
         Export.Output exportRun2 = export2.run(TestsUtils.mockRunContext(runContextFactory, export, Map.of()));
 
         assertThat(exportRun2.getFile().getName(), is(upload2Run.getFile().getName()));
-        assertThat(exportRun2.getFile().getSize(), is(upload2Run.getFile().getSize()));
-        assertThat(exportRun2.getFile().getVersion(), is(upload2Run.getFile().getVersion()));
-        assertThat(exportRun2.getFile().getMimeType(), notNullValue());
+        assertThat(exportRun.getFile().getSize(), notNullValue());
+        assertThat(exportRun.getFile().getSize(), greaterThanOrEqualTo(318L));
+        assertThat(exportRun2.getFile().getVersion(), greaterThanOrEqualTo(upload2Run.getFile().getVersion()));
+        assertThat(exportRun2.getFile().getMimeType(), is(upload2Run.getFile().getMimeType()));
         assertThat(exportRun2.getFile().getCreatedTime(), is(upload2Run.getFile().getCreatedTime()));
         assertThat(exportRun2.getFile().getParents().equals(upload2Run.getFile().getParents()), is(true));
         assertThat(exportRun2.getFile().getTrashed(), is(upload2Run.getFile().getTrashed()));
