@@ -101,7 +101,7 @@ public abstract class AbstractRead extends AbstractSheet {
     }
 
     protected File store(RunContext runContext, List<Object> values) throws IOException {
-        File tempFile = runContext.tempFile(".ion").toFile();
+        File tempFile = runContext.workingDir().createTempFile(".ion").toFile();
 
         try (
             OutputStream output = new FileOutputStream(tempFile);

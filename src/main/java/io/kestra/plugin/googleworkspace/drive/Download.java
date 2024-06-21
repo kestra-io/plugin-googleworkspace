@@ -47,7 +47,7 @@ public class Download extends AbstractDrive implements RunnableTask<Download.Out
         Logger logger = runContext.logger();
         String fileId = runContext.render(this.fileId);
 
-        File tempFile = runContext.tempFile().toFile();
+        File tempFile = runContext.workingDir().createTempFile().toFile();
         try (BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(tempFile))) {
             Drive.Files.Get get = service.files().get(fileId);
             com.google.api.services.drive.model.File file = get

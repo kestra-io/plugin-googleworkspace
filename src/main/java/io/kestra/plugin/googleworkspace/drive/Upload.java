@@ -73,7 +73,7 @@ public class Upload extends AbstractCreate implements RunnableTask<Upload.Output
 
         File fileMetadata = this.file(runContext);
 
-        java.io.File tempFile = runContext.tempFile().toFile();
+        java.io.File tempFile = runContext.workingDir().createTempFile().toFile();
         try (FileOutputStream out = new FileOutputStream(tempFile)) {
             IOUtils.copy(runContext.storage().getFile(from), out);
         }
