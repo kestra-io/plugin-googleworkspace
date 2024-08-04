@@ -7,6 +7,7 @@ import io.kestra.core.storages.StorageInterface;
 import io.kestra.core.utils.IdUtils;
 import io.kestra.plugin.googleworkspace.UtilsTest;
 import jakarta.inject.Inject;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIf;
 
@@ -33,6 +34,13 @@ class LoadTest {
     @Inject
     private StorageInterface storageInterface;
 
+    private static String serviceAccount;
+
+    @BeforeAll
+    static void intiAccount() throws Exception {
+        serviceAccount = UtilsTest.serviceAccount();
+    }
+
     @Test
     void loadCSV() throws Exception {
         RunContext runContext = runContextFactory.of();
@@ -41,7 +49,7 @@ class LoadTest {
 
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(UtilsTest.serviceAccount())
+            .serviceAccount(serviceAccount)
             .spreadsheetId(spreadsheetId)
             .from(getSource(".csv").toString())
             .build();
@@ -63,7 +71,8 @@ class LoadTest {
         URI source = getSource(".json");
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(UtilsTest.serviceAccount())
+            .serviceAccount(serviceAccount)
+            .spreadsheetId(spreadsheetId)
             .from(source.toString())
             .build();
 
@@ -85,7 +94,7 @@ class LoadTest {
 
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(UtilsTest.serviceAccount())
+            .serviceAccount(serviceAccount)
             .spreadsheetId(spreadsheetId)
             .from(source.toString())
             .header(true)
@@ -108,7 +117,7 @@ class LoadTest {
         URI source = getSource(".avro");
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(UtilsTest.serviceAccount())
+            .serviceAccount(serviceAccount)
             .spreadsheetId(spreadsheetId)
             .from(source.toString())
             .build();
@@ -131,7 +140,7 @@ class LoadTest {
 
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(UtilsTest.serviceAccount())
+            .serviceAccount(serviceAccount)
             .spreadsheetId(spreadsheetId)
             .from(source.toString())
             .header(true)
@@ -154,7 +163,7 @@ class LoadTest {
         URI source = getSource(".orc");
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(UtilsTest.serviceAccount())
+            .serviceAccount(serviceAccount)
             .spreadsheetId(spreadsheetId)
             .from(source.toString())
             .build();
@@ -177,7 +186,7 @@ class LoadTest {
 
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(UtilsTest.serviceAccount())
+            .serviceAccount(serviceAccount)
             .spreadsheetId(spreadsheetId)
             .from(source.toString())
             .header(true)
@@ -200,7 +209,7 @@ class LoadTest {
         URI source = getSource(".parquet");
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(UtilsTest.serviceAccount())
+            .serviceAccount(serviceAccount)
             .spreadsheetId(spreadsheetId)
             .from(source.toString())
             .build();
@@ -223,7 +232,7 @@ class LoadTest {
 
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(UtilsTest.serviceAccount())
+            .serviceAccount(serviceAccount)
             .spreadsheetId(spreadsheetId)
             .from(source.toString())
             .header(true)
@@ -252,7 +261,7 @@ class LoadTest {
         CreateSpreadsheet createTask = CreateSpreadsheet.builder()
             .id(LoadTest.class.getSimpleName())
             .title("CSV Test Spreadsheet")
-            .serviceAccount(UtilsTest.serviceAccount())
+            .serviceAccount(serviceAccount)
             .build();
 
         CreateSpreadsheet.Output createOutput = createTask.run(runContext);
@@ -265,7 +274,7 @@ class LoadTest {
     private void deleteSpreadsheet(RunContext runContext, String spreadsheetId) throws Exception {
         DeleteSpreadsheet deleteTask = DeleteSpreadsheet.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(UtilsTest.serviceAccount())
+            .serviceAccount(serviceAccount)
             .spreadsheetId(spreadsheetId)
             .build();
 

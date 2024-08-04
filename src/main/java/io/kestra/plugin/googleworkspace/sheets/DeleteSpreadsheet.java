@@ -57,6 +57,7 @@ public class DeleteSpreadsheet extends AbstractSheet implements RunnableTask<Del
 		}
 
 		Delete delete = Delete.builder()
+			.serviceAccount(runContext.render(this.serviceAccount))
 			.fileId(spreadsheetId)
 			.build();
 
