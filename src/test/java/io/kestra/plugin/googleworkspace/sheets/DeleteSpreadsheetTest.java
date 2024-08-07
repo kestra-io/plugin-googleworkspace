@@ -41,7 +41,7 @@ class DeleteSpreadsheetTest {
         DeleteSpreadsheet deleteTask = DeleteSpreadsheet.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(UtilsTest.serviceAccount())
-            .spreadsheetId(createOutput.getSpreadsheetUrl())
+            .spreadsheetId(createOutput.getSpreadsheetId())
             .build();
 
         DeleteSpreadsheet.Output deleteOutput = deleteTask.run(runContext);
