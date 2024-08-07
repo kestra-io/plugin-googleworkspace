@@ -33,17 +33,6 @@ tasks.withType(JavaCompile) {
     options.compilerArgs.add("-parameters")
 }
 
-// Solution for apache hadoop dependency conflicts with kestra fasterxml.jackson
-configurations.all {
-    resolutionStrategy.eachDependency {
-        DependencyResolveDetails details ->
-            def requested = details.requested
-            if (requested.group == 'com.fasterxml.jackson.core') {
-                details.useVersion('2.17.2')
-            }
-    }
-}
-
 dependencies {
     // Platform
     annotationProcessor enforcedPlatform("io.kestra:platform:$kestraVersion")
@@ -76,9 +65,18 @@ dependencies {
     api('org.apache.orc:orc-mapreduce:1.7.0')
 
     // Additional libraries for Parquet, Avro, ORC parsers
-    api('org.apache.hadoop:hadoop-hdfs-client:3.4.0')
-    api('org.apache.hadoop:hadoop-common:3.4.0')
-    api('org.apache.hadoop:hadoop-mapreduce-client-core:3.4.0')
+    api('org.apache.hadoop:hadoop-hdfs-client:3.4.0') {
+        exclude group: 'com.fasterxml.jackson.core'
+    }
+    api('org.apache.hadoop:hadoop-common:3.4.0') {
+        exclude group: 'com.fasterxml.jackson.core'
+        exclude group: 'org.apache.zookeeper'
+    }
+    api('org.apache.hadoop:hadoop-mapreduce-client-core:3.4.0') {
+        exclude group: 'com.fasterxml.jackson.core'
+    }
+
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
 
     // For CSV parsing
     api('org.apache.commons:commons-csv:1.9.0')

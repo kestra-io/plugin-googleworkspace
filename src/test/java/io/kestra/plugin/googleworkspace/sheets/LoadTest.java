@@ -51,7 +51,7 @@ class LoadTest {
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(serviceAccount)
             .spreadsheetId(spreadsheetId)
-            .from(getSource(".csv").toString())
+            .from(getSource(".csv"))
             .build();
 
         Load.Output run = task.run(runContext);
@@ -73,7 +73,7 @@ class LoadTest {
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(serviceAccount)
             .spreadsheetId(spreadsheetId)
-            .from(source.toString())
+            .from(source)
             .build();
 
         Load.Output run = task.run(runContext);
@@ -96,7 +96,7 @@ class LoadTest {
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(serviceAccount)
             .spreadsheetId(spreadsheetId)
-            .from(source.toString())
+            .from(source)
             .header(true)
             .build();
 
@@ -119,7 +119,7 @@ class LoadTest {
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(serviceAccount)
             .spreadsheetId(spreadsheetId)
-            .from(source.toString())
+            .from(source)
             .build();
 
         Load.Output run = task.run(runContext);
@@ -142,7 +142,7 @@ class LoadTest {
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(serviceAccount)
             .spreadsheetId(spreadsheetId)
-            .from(source.toString())
+            .from(source)
             .header(true)
             .build();
 
@@ -165,7 +165,7 @@ class LoadTest {
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(serviceAccount)
             .spreadsheetId(spreadsheetId)
-            .from(source.toString())
+            .from(source)
             .build();
 
         Load.Output run = task.run(runContext);
@@ -188,7 +188,7 @@ class LoadTest {
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(serviceAccount)
             .spreadsheetId(spreadsheetId)
-            .from(source.toString())
+            .from(source)
             .header(true)
             .build();
 
@@ -211,7 +211,7 @@ class LoadTest {
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(serviceAccount)
             .spreadsheetId(spreadsheetId)
-            .from(source.toString())
+            .from(source)
             .build();
 
         Load.Output run = task.run(runContext);
@@ -234,7 +234,7 @@ class LoadTest {
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(serviceAccount)
             .spreadsheetId(spreadsheetId)
-            .from(source.toString())
+            .from(source)
             .header(true)
             .build();
 

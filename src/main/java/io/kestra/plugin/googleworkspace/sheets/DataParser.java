@@ -5,13 +5,15 @@ import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.runners.RunContext;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.Schema;
-import org.apache.avro.file.DataFileReader;
+import org.apache.avro.file.DataFileStream;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.ql.exec.vector.*;
 import org.apache.orc.OrcFile;
@@ -22,9 +24,7 @@ import org.apache.parquet.avro.AvroParquetReader;
 import org.apache.parquet.hadoop.ParquetReader;
 import org.apache.parquet.io.LocalInputFile;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,14 +35,14 @@ public class DataParser {
 
 	private final RunContext runContext;
 
-	public List<List<Object>> parseCsv(File file, AbstractLoad.CsvOptions csvOptions) throws IOException, IllegalVariableEvaluationException {
+	public List<List<Object>> parseCsv(InputStream inputStream, AbstractLoad.CsvOptions csvOptions) throws IOException, IllegalVariableEvaluationException {
 		List<List<Object>> result = new ArrayList<>();
 
 		Charset charset = Charset.forName(
 			runContext.render(csvOptions.getEncoding())
 		);
 
-		FileReader reader = new FileReader(file, charset);
+		InputStreamReader reader = new InputStreamReader(inputStream, charset);
 		CSVFormat format = getCsvFormat(csvOptions);
 		try (CSVParser parser = new CSVParser(reader, format)) {
 			for (CSVRecord record : parser) {
@@ -55,10 +55,10 @@ public class DataParser {
 		}
 	}
 
-	public List<List<Object>> parseThroughMapper(File file, ObjectMapper mapper, boolean includeHeaders) throws IOException {
+	public List<List<Object>> parseThroughMapper(InputStream inputStream, ObjectMapper mapper, boolean includeHeaders) throws IOException {
 		List<List<Object>> result = new ArrayList<>();
 
-		List<Map<String, Object>> list = mapper.readValue(file, List.class);
+		List<Map<String, Object>> list = mapper.readValue(inputStream, List.class);
 
 		if (includeHeaders) {
 			List<ArrayList<Object>> headers = list.stream()
@@ -80,13 +80,11 @@ public class DataParser {
 		return result;
 	}
 
-	public List<List<Object>> parseAvro(File file, boolean includeHeaders, String avroSchema) throws IOException {
+	public List<List<Object>> parseAvro(InputStream inputStream, boolean includeHeaders, String avroSchema) throws IOException {
 		List<List<Object>> result = new ArrayList<>();
 
 		boolean isHeaderIncluded = false;
-		try (org.apache.avro.file.FileReader<GenericRecord> reader =
-			     DataFileReader.openReader(file, new GenericDatumReader<>())
-		) {
+		try (DataFileStream<GenericRecord> reader = new DataFileStream<>(inputStream, new GenericDatumReader<>())) {
 			Schema schema;
 			if (avroSchema != null) {
 				schema = new Schema.Parser().parse(avroSchema);
@@ -120,12 +118,19 @@ public class DataParser {
 		return result;
 	}
 
-	public List<List<Object>> parseParquet(File file, boolean includeHeaders) throws IOException {
+	public List<List<Object>> parseParquet(InputStream inputStream, boolean includeHeaders) throws IOException {
 		List<List<Object>> result = new ArrayList<>();
+
+		File tempFile = File.createTempFile("temp-parquet", ".parquet");
+		tempFile.deleteOnExit();
+
+		try (FileOutputStream outputStream = new FileOutputStream(tempFile)) {
+			IOUtils.copy(inputStream, outputStream);
+		}
 
 		boolean isHeaderIncluded = false;
 		Configuration configuration = new Configuration();
-		LocalInputFile inputFile = new LocalInputFile(file.toPath());
+		LocalInputFile inputFile = new LocalInputFile(tempFile.toPath());
 		try (ParquetReader<GenericRecord> reader = AvroParquetReader
 			.<GenericRecord>builder(inputFile).withConf(configuration).build()
 		) {
@@ -160,12 +165,20 @@ public class DataParser {
 		return result;
 	}
 
-	public List<List<Object>> parseORC(File file, boolean includeHeaders) throws IOException {
+	public List<List<Object>> parseORC(InputStream inputStream, boolean includeHeaders) throws IOException {
 		List<List<Object>> result = new ArrayList<>();
 
+		File tempFile = File.createTempFile("temp-orc", ".orc");
+		tempFile.deleteOnExit();
+
+		try (FileOutputStream outputStream = new FileOutputStream(tempFile)) {
+			IOUtils.copy(inputStream, outputStream);
+		}
+
 		Configuration configuration = new Configuration();
-		Path path = new Path(file.getPath());
-		try (Reader reader = OrcFile.createReader(path, OrcFile.readerOptions(configuration))) {
+		FileSystem fileSystem = FileSystem.get(configuration);
+		Path path = new Path(tempFile.getPath());
+		try (Reader reader = OrcFile.createReader(path, OrcFile.readerOptions(configuration).filesystem(fileSystem))) {
 			TypeDescription schema = reader.getSchema();
 			VectorizedRowBatch rowBatch = schema.createRowBatch();
 

@@ -19,12 +19,12 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @NoArgsConstructor
 @Schema(
-	title = "Deletes an spreadsheet file in Google Workspace"
+	title = "Deletes a spreadsheet in Google Workspace"
 )
 @Plugin(
 	examples = {
 		@Example(
-			title = "Deletes an spreadsheet in google workspace",
+			title = "Deletes a spreadsheet in google workspace",
 			code = {
 				"type: io.kestra.plugin.googleworkspace.sheets.CreateSpreadsheet",
 				"serviceAccount: \"{{ inputs.serviceAccount }}\"",
@@ -36,7 +36,7 @@ import lombok.experimental.SuperBuilder;
 public class DeleteSpreadsheet extends AbstractSheet implements RunnableTask<DeleteSpreadsheet.Output> {
 
 	@Schema(
-		title = "Spreadsheet ID"
+		title = "Spreadsheet ID."
 	)
 	@NotNull
 	@PluginProperty(dynamic = true)

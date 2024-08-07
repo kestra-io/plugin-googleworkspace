@@ -26,12 +26,12 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Create an spreadsheet file in Google Workspace"
+    title = "Create a spreadsheet in Google Workspace"
 )
 @Plugin(
 	examples = {
 		@Example(
-			title = "Create an spreadsheet in Google Workspace",
+			title = "Create a spreadsheet in Google Workspace",
 			code = {
 				"type: io.kestra.plugin.googleworkspace.sheets.CreateSpreadsheet",
 				"serviceAccount: \"{{ inputs.serviceAccount }}\""
@@ -42,7 +42,7 @@ import java.util.List;
 public class CreateSpreadsheet extends AbstractSheet implements RunnableTask<CreateSpreadsheet.Output> {
 
 	@Schema(
-		title = "Spreadsheet title"
+		title = "Spreadsheet title."
 	)
 	@NotNull
 	@PluginProperty(dynamic = true)

@@ -1,8 +1,6 @@
 package io.kestra.plugin.googleworkspace.sheets;
 
 import com.google.api.services.sheets.v4.Sheets;
-import com.google.api.services.sheets.v4.model.Spreadsheet;
-import com.google.api.services.sheets.v4.model.SpreadsheetProperties;
 import com.google.api.services.sheets.v4.model.UpdateValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import io.kestra.core.models.annotations.Example;
@@ -15,7 +13,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.slf4j.Logger;
 
-import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 
 @SuperBuilder
@@ -24,12 +22,12 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Load data from local file to Google Workspace"
+    title = "Load data from a local file to a Google Workspace spreadsheet"
 )
 @Plugin(
 	examples = {
 		@Example(
-			title = "Load data into Google Workspace spreadsheet from an input file",
+			title = "Load data into a Google Workspace spreadsheet from an input file",
 			code = {
 				"type: io.kestra.plugin.googleworkspace.sheets.Load",
 				"from: \"{{ inputs.file }}\"",
@@ -45,13 +43,13 @@ import java.util.List;
 public class Load extends AbstractLoad implements RunnableTask<Load.Output> {
 
 	@Schema(
-		title = "The fully-qualified URIs that point to source data"
+		title = "The URI of the Kestra's internal storage file."
 	)
 	@PluginProperty(dynamic = true)
-	private String from;
+	private URI from;
 
 	@Schema(
-		title = "The sheet name or range to select"
+		title = "The sheet name or range to select."
 	)
 	@Builder.Default
 	@PluginProperty(dynamic = true)
@@ -80,35 +78,22 @@ public class Load extends AbstractLoad implements RunnableTask<Load.Output> {
 			.build();
 	}
 
-	private Spreadsheet createSpreadsheet(Sheets service) throws IOException {
-		SpreadsheetProperties properties = new SpreadsheetProperties()
-			.setTitle("New Spreadsheet");
-
-		Spreadsheet spreadsheet = new Spreadsheet()
-			.setProperties(properties);
-
-		return service
-			.spreadsheets()
-			.create(spreadsheet)
-			.execute();
-	}
-
 	@Getter
 	@Builder
 	public static class Output implements io.kestra.core.models.tasks.Output {
 
 		@Schema(
-			title = "The size of the rows fetch"
+			title = "The spreadsheet ID or range"
 		)
 		private String range;
 
 		@Schema(
-			title = "The size of the rows fetch"
+			title = "The number of rows loaded"
 		)
 		private int rows;
 
 		@Schema(
-			title = "The size of the rows fetch"
+			title = "The number of columns loaded"
 		)
 		private int columns;
 

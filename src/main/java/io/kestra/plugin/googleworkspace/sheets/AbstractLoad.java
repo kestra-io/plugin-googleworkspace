@@ -8,12 +8,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
@@ -23,16 +20,13 @@ import java.util.List;
 @EqualsAndHashCode
 @Getter
 @NoArgsConstructor
-@Schema(
-    title = "Read from a sheets"
-)
 public abstract class AbstractLoad extends AbstractSheet {
 
     private final static ObjectMapper JSON_MAPPER = JacksonMapper.ofJson();
     private final static ObjectMapper ION_MAPPER = JacksonMapper.ofIon();
 
     @Schema(
-        title = "The spreadsheet unique id"
+        title = "The spreadsheet unique id."
     )
     @NotNull
     @PluginProperty(dynamic = true)
@@ -40,7 +34,7 @@ public abstract class AbstractLoad extends AbstractSheet {
 
     @Builder.Default
     @Schema(
-        title = "Specifies if the first line should be the header (default: false)"
+        title = "Specifies if the first line should be the header (default: false)."
     )
     protected final Boolean header = false;
 
@@ -51,43 +45,38 @@ public abstract class AbstractLoad extends AbstractSheet {
     private CsvOptions csvOptions = CsvOptions.builder().build();
 
     @Schema(
-        title = "Schema to read avro objects (Optional).",
-        description = "If provided, task will read avro objects from this schema."
+        title = "Schema for avro objects (Optional).",
+        description = "If provided, the task will read avro objects using this schema."
     )
     @PluginProperty(dynamic = true)
     private String avroSchema;
 
     @Schema(
-        title = "Format of input file.",
-        description = "If not provided task will programmatically try to find correct format, base on extension"
+        title = "Format of the input file.",
+        description = "If not provided, the task will programmatically try to find the correct format based on the extension."
     )
     @PluginProperty(dynamic = true)
     private Format format;
 
-    protected List<List<Object>> parse(RunContext runContext, String from) throws Exception {
+    protected List<List<Object>> parse(RunContext runContext, URI from) throws Exception {
         Format format;
         if (this.format == null) {
-            format = Format.getFromFile(new File(from));
+            format = Format.getFromFile(from.toString());
         } else {
             format = this.format;
         }
 
-	    URI fromURI = new URI(runContext.render(from));
-
-        File file = runContext.workingDir().createTempFile(FilenameUtils.getExtension(from)).toFile();
-        try (FileOutputStream out = new FileOutputStream(file)) {
-            IOUtils.copy(runContext.storage().getFile(fromURI), out);
+        try (InputStream inputStream = runContext.storage().getFile(from)) {
+            DataParser parser = new DataParser(runContext);
+            return switch (format) {
+                case ION -> parser.parseThroughMapper(inputStream, ION_MAPPER, header);
+                case JSON -> parser.parseThroughMapper(inputStream, JSON_MAPPER, header);
+                case CSV -> parser.parseCsv(inputStream, csvOptions);
+                case AVRO -> parser.parseAvro(inputStream, header, runContext.render(this.avroSchema));
+                case PARQUET -> parser.parseParquet(inputStream, header);
+                case ORC -> parser.parseORC(inputStream, header);
+            };
         }
-
-        DataParser parser = new DataParser(runContext);
-        return switch (format) {
-            case ION -> parser.parseThroughMapper(file, ION_MAPPER, header);
-            case JSON -> parser.parseThroughMapper(file, JSON_MAPPER, header);
-            case CSV -> parser.parseCsv(file, csvOptions);
-            case AVRO -> parser.parseAvro(file, header, runContext.render(this.avroSchema));
-            case PARQUET -> parser.parseParquet(file, header);
-            case ORC -> parser.parseORC(file, header);
-        };
     }
 
     @Getter
@@ -102,9 +91,8 @@ public abstract class AbstractLoad extends AbstractSheet {
 
         private final String extension;
 
-        public static Format getFromFile(File file) {
-            String fileName = file.getName();
-            String extension = FilenameUtils.getExtension(fileName);
+        public static Format getFromFile(String uri) {
+            String extension = FilenameUtils.getExtension(uri);
             return Format.getFromExtension(extension);
         }
 
