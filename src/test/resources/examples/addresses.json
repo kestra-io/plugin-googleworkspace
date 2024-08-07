@@ -1,0 +1,50 @@
+[
+    {
+        "first_name": "John",
+        "second_name": "Doe",
+        "street": "120 jefferson st.",
+        "city": "Riverside",
+        "state": "NJ",
+        "zip": "08075"
+    },
+    {
+        "first_name": "Jack",
+        "second_name": "McGinnis",
+        "street": "220 hobo Av.",
+        "city": "Phila",
+        "state": "PA",
+        "zip": "09119"
+    },
+    {
+        "first_name": "John \"\"Da Man\"\"",
+        "second_name": "Repici",
+        "street": "120 Jefferson St.",
+        "city": "Riverside",
+        "state": "NJ",
+        "zip": "08075"
+    },
+    {
+        "first_name": "Stephen",
+        "second_name": "Tyler",
+        "street": "7452 Terrace \"\"At the Plaza\"\" road",
+        "city": "SomeTown",
+        "state": "SD",
+        "zip": "91234"
+    },
+    {
+        "first_name": "",
+        "second_name": "Blankman",
+        "street": "",
+        "city": "SomeTown",
+        "state": "SD",
+        "zip": "00298"
+    },
+    {
+        "first_name": "Joan \"\"the bone\", Anne\"",
+        "second_name": "Jet",
+        "street": "9th, at Terrace plc",
+        "city": "Desert City",
+        "state": "CO",
+        "zip": "00123"
+    }
+]
