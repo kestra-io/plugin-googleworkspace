@@ -51,7 +51,7 @@ dependencies {
     api 'com.google.api-client:google-api-client:2.4.0'
     api 'com.google.auth:google-auth-library-oauth2-http:1.23.0'
     api 'com.google.apis:google-api-services-drive:v3-rev20240123-2.0.0'
-    api 'com.google.apis:google-api-services-sheets:v4-rev20240716-2.0.0'
+    api 'com.google.apis:google-api-services-sheets:v4-rev20240730-2.0.0'
 
     // Logs
     compileOnly'org.slf4j:slf4j-api'
