@@ -61,7 +61,7 @@ dependencies {
     api('org.apache.parquet:parquet-hadoop:1.14.1')
 
     // For ORC parsing
-    api('org.apache.orc:orc-core:1.7.0')
+    api('org.apache.orc:orc-core:2.0.1')
     api('org.apache.orc:orc-mapreduce:1.7.0')
 
     // Additional libraries for Parquet, Avro, ORC parsers
