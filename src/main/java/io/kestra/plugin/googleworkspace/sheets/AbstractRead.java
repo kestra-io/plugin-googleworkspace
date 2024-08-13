@@ -7,17 +7,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import jakarta.validation.constraints.NotNull;
-
-import static io.kestra.core.utils.Rethrow.throwConsumer;
+import reactor.core.publisher.Flux;
 
 @SuperBuilder
 @ToString
@@ -104,12 +100,10 @@ public abstract class AbstractRead extends AbstractSheet {
         File tempFile = runContext.workingDir().createTempFile(".ion").toFile();
 
         try (
-            OutputStream output = new FileOutputStream(tempFile);
+            var output = new BufferedWriter(new FileWriter(tempFile), FileSerde.BUFFER_SIZE)
         ) {
-            values
-                .forEach(throwConsumer(row -> {
-                    FileSerde.write(output, row);
-                }));
+            var flux = Flux.fromIterable(values);
+            FileSerde.writeAll(output, flux).block();
         }
         return tempFile;
     }
