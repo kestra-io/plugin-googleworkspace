@@ -48,10 +48,10 @@ dependencies {
     compileOnly group: "io.kestra", name: "core", version: kestraVersion
 
     // api
-    api 'com.google.api-client:google-api-client:2.4.0'
-    api 'com.google.auth:google-auth-library-oauth2-http:1.23.0'
-    api 'com.google.apis:google-api-services-drive:v3-rev20240123-2.0.0'
-    api 'com.google.apis:google-api-services-sheets:v4-rev20240716-2.0.0'
+    api 'com.google.api-client:google-api-client:2.6.0'
+    api 'com.google.auth:google-auth-library-oauth2-http:1.24.0'
+    api 'com.google.apis:google-api-services-drive:v3-rev20240730-2.0.0'
+    api 'com.google.apis:google-api-services-sheets:v4-rev20240730-2.0.0'
 
     // Logs
     compileOnly'org.slf4j:slf4j-api'
@@ -61,8 +61,8 @@ dependencies {
     api('org.apache.parquet:parquet-hadoop:1.14.1')
 
     // For ORC parsing
-    api('org.apache.orc:orc-core:1.7.0')
-    api('org.apache.orc:orc-mapreduce:1.7.0')
+    api('org.apache.orc:orc-core:1.8.7')
+    api('org.apache.orc:orc-mapreduce:1.8.7')
 
     // Additional libraries for Parquet, Avro, ORC parsers
     api('org.apache.hadoop:hadoop-hdfs-client:3.4.0') {
@@ -79,7 +79,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind'
 
     // For CSV parsing
-    api('org.apache.commons:commons-csv:1.9.0')
+    api('org.apache.commons:commons-csv:1.11.0')
 }
 
 
