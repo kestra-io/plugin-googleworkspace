@@ -29,13 +29,23 @@ import java.util.List;
     title = "Create a spreadsheet in Google Workspace"
 )
 @Plugin(
-	examples = {
-		@Example(
-			title = "Create a spreadsheet in Google Workspace",
-			code = {
-				"type: io.kestra.plugin.googleworkspace.sheets.CreateSpreadsheet",
-				"serviceAccount: \"{{ inputs.serviceAccount }}\""
-			}
+    examples = {
+        @Example(
+            title = "Create a spreadsheet in Google Workspace",
+			full = true,
+            code = """
+                id: googleworkspace_sheets_create
+                namespace: company.team
+                
+                inputs:
+                  - id: serviceAccount
+                    type: STRING
+                
+                tasks:
+                  - id: create_spreadsheet
+                    type: io.kestra.plugin.googleworkspace.sheets.CreateSpreadsheet
+                    serviceAccount: "{{ inputs.serviceAccount }}"
+			    """
 		)
 	}
 )

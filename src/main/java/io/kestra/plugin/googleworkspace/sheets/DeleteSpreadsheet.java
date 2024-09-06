@@ -22,14 +22,24 @@ import lombok.experimental.SuperBuilder;
 	title = "Deletes a spreadsheet in Google Workspace"
 )
 @Plugin(
-	examples = {
-		@Example(
-			title = "Deletes a spreadsheet in google workspace",
-			code = {
-				"type: io.kestra.plugin.googleworkspace.sheets.CreateSpreadsheet",
-				"serviceAccount: \"{{ inputs.serviceAccount }}\"",
-				"spreadsheetId: xxxxxxxxxxxxxxxxx"
-			}
+    examples = {
+        @Example(
+            title = "Deletes a spreadsheet in google workspace",
+            full = true,
+            code = """
+                id: googleworkspace_sheets_delete
+                namespace: company.team
+                
+                inputs:
+                  - id: serviceAccount
+                    type: STRING
+                
+                tasks:
+                  - id: delete_spreadsheet
+                    type: io.kestra.plugin.googleworkspace.sheets.DeleteSpreadsheet
+                    serviceAccount: "{{ inputs.serviceAccount }}"
+                    spreadsheetId: "xxxxxxxxxxxxxxxx"
+			    """
 		)
 	}
 )

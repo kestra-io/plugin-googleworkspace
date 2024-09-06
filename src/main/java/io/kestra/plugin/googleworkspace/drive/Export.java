@@ -26,9 +26,16 @@ import jakarta.validation.constraints.NotNull;
 @Plugin(
     examples = {
         @Example(
-            code = {
-                "fileId: \"1Dkd3W0OQo-wxz1rrORLP7YGSj6EBLEg74fiTdbJUIQE\""
-            }
+            full = true,
+            code = """
+                id: googleworkspace_drive_export
+                namespace: company.team
+
+                tasks:
+                  - id: export
+                    type: io.kestra.plugin.googleworkspace.drive.Export
+                    fileId: "1Dkd3W0OQo-wxz1rrORLP7YGSj6EBLEg74fiTdbJUIQE"
+                """
         )
     }
 )

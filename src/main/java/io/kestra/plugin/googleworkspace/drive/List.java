@@ -27,11 +27,18 @@ import java.util.stream.Collectors;
     examples = {
         @Example(
             title = "List subfolder in a Drive folder",
-            code = {
-                "query: |",
-                "  mimeType = 'application/vnd.google-apps.folder' \n" +
-                "  and '1z2GZgLEX12BN9zbVE6TodrCHyTRMj_ka' in parents"
-            }
+            full = true,
+            code = """
+                id: googleworkspace_drive_list
+                namespace: company.team
+
+                tasks:
+                  - id: list
+                    type: io.kestra.plugin.googleworkspace.drive.List
+                    query: |
+                      mimeType = 'application/vnd.google-apps.folder' 
+                      and '1z2GZgLEX12BN9zbVE6TodrCHyTRMj_ka' in parents
+                """
         )
     }
 )

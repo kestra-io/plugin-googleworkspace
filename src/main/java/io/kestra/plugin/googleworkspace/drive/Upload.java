@@ -28,14 +28,26 @@ import jakarta.validation.constraints.NotNull;
     examples = {
         @Example(
             title = "Upload a csv and convert it to sheet format",
-            code = {
-                "from: \"{{ inputs.file }}\"",
-                "parents:",
-                " - \"1HuxzpLt1b0111MuKMgy8wAv-m9Myc1E_\"",
-                "name: \"My awesome CSV\"",
-                "contentType: \"text/csv\"",
-                "mimeType: \"application/vnd.google-apps.spreadsheet\""
-            }
+            full = true,
+            code = """
+                id: googleworkspace_drive_upload
+                namespace: company.team
+
+                inputs:
+                  - id: file
+                    type: FILE
+                    description: The file to be uploaded to Google Drive
+
+                tasks:
+                  - id: upload
+                    type: io.kestra.plugin.googleworkspace.drive.Upload
+                    from: "{{ inputs.file }}"
+                    parents:
+                     - "1HuxzpLt1b0111MuKMgy8wAv-m9Myc1E_"
+                    name: "My awesome CSV"
+                    contentType: "text/csv"
+                    mimeType: "application/vnd.google-apps.spreadsheet"
+                """
         )
     }
 )

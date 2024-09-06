@@ -28,15 +28,27 @@ import java.util.List;
 	examples = {
 		@Example(
 			title = "Load data into a Google Workspace spreadsheet from an input file",
-			code = {
-				"type: io.kestra.plugin.googleworkspace.sheets.Load",
-				"from: \"{{ inputs.file }}\"",
-				"spreadsheetId: xxxxxxxxxxxxxxxxx",
-				"range: Sheet2",
-				"serviceAccount: \"{{ inputs.serviceAccount }}\"",
-				"csvOptions:",
-				"  fieldDelimiter: \";\""
-			}
+			full = true,
+			code = """
+			    id: googleworkspace_sheets_load
+				namespace: company.team
+
+				inputs:
+				  - id: file
+				    type: FILE
+				  - id: serviceAccount
+				    type: STRING
+
+				tasks:
+				  - id: load_data
+				    type: io.kestra.plugin.googleworkspace.sheets.Load
+				    from: "{{ inputs.file }}"
+				    spreadsheetId: xxxxxxxxxxxxxxxxx
+				    range: Sheet2
+				    serviceAccount: "{{ inputs.serviceAccount }}"
+				    csvOptions:
+				      fieldDelimiter: ";"
+			    """
 		)
 	}
 )
