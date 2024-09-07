@@ -35,11 +35,18 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
 @Plugin(
     examples = {
         @Example(
-            code = {
-                "spreadsheetId: \"1Dkd3W0OQo-wxz1rrORLP7YGSj6EBLEg74fiTdbJUIQE\"",
-                "store: true",
-                "valueRender: FORMATTED_VALUE"
-            }
+            full = true,
+            code = """
+                id: googleworkspace_sheets_read
+                namespace: company.team
+
+                tasks:
+                  - id: read
+                    type: io.kestra.plugin.googleworkspace.sheets.Read
+                    spreadsheetId: "1Dkd3W0OQo-wxz1rrORLP7YGSj6EBLEg74fiTdbJUIQE"
+                    store: true
+                    valueRender: FORMATTED_VALUE
+                """
         )
     }
 )

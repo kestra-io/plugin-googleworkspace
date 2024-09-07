@@ -19,10 +19,17 @@ import org.slf4j.Logger;
 @Plugin(
     examples = {
         @Example(
-            code = {
-                "name: \"My Folder\"",
-                "mimeType: \"application/vnd.google-apps.folder\""
-            }
+            full = true,
+            code = """
+                id: googleworkspace_drive_create
+                namespace: company.team
+
+                tasks:
+                  - id: create
+                    type: io.kestra.plugin.googleworkspace.drive.Create
+                    name: "My Folder"
+                    mimeType: "application/vnd.google-apps.folder"
+                """
         )
     }
 )

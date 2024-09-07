@@ -26,12 +26,19 @@ import java.util.List;
 @Plugin(
     examples = {
         @Example(
-            code = {
-                "spreadsheetId: \"1Dkd3W0OQo-wxz1rrORLP7YGSj6EBLEg74fiTdbJUIQE\"",
-                "range: \"Second One!A1:I\"",
-                "store: true",
-                "valueRender: FORMATTED_VALUE"
-            }
+            full = true,
+            code = """
+                id: googleworkspace_sheets_readrange
+                namespace: company.team
+
+                tasks:
+                  - id: read_range
+                    type: io.kestra.plugin.googleworkspace.sheets.ReadRange
+                    spreadsheetId: "1Dkd3W0OQo-wxz1rrORLP7YGSj6EBLEg74fiTdbJUIQE"
+                    range: "Second One!A1:I"
+                    store: true
+                    valueRender: FORMATTED_VALUE
+                """
         )
     }
 )
