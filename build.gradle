@@ -57,7 +57,7 @@ dependencies {
     compileOnly'org.slf4j:slf4j-api'
 
     // For Parquet and Avro parsing
-    api('org.apache.parquet:parquet-avro:1.14.2')
+    api('org.apache.parquet:parquet-avro:1.14.3')
     api('org.apache.parquet:parquet-hadoop:1.14.2')
 
     // For ORC parsing
