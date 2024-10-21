@@ -72,7 +72,7 @@ dependencies {
         exclude group: 'com.fasterxml.jackson.core'
         exclude group: 'org.apache.zookeeper'
     }
-    api('org.apache.hadoop:hadoop-mapreduce-client-core:3.4.0') {
+    api('org.apache.hadoop:hadoop-mapreduce-client-core:3.4.1') {
         exclude group: 'com.fasterxml.jackson.core'
     }
 
