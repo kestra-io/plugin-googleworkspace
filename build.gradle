@@ -68,7 +68,7 @@ dependencies {
     api('org.apache.hadoop:hadoop-hdfs-client:3.4.0') {
         exclude group: 'com.fasterxml.jackson.core'
     }
-    api('org.apache.hadoop:hadoop-common:3.4.0') {
+    api('org.apache.hadoop:hadoop-common:3.4.1') {
         exclude group: 'com.fasterxml.jackson.core'
         exclude group: 'org.apache.zookeeper'
     }
