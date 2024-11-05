@@ -1,0 +1,82 @@
+package io.kestra.plugin.googleworkspace.calendar;
+
+import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.model.Event;
+
+import io.kestra.core.models.annotations.Example;
+import io.kestra.core.models.annotations.Plugin;
+import io.kestra.core.models.tasks.RunnableTask;
+import io.kestra.core.runners.RunContext;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+
+import org.slf4j.Logger;
+
+@SuperBuilder
+@ToString
+@EqualsAndHashCode
+@Getter
+@NoArgsConstructor
+@Plugin(
+    examples = {
+        @Example(
+            full = true,
+            code = """
+                id: googleworkspace_calendar_insert_event
+                namespace: company.team
+
+                tasks:
+                  - id: insert_event
+                    type: io.kestra.plugin.googleworkspace.calendar.InsertEvent
+                    serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
+                    calendarId: primary
+                    summary: Sample Event
+                    description: This is a sample event from Kestra
+                    location: Thane, Mumbai
+                    startTime:
+                      dateTime: "2024-11-28T09:00:00+05:30"
+                      timeZone: "Asia/Calcutta"
+                    endTime:
+                      dateTime: "2024-11-28T10:00:00+05:30"
+                      timeZone: "Asia/Calcutta"
+                    creator:
+                      email: myself@gmail.com
+                """
+        )
+    }
+)
+@Schema(
+    title = "Insert event into Google Calendar."
+)
+public class InsertEvent extends AbstractInsertEvent implements RunnableTask<InsertEvent.Output> {
+    @Override
+    public Output run(RunContext runContext) throws Exception {
+        Calendar service = this.connection(runContext);
+        Logger logger = runContext.logger();
+
+        Event eventMetadata = event(runContext);
+
+        Event event = service
+            .events()
+            .insert(calendarId, eventMetadata)
+            .setFields("id")
+            .execute();
+
+        logger.debug("Inserted event '{}' in calendar '{}'", event.getId(), calendarId);
+
+        return Output
+            .builder()
+            .event(io.kestra.plugin.googleworkspace.calendar.models.Event.of(event))
+            .build();
+    }
+
+    @Builder
+    @Getter
+    public static class Output implements io.kestra.core.models.tasks.Output {
+        @Schema(
+            title = "Event ID of the inserted event."
+        )
+        private final io.kestra.plugin.googleworkspace.calendar.models.Event event;
+    }
+}
