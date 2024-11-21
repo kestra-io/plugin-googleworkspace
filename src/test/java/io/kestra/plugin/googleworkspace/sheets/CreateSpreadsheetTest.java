@@ -3,7 +3,6 @@ package io.kestra.plugin.googleworkspace.sheets;
 import io.kestra.core.junit.annotations.KestraTest;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
-import io.kestra.core.storages.StorageInterface;
 import io.kestra.plugin.googleworkspace.UtilsTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;

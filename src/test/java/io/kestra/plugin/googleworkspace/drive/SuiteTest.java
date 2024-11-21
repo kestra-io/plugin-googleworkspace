@@ -35,6 +35,7 @@ class SuiteTest {
     void run() throws Exception {
         URI source = storageInterface.put(
             null,
+            null,
             new URI("/" + IdUtils.create()),
             new FileInputStream(new File(Objects.requireNonNull(SuiteTest.class.getClassLoader()
                     .getResource("examples/addresses.csv"))
@@ -42,6 +43,7 @@ class SuiteTest {
         );
 
         URI source2 = storageInterface.put(
+            null,
             null,
             new URI("/" + IdUtils.create()),
             new FileInputStream(new File(Objects.requireNonNull(SuiteTest.class.getClassLoader()
@@ -96,7 +98,7 @@ class SuiteTest {
         assertThat(exportRun.getFile().getParents().equals(uploadRun.getFile().getParents()), is(true));
         assertThat(exportRun.getFile().getTrashed(), is(uploadRun.getFile().getTrashed()));
 
-        InputStream get = storageInterface.get(null, exportRun.getUri());
+        InputStream get = storageInterface.get(null, null, exportRun.getUri());
         String getContent = CharStreams.toString(new InputStreamReader(get));
 
         assertThat(getContent, containsString("John,Doe"));
@@ -136,7 +138,7 @@ class SuiteTest {
         assertThat(exportRun2.getFile().getParents().equals(upload2Run.getFile().getParents()), is(true));
         assertThat(exportRun2.getFile().getTrashed(), is(upload2Run.getFile().getTrashed()));
 
-        InputStream get2 = storageInterface.get(null, exportRun2.getUri());
+        InputStream get2 = storageInterface.get(null, null, exportRun2.getUri());
         String getContent2 = CharStreams.toString(new InputStreamReader(get2));
 
         assertThat(getContent2, containsString("Jane,Doe"));
@@ -177,6 +179,7 @@ class SuiteTest {
 
         URI source = storageInterface.put(
             null,
+            null,
             new URI("/" + IdUtils.create()),
             new FileInputStream(file)
         );
@@ -212,7 +215,7 @@ class SuiteTest {
         assertThat(downloadRun.getFile().getParents().equals(uploadRun.getFile().getParents()), is(true));
         assertThat(downloadRun.getFile().getTrashed(), is(uploadRun.getFile().getTrashed()));
 
-        InputStream get = storageInterface.get(null, downloadRun.getUri());
+        InputStream get = storageInterface.get(null, null, downloadRun.getUri());
 
         assertThat(
             CharStreams.toString(new InputStreamReader(get)),
