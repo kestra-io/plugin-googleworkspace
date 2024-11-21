@@ -251,6 +251,7 @@ class LoadTest {
 
         return storageInterface.put(
             null,
+            null,
             new URI("/" + IdUtils.create() + extension),
             new FileInputStream(new File(Objects.requireNonNull(resource)
                 .toURI()))

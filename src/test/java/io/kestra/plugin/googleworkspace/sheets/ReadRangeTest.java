@@ -60,7 +60,7 @@ class ReadRangeTest {
         assertThat(run.getSize(), is(30));
 
         List<Object> result = new ArrayList<>();
-        FileSerde.reader(new BufferedReader(new InputStreamReader(storageInterface.get(null, run.getUri()))), result::add);
+        FileSerde.reader(new BufferedReader(new InputStreamReader(storageInterface.get(null, null, run.getUri()))), result::add);
 
         assertThat(((Map<String, Object>) result.get(0)).get("Student Name"), is("Alexandra"));
         assertThat(((Map<String, Object>) result.get(0)).get("Formula"), is("Female"));
