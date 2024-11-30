@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
                   - id: list
                     type: io.kestra.plugin.googleworkspace.drive.List
                     query: |
-                      mimeType = 'application/vnd.google-apps.folder' 
+                      mimeType = 'application/vnd.google-apps.folder'
                       and '1z2GZgLEX12BN9zbVE6TodrCHyTRMj_ka' in parents
                 """
         )
@@ -100,7 +100,8 @@ public class List extends AbstractDrive implements RunnableTask<List.Output> {
         String pageToken = null;
         do {
             FileList fileList = list.setPageToken(pageToken)
-                .setSupportsTeamDrives(true)
+                .setSupportsAllDrives(true)
+                .setIncludeItemsFromAllDrives(true)
                 .execute();
 
             result.addAll(fileList

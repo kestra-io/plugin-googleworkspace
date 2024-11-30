@@ -59,7 +59,7 @@ public class Download extends AbstractDrive implements RunnableTask<Download.Out
             Drive.Files.Get get = service.files().get(fileId);
             com.google.api.services.drive.model.File file = get
                 .setFields("id, name, size, version, createdTime, parents, trashed, mimeType")
-                .setSupportsTeamDrives(true)
+                .setSupportsAllDrives(true)
                 .execute();
 
             get.executeMediaAndDownloadTo(outputStream);
