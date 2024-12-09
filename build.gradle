@@ -47,7 +47,8 @@ dependencies {
     annotationProcessor group: "io.kestra", name: "processor", version: kestraVersion
     compileOnly group: "io.kestra", name: "core", version: kestraVersion
 
-    // api
+    // Google libraries are managed by the the Kestra Platform so they are aligned on all plugins
+    api platform('com.google.cloud:libraries-bom')
     api 'com.google.api-client:google-api-client:2.7.0'
     api 'com.google.auth:google-auth-library-oauth2-http:1.27.0'
     api 'com.google.apis:google-api-services-drive:v3-rev20240914-2.0.0'
