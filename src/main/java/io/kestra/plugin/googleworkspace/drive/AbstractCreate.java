@@ -3,6 +3,7 @@ package io.kestra.plugin.googleworkspace.drive;
 import com.google.api.services.drive.model.File;
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.models.annotations.PluginProperty;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
@@ -22,15 +23,13 @@ public abstract class AbstractCreate extends AbstractDrive {
     @Schema(
         title = "The destination path"
     )
-    @PluginProperty(dynamic = true)
-    protected List<String> parents;
+    protected Property<List<String>> parents;
 
     @Schema(
         title = "The name of the file",
         description = "This is not necessarily unique within a folder"
     )
-    @PluginProperty(dynamic = true)
-    protected String name;
+    protected Property<String> name;
 
     @Schema(
         title = "A short description of the file."
@@ -45,32 +44,31 @@ public abstract class AbstractCreate extends AbstractDrive {
             "with a Google Doc MIME type, the uploaded content will be imported if possible. " +
             "The supported import formats are published [here](https://developers.google.com/drive/api/v3/mime-types)."
     )
-    @PluginProperty(dynamic = true)
-    protected String mimeType;
+    protected Property<String> mimeType;
 
     @Schema(
         title = "ID of the Team Drive the file resides in."
     )
-    @PluginProperty(dynamic = true)
-    protected String teamDriveId;
+    protected Property<String> teamDriveId;
 
     protected File file(RunContext runContext) throws IllegalVariableEvaluationException {
         File fileMetadata = new File();
 
         if (this.name != null) {
-            fileMetadata.setName(runContext.render(this.name));
+            fileMetadata.setName(runContext.render(this.name).as(String.class).orElseThrow());
         }
 
-        if (this.parents != null) {
-            fileMetadata.setParents(runContext.render(this.parents));
+        var renderedParents = runContext.render(this.parents).asList(String.class);
+        if (!renderedParents.isEmpty()) {
+            fileMetadata.setParents(renderedParents);
         }
 
         if (mimeType != null) {
-            fileMetadata.setMimeType(runContext.render(mimeType));
+            fileMetadata.setMimeType(runContext.render(mimeType).as(String.class).orElseThrow());
         }
 
         if (teamDriveId != null) {
-            fileMetadata.setTeamDriveId(runContext.render(teamDriveId));
+            fileMetadata.setTeamDriveId(runContext.render(teamDriveId).as(String.class).orElseThrow());
         }
 
         if (description != null) {

@@ -1,6 +1,7 @@
 package io.kestra.plugin.googleworkspace.drive;
 
 import com.google.common.io.CharStreams;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.storages.StorageInterface;
 import io.kestra.core.utils.IdUtils;
@@ -54,10 +55,10 @@ class SuiteTest {
         Create create = Create.builder()
             .id(SuiteTest.class.getSimpleName())
             .type(Create.class.getName())
-            .name(IdUtils.create())
-            .parents(List.of("1gkUuyf7CmVjEz7QR-Hl9Xx5kdmbk5Lwo"))
-            .mimeType("application/vnd.google-apps.folder")
-            .serviceAccount(UtilsTest.serviceAccount())
+            .name(Property.of(IdUtils.create()))
+            .parents(Property.of(List.of("1gkUuyf7CmVjEz7QR-Hl9Xx5kdmbk5Lwo")))
+            .mimeType(Property.of("application/vnd.google-apps.folder"))
+            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
             .build();
 
         Create.Output createRun = create.run(TestsUtils.mockRunContext(runContextFactory, create, Map.of()));
@@ -67,12 +68,12 @@ class SuiteTest {
         Upload upload = Upload.builder()
             .id(SuiteTest.class.getSimpleName())
             .type(Upload.class.getName())
-            .from(source.toString())
-            .parents(List.of(createRun.getFile().getId()))
-            .name(IdUtils.create())
-            .contentType("text/csv")
-            .mimeType("application/vnd.google-apps.spreadsheet")
-            .serviceAccount(UtilsTest.serviceAccount())
+            .from(Property.of(source.toString()))
+            .parents(Property.of(List.of(createRun.getFile().getId())))
+            .name(Property.of(IdUtils.create()))
+            .contentType(Property.of("text/csv"))
+            .mimeType(Property.of("application/vnd.google-apps.spreadsheet"))
+            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
             .build();
 
         Upload.Output uploadRun = upload.run(TestsUtils.mockRunContext(runContextFactory, upload, Map.of()));
@@ -82,9 +83,9 @@ class SuiteTest {
         Export export = Export.builder()
             .id(SuiteTest.class.getSimpleName())
             .type(Export.class.getName())
-            .fileId(uploadRun.getFile().getId())
-            .contentType("text/csv")
-            .serviceAccount(UtilsTest.serviceAccount())
+            .fileId(Property.of(uploadRun.getFile().getId()))
+            .contentType(Property.of("text/csv"))
+            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
             .build();
 
         Export.Output exportRun = export.run(TestsUtils.mockRunContext(runContextFactory, export, Map.of()));
@@ -107,12 +108,12 @@ class SuiteTest {
         Upload upload2 = Upload.builder()
             .id(SuiteTest.class.getSimpleName())
             .type(Upload.class.getName())
-            .from(source2.toString())
-            .fileId(uploadRun.getFile().getId())
-            .name(IdUtils.create())
-            .contentType("text/csv")
-            .mimeType("application/vnd.google-apps.spreadsheet")
-            .serviceAccount(UtilsTest.serviceAccount())
+            .from(Property.of(source2.toString()))
+            .fileId(Property.of(uploadRun.getFile().getId()))
+            .name(Property.of(IdUtils.create()))
+            .contentType(Property.of("text/csv"))
+            .mimeType(Property.of("application/vnd.google-apps.spreadsheet"))
+            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
             .build();
 
         Upload.Output upload2Run = upload2.run(TestsUtils.mockRunContext(runContextFactory, upload, Map.of()));
@@ -122,9 +123,9 @@ class SuiteTest {
         Export export2 = Export.builder()
             .id(SuiteTest.class.getSimpleName())
             .type(Export.class.getName())
-            .fileId(uploadRun.getFile().getId())
-            .contentType("text/csv")
-            .serviceAccount(UtilsTest.serviceAccount())
+            .fileId(Property.of(uploadRun.getFile().getId()))
+            .contentType(Property.of("text/csv"))
+            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
             .build();
 
         Export.Output exportRun2 = export2.run(TestsUtils.mockRunContext(runContextFactory, export, Map.of()));
@@ -147,8 +148,8 @@ class SuiteTest {
         Delete delete = Delete.builder()
             .id(SuiteTest.class.getSimpleName())
             .type(Delete.class.getName())
-            .fileId(uploadRun.getFile().getId())
-            .serviceAccount(UtilsTest.serviceAccount())
+            .fileId(Property.of(uploadRun.getFile().getId()))
+            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
             .build();
 
         Delete.Output deleteRun = delete.run(TestsUtils.mockRunContext(runContextFactory, delete, Map.of()));
@@ -158,8 +159,8 @@ class SuiteTest {
         Delete deleteFolder = Delete.builder()
             .id(SuiteTest.class.getSimpleName())
             .type(Delete.class.getName())
-            .fileId(createRun.getFile().getId())
-            .serviceAccount(UtilsTest.serviceAccount())
+            .fileId(Property.of(createRun.getFile().getId()))
+            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
             .build();
 
         Delete.Output deleteFolderRun = deleteFolder.run(TestsUtils.mockRunContext(runContextFactory, deleteFolder, Map.of()));
@@ -187,11 +188,11 @@ class SuiteTest {
         Upload upload = Upload.builder()
             .id(SuiteTest.class.getSimpleName())
             .type(Upload.class.getName())
-            .from(source.toString())
-            .parents(List.of("1gkUuyf7CmVjEz7QR-Hl9Xx5kdmbk5Lwo"))
-            .name(IdUtils.create())
-            .contentType("application/zip")
-            .serviceAccount(UtilsTest.serviceAccount())
+            .from(Property.of(source.toString()))
+            .parents(Property.of(List.of("1gkUuyf7CmVjEz7QR-Hl9Xx5kdmbk5Lwo")))
+            .name(Property.of(IdUtils.create()))
+            .contentType(Property.of("application/zip"))
+            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
             .build();
 
         Upload.Output uploadRun = upload.run(TestsUtils.mockRunContext(runContextFactory, upload, Map.of()));
@@ -201,8 +202,8 @@ class SuiteTest {
         Download download = Download.builder()
             .id(SuiteTest.class.getSimpleName())
             .type(Export.class.getName())
-            .fileId(uploadRun.getFile().getId())
-            .serviceAccount(UtilsTest.serviceAccount())
+            .fileId(Property.of(uploadRun.getFile().getId()))
+            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
             .build();
 
         Download.Output downloadRun = download.run(TestsUtils.mockRunContext(runContextFactory, upload, Map.of()));
@@ -225,8 +226,8 @@ class SuiteTest {
         Delete delete = Delete.builder()
             .id(SuiteTest.class.getSimpleName())
             .type(Delete.class.getName())
-            .fileId(uploadRun.getFile().getId())
-            .serviceAccount(UtilsTest.serviceAccount())
+            .fileId(Property.of(uploadRun.getFile().getId()))
+            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
             .build();
 
         Delete.Output deleteRun = delete.run(TestsUtils.mockRunContext(runContextFactory, upload, Map.of()));

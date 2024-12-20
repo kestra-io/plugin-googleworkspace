@@ -5,6 +5,7 @@ import com.google.api.services.sheets.v4.model.ValueRange;
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.executions.metrics.Counter;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -46,7 +47,7 @@ public class ReadRange extends AbstractRead implements RunnableTask<ReadRange.Ou
     @Schema(
         title = "The range to select"
     )
-    private String range;
+    private Property<String> range;
 
     @Override
     public ReadRange.Output run(RunContext runContext) throws Exception {
@@ -56,21 +57,21 @@ public class ReadRange extends AbstractRead implements RunnableTask<ReadRange.Ou
         ValueRange response = service.spreadsheets()
             .values()
             .get(
-                runContext.render(spreadsheetId),
-                runContext.render(range)
+                runContext.render(spreadsheetId).as(String.class).orElseThrow(),
+                runContext.render(range).as(String.class).orElse(null)
             )
-            .set("valueRenderOption", this.valueRender.name())
-            .set("dateTimeRenderOption", this.dateTimeRender.name())
+            .set("valueRenderOption", runContext.render(this.valueRender).as(ValueRender.class).orElseThrow().name())
+            .set("dateTimeRenderOption", runContext.render(this.dateTimeRender).as(DateTimeRender.class).orElseThrow().name())
             .execute();
 
         logger.info("Fetch {} rows from range '{}'", response.getValues().size(), response.getRange());
 
-        List<Object> values = this.transform(response.getValues());
+        List<Object> values = this.transform(response.getValues(), runContext);
 
         Output.OutputBuilder builder = Output.builder()
             .size(values.size());
 
-        if (this.fetch) {
+        if (runContext.render(this.fetch).as(Boolean.class).orElseThrow()) {
             builder.rows(values);
         } else {
             builder.uri(runContext.storage().putFile(this.store(runContext, values)));

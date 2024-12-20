@@ -5,6 +5,7 @@ import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.auth.http.HttpCredentialsAdapter;
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.models.annotations.PluginProperty;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.googleworkspace.AbstractTask;
 import lombok.*;
@@ -21,8 +22,7 @@ import java.util.List;
 @NoArgsConstructor
 public abstract class AbstractSheet extends AbstractTask {
     @Builder.Default
-    @PluginProperty(dynamic = true)
-    protected List<String> scopes = List.of(SheetsScopes.SPREADSHEETS);
+    protected Property<List<String>> scopes = Property.of(List.of(SheetsScopes.SPREADSHEETS));
 
     protected Sheets connection(RunContext runContext) throws IllegalVariableEvaluationException, IOException, GeneralSecurityException {
         HttpCredentialsAdapter credentials = this.credentials(runContext);

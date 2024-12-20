@@ -6,6 +6,7 @@ import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.executions.metrics.Counter;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.googleworkspace.drive.models.File;
@@ -36,7 +37,7 @@ import java.util.stream.Collectors;
                   - id: list
                     type: io.kestra.plugin.googleworkspace.drive.List
                     query: |
-                      mimeType = 'application/vnd.google-apps.folder' 
+                      mimeType = 'application/vnd.google-apps.folder'
                       and '1z2GZgLEX12BN9zbVE6TodrCHyTRMj_ka' in parents
                 """
         )
@@ -51,8 +52,7 @@ public class List extends AbstractDrive implements RunnableTask<List.Output> {
         description = "see details [here](https://developers.google.com/drive/api/v3/search-files)\n" +
             "if not defined, will list all files that the service account have access"
     )
-    @PluginProperty(dynamic = true)
-    private String query;
+    private Property<String> query;
 
     @Schema(
         title = "list of bodies of items (files/documents) to which the query applies.",
@@ -60,15 +60,14 @@ public class List extends AbstractDrive implements RunnableTask<List.Output> {
             " be combined with 'user'; all other values must be used in isolation. Prefer 'user' or 'teamDrive' " +
             "to 'allTeamDrives' for efficiency."
     )
-    @PluginProperty(dynamic = false)
-    private java.util.List<Corpora> corpora;
+    private Property<java.util.List<Corpora>> corpora;
 
     @Override
     public Output run(RunContext runContext) throws Exception {
         Drive service = this.connection(runContext);
         Logger logger = runContext.logger();
 
-        String query = this.query != null ? runContext.render(this.query) : null;
+        String query = this.query != null ? runContext.render(this.query).as(String.class).orElseThrow() : null;
 
         Drive.Files.List list = service.files()
             .list()
@@ -76,7 +75,7 @@ public class List extends AbstractDrive implements RunnableTask<List.Output> {
             .setQ(query);
 
         if (this.corpora != null) {
-            list.setCorpora(this.corpora
+            list.setCorpora(runContext.render(this.corpora).asList(Corpora.class)
                 .stream()
                 .map(Enum::name)
                 .collect(Collectors.joining(","))

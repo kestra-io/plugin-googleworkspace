@@ -5,6 +5,7 @@ import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.executions.metrics.Counter;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -44,15 +45,14 @@ public class Download extends AbstractDrive implements RunnableTask<Download.Out
     @Schema(
         title = "The file id to copy"
     )
-    @PluginProperty(dynamic = true)
     @NotNull
-    private String fileId;
+    private Property<String> fileId;
 
     @Override
     public Output run(RunContext runContext) throws Exception {
         Drive service = this.connection(runContext);
         Logger logger = runContext.logger();
-        String fileId = runContext.render(this.fileId);
+        String fileId = runContext.render(this.fileId).as(String.class).orElseThrow();
 
         File tempFile = runContext.workingDir().createTempFile().toFile();
         try (BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(tempFile))) {

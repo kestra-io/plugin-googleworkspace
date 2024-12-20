@@ -7,6 +7,7 @@ import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.executions.metrics.Counter;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -56,32 +57,29 @@ import jakarta.validation.constraints.NotNull;
 )
 public class Upload extends AbstractCreate implements RunnableTask<Upload.Output> {
     @Schema(
-        title = "The file to copy"
+        title = "The file URI to copy"
     )
-    @PluginProperty(dynamic = true)
     @NotNull
-    private String from;
+    private Property<String> from;
 
     @Schema(
         title = "The file id to update",
         description = "If not provided, it will create a new file"
     )
-    @PluginProperty(dynamic = true)
-    private String fileId;
+    private Property<String> fileId;
 
     @Schema(
         title = "The content-type of the file.",
         description = "a valid [RFC2045](https://datatracker.ietf.org/doc/html/rfc2045) like `text/csv`, `application/msword`, ... "
     )
-    @PluginProperty(dynamic = true)
     @NotNull
-    private String contentType;
+    private Property<String> contentType;
 
     @Override
     public Output run(RunContext runContext) throws Exception {
         Drive service = this.connection(runContext);
         Logger logger = runContext.logger();
-        URI from = URI.create(runContext.render(this.from));
+        URI from = URI.create(runContext.render(this.from).as(String.class).orElseThrow());
 
         File fileMetadata = this.file(runContext);
 
@@ -90,13 +88,13 @@ public class Upload extends AbstractCreate implements RunnableTask<Upload.Output
             IOUtils.copy(runContext.storage().getFile(from), out);
         }
 
-        FileContent fileContent = new FileContent(runContext.render(contentType), tempFile);
+        FileContent fileContent = new FileContent(runContext.render(contentType).as(String.class).orElseThrow(), tempFile);
 
         File file;
         if (this.fileId != null) {
             file = service
                 .files()
-                .update(runContext.render(this.fileId), fileMetadata, fileContent)
+                .update(runContext.render(this.fileId).as(String.class).orElseThrow(), fileMetadata, fileContent)
                 .setFields("id, name, version, createdTime, parents, trashed, mimeType")
                 .setSupportsTeamDrives(true)
                 .execute();

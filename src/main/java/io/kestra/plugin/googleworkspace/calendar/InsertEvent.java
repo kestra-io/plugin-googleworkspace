@@ -57,13 +57,14 @@ public class InsertEvent extends AbstractInsertEvent implements RunnableTask<Ins
 
         Event eventMetadata = event(runContext);
 
+        var renderedCalendarId= runContext.render(calendarId).as(String.class).orElseThrow();
         Event event = service
             .events()
-            .insert(calendarId, eventMetadata)
+            .insert(renderedCalendarId, eventMetadata)
             .setFields("id")
             .execute();
 
-        logger.debug("Inserted event '{}' in calendar '{}'", event.getId(), calendarId);
+        logger.debug("Inserted event '{}' in calendar '{}'", event.getId(), renderedCalendarId);
 
         return Output
             .builder()

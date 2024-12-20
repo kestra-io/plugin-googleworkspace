@@ -1,5 +1,6 @@
 package io.kestra.plugin.googleworkspace.sheets;
 
+import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.utils.TestsUtils;
 import io.kestra.plugin.googleworkspace.UtilsTest;
@@ -25,9 +26,9 @@ class ReadTest {
         Read task = Read.builder()
             .id(ReadTest.class.getSimpleName())
             .type(ReadRange.class.getName())
-            .spreadsheetId("1Dkd7W0OQo-wxz9rrORLP7YGSj6EBLEg73fiTdbJUIQE")
-            .serviceAccount(UtilsTest.serviceAccount())
-            .fetch(true)
+            .spreadsheetId(Property.of("1Dkd7W0OQo-wxz9rrORLP7YGSj6EBLEg73fiTdbJUIQE"))
+            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
+            .fetch(Property.of(true))
             .build();
 
         Read.Output run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));
@@ -48,10 +49,10 @@ class ReadTest {
         Read task = Read.builder()
             .id(ReadTest.class.getSimpleName())
             .type(ReadRange.class.getName())
-            .spreadsheetId("1Dkd7W0OQo-wxz9rrORLP7YGSj6EBLEg73fiTdbJUIQE")
-            .serviceAccount(UtilsTest.serviceAccount())
-            .selectedSheetsTitle(List.of("Second One"))
-            .fetch(true)
+            .spreadsheetId(Property.of("1Dkd7W0OQo-wxz9rrORLP7YGSj6EBLEg73fiTdbJUIQE"))
+            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
+            .selectedSheetsTitle(Property.of(List.of("Second One")))
+            .fetch(Property.of(true))
             .build();
 
         Read.Output run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));

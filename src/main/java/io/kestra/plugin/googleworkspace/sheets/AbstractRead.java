@@ -1,6 +1,7 @@
 package io.kestra.plugin.googleworkspace.sheets;
 
-import io.kestra.core.models.annotations.PluginProperty;
+import io.kestra.core.exceptions.IllegalVariableEvaluationException;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.serializers.FileSerde;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -28,8 +29,7 @@ public abstract class AbstractRead extends AbstractSheet {
         title = "The spreadsheet unique id"
     )
     @NotNull
-    @PluginProperty(dynamic = true)
-    protected String spreadsheetId;
+    protected Property<String> spreadsheetId;
 
     @Schema(
         title = "Determines how values should be rendered in the output.",
@@ -37,8 +37,7 @@ public abstract class AbstractRead extends AbstractSheet {
     )
     @NotNull
     @Builder.Default
-    @PluginProperty(dynamic = false)
-    protected ValueRender valueRender = ValueRender.UNFORMATTED_VALUE;
+    protected Property<ValueRender> valueRender = Property.of(ValueRender.UNFORMATTED_VALUE);
 
     @Schema(
         title = "How dates, times, and durations should be represented in the output.",
@@ -47,37 +46,34 @@ public abstract class AbstractRead extends AbstractSheet {
     )
     @NotNull
     @Builder.Default
-    @PluginProperty(dynamic = false)
-    protected DateTimeRender dateTimeRender = DateTimeRender.FORMATTED_STRING;
+    protected Property<DateTimeRender> dateTimeRender = Property.of(DateTimeRender.FORMATTED_STRING);
 
     @Builder.Default
     @Schema(
         title = "Specifies if the first line should be the header (default: false)"
     )
-    protected final Boolean header = true;
+    protected final Property<Boolean> header = Property.of(true);
 
     @Schema(
         title = "Whether to Fetch the data from the query result to the task output"
     )
-    @PluginProperty(dynamic = false)
     @Builder.Default
-    protected final boolean fetch = false;
+    protected final Property<Boolean> fetch = Property.of(false);
 
     @Schema(
         title = "Whether to store the data from the query result into an ion serialized data file"
     )
-    @PluginProperty(dynamic = false)
     @Builder.Default
-    protected final boolean store = true;
+    protected final Property<Boolean> store = Property.of(true);
 
-    protected List<Object> transform(List<List<Object>> values) {
+    protected List<Object> transform(List<List<Object>> values, RunContext runContext) throws IllegalVariableEvaluationException {
         List<Object> result = new ArrayList<>();
 
         if (values == null || values.isEmpty()) {
             return result;
         }
 
-        if (this.header) {
+        if (runContext.render(this.header).as(Boolean.class).orElseThrow()) {
             List<Object> headers = values.get(0);
 
             for (int i = 1; i < values.size(); i++) {

@@ -5,6 +5,7 @@ import com.google.api.services.sheets.v4.Sheets;
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.googleworkspace.drive.Delete;
@@ -29,11 +30,11 @@ import lombok.experimental.SuperBuilder;
             code = """
                 id: googleworkspace_sheets_delete
                 namespace: company.team
-                
+
                 inputs:
                   - id: serviceAccount
                     type: STRING
-                
+
                 tasks:
                   - id: delete_spreadsheet
                     type: io.kestra.plugin.googleworkspace.sheets.DeleteSpreadsheet
@@ -49,14 +50,13 @@ public class DeleteSpreadsheet extends AbstractSheet implements RunnableTask<Del
 		title = "Spreadsheet ID."
 	)
 	@NotNull
-	@PluginProperty(dynamic = true)
-	private String spreadsheetId;
+	private Property<String> spreadsheetId;
 
 	@Override
 	public Output run(RunContext runContext) throws Exception {
 		Sheets services = this.connection(runContext);
 
-		String spreadsheetId = runContext.render(this.spreadsheetId);
+		String spreadsheetId = runContext.render(this.spreadsheetId).as(String.class).orElseThrow();
 
 		try {
 			services.spreadsheets()
@@ -67,8 +67,8 @@ public class DeleteSpreadsheet extends AbstractSheet implements RunnableTask<Del
 		}
 
 		Delete delete = Delete.builder()
-			.serviceAccount(runContext.render(this.serviceAccount))
-			.fileId(spreadsheetId)
+			.serviceAccount(this.serviceAccount)
+			.fileId(Property.of(spreadsheetId))
 			.build();
 
 		Delete.Output output = delete.run(runContext);

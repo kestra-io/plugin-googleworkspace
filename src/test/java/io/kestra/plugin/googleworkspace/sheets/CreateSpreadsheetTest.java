@@ -1,6 +1,7 @@
 package io.kestra.plugin.googleworkspace.sheets;
 
 import io.kestra.core.junit.annotations.KestraTest;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.plugin.googleworkspace.UtilsTest;
@@ -27,8 +28,8 @@ class CreateSpreadsheetTest {
 
         CreateSpreadsheet createTask = CreateSpreadsheet.builder()
             .id(CreateSpreadsheetTest.class.getSimpleName())
-            .title("CSV Test Spreadsheet")
-            .serviceAccount(UtilsTest.serviceAccount())
+            .title(Property.of("CSV Test Spreadsheet"))
+            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
             .build();
 
         CreateSpreadsheet.Output createOutput = createTask.run(runContext);
@@ -38,8 +39,8 @@ class CreateSpreadsheetTest {
 
         DeleteSpreadsheet deleteTask = DeleteSpreadsheet.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(UtilsTest.serviceAccount())
-            .spreadsheetId(createOutput.getSpreadsheetId())
+            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
+            .spreadsheetId(Property.of(createOutput.getSpreadsheetId()))
             .build();
 
         DeleteSpreadsheet.Output deleteOutput = deleteTask.run(runContext);

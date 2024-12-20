@@ -6,6 +6,7 @@ import com.google.api.services.sheets.v4.model.ValueRange;
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -57,27 +58,28 @@ public class Load extends AbstractLoad implements RunnableTask<Load.Output> {
 	@Schema(
 		title = "The URI of the Kestra's internal storage file."
 	)
-	@PluginProperty(dynamic = true)
-	private URI from;
+	private Property<String> from;
 
 	@Schema(
 		title = "The sheet name or range to select."
 	)
 	@Builder.Default
-	@PluginProperty(dynamic = true)
-	private String range = "Sheet1";
+	private Property<String> range = Property.of("Sheet1");
 
 	@Override
 	public Output run(RunContext runContext) throws Exception {
 		Sheets service = this.connection(runContext);
         Logger logger = runContext.logger();
 
+        URI from = URI.create(runContext.render(this.from).as(String.class).orElseThrow());
 		List<List<Object>> values = this.parse(runContext, from);
 
 		ValueRange body = new ValueRange().setValues(values);
 
 		UpdateValuesResponse response = service.spreadsheets().values()
-			.update(runContext.render(this.spreadsheetId), runContext.render(this.range), body)
+			.update(runContext.render(this.spreadsheetId).as(String.class).orElseThrow(),
+                runContext.render(this.range).as(String.class).orElseThrow(),
+                body)
 			.setValueInputOption("RAW")
 			.execute();
 
