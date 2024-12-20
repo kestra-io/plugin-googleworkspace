@@ -4,6 +4,7 @@ import com.google.api.services.drive.Drive;
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -41,14 +42,13 @@ public class Delete extends AbstractDrive implements RunnableTask<Delete.Output>
     @Schema(
         title = "The file id to delete"
     )
-    @PluginProperty(dynamic = true)
-    private String fileId;
+    private Property<String> fileId;
 
     @Override
     public Output run(RunContext runContext) throws Exception {
         Drive service = this.connection(runContext);
         Logger logger = runContext.logger();
-        String id = runContext.render(this.fileId);
+        String id = runContext.render(this.fileId).as(String.class).orElse(null);
 
         Void execute = service
             .files()

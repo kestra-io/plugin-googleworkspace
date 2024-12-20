@@ -2,6 +2,7 @@ package io.kestra.plugin.googleworkspace.sheets;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kestra.core.models.annotations.PluginProperty;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.serializers.JacksonMapper;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -29,14 +30,13 @@ public abstract class AbstractLoad extends AbstractSheet {
         title = "The spreadsheet unique id."
     )
     @NotNull
-    @PluginProperty(dynamic = true)
-    protected String spreadsheetId;
+    protected Property<String> spreadsheetId;
 
     @Builder.Default
     @Schema(
         title = "Specifies if the first line should be the header (default: false)."
     )
-    protected final Boolean header = false;
+    protected final Property<Boolean> header = Property.of(false);
 
     @Schema(
         title = "Csv parsing options (Optional)."
@@ -48,33 +48,32 @@ public abstract class AbstractLoad extends AbstractSheet {
         title = "Schema for avro objects (Optional).",
         description = "If provided, the task will read avro objects using this schema."
     )
-    @PluginProperty(dynamic = true)
-    private String avroSchema;
+    private Property<String> avroSchema;
 
     @Schema(
         title = "Format of the input file.",
         description = "If not provided, the task will programmatically try to find the correct format based on the extension."
     )
-    @PluginProperty(dynamic = true)
-    private Format format;
+    private Property<Format> format;
 
     protected List<List<Object>> parse(RunContext runContext, URI from) throws Exception {
         Format format;
         if (this.format == null) {
             format = Format.getFromFile(from.toString());
         } else {
-            format = this.format;
+            format = runContext.render(this.format).as(Format.class).orElseThrow();
         }
 
         try (InputStream inputStream = runContext.storage().getFile(from)) {
             DataParser parser = new DataParser(runContext);
+            var headerValue = runContext.render(header).as(Boolean.class).orElseThrow();
             return switch (format) {
-                case ION -> parser.parseThroughMapper(inputStream, ION_MAPPER, header);
-                case JSON -> parser.parseThroughMapper(inputStream, JSON_MAPPER, header);
+                case ION -> parser.parseThroughMapper(inputStream, ION_MAPPER, headerValue);
+                case JSON -> parser.parseThroughMapper(inputStream, JSON_MAPPER, headerValue);
                 case CSV -> parser.parseCsv(inputStream, csvOptions);
-                case AVRO -> parser.parseAvro(inputStream, header, runContext.render(this.avroSchema));
-                case PARQUET -> parser.parseParquet(inputStream, header);
-                case ORC -> parser.parseORC(inputStream, header);
+                case AVRO -> parser.parseAvro(inputStream, headerValue, runContext.render(this.avroSchema).as(String.class).orElse(null));
+                case PARQUET -> parser.parseParquet(inputStream, headerValue);
+                case ORC -> parser.parseORC(inputStream, headerValue);
             };
         }
     }
@@ -116,8 +115,7 @@ public abstract class AbstractLoad extends AbstractSheet {
             title = "The separator for fields in a CSV file."
         )
         @Builder.Default
-        @PluginProperty(dynamic = true)
-        private String fieldDelimiter = ",";
+        private Property<String> fieldDelimiter = Property.of(",");
 
         @Schema(
             title = "The number of rows at the top of a CSV file that will be skipped when reading the data.",
@@ -125,20 +123,18 @@ public abstract class AbstractLoad extends AbstractSheet {
                 " that should be skipped."
         )
         @PluginProperty
-        private Long skipLeadingRows;
+        private Property<Long> skipLeadingRows;
 
         @Schema(
             title = "The quote character in a CSV file."
         )
-        @PluginProperty(dynamic = true)
-        private String quote;
+        private Property<String> quote;
 
         @Schema(
             title = "The file encoding of CSV file."
         )
         @Builder.Default
-        @PluginProperty(dynamic = true)
-        private String encoding = "UTF-8";
+        private Property<String> encoding = Property.of("UTF-8");
 
     }
 }

@@ -8,6 +8,7 @@ import com.google.api.services.sheets.v4.model.ValueRange;
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.models.tasks.Task;
 import io.kestra.core.runners.RunContext;
@@ -36,11 +37,11 @@ import java.util.List;
             code = """
                 id: googleworkspace_sheets_create
                 namespace: company.team
-                
+
                 inputs:
                   - id: serviceAccount
                     type: STRING
-                
+
                 tasks:
                   - id: create_spreadsheet
                     type: io.kestra.plugin.googleworkspace.sheets.CreateSpreadsheet
@@ -55,8 +56,7 @@ public class CreateSpreadsheet extends AbstractSheet implements RunnableTask<Cre
 		title = "Spreadsheet title."
 	)
 	@NotNull
-	@PluginProperty(dynamic = true)
-	private String title;
+	private Property<String> title;
 
 	@Override
 	public Output run(RunContext runContext) throws Exception {
@@ -64,7 +64,7 @@ public class CreateSpreadsheet extends AbstractSheet implements RunnableTask<Cre
         Logger logger = runContext.logger();
 
 		SpreadsheetProperties properties = new SpreadsheetProperties()
-			.setTitle(runContext.render(this.title));
+			.setTitle(runContext.render(this.title).as(String.class).orElseThrow());
 
 		Spreadsheet spreadsheet = new Spreadsheet()
 			.setProperties(properties);

@@ -6,6 +6,7 @@ import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.executions.metrics.Counter;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.utils.ListUtils;
@@ -20,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import jakarta.validation.constraints.NotNull;
 
 import static io.kestra.core.utils.Rethrow.throwFunction;
 
@@ -55,7 +55,7 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
         title = "The sheet title to be included",
         description = "If not provided all the sheets will be included."
     )
-    private List<String> selectedSheetsTitle;
+    private Property<List<String>> selectedSheetsTitle;
 
     @Override
     public Read.Output run(RunContext runContext) throws Exception {
@@ -63,10 +63,10 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
         Logger logger = runContext.logger();
 
         Spreadsheet spreadsheet = service.spreadsheets()
-            .get(runContext.render(spreadsheetId))
+            .get(runContext.render(spreadsheetId).as(String.class).orElseThrow())
             .execute();
 
-        List<String> includedSheetsTitle = ListUtils.emptyOnNull(this.selectedSheetsTitle)
+        List<String> includedSheetsTitle = runContext.render(this.selectedSheetsTitle).asList(String.class)
             .stream()
             .map(throwFunction(runContext::render))
             .collect(Collectors.toList());
@@ -89,10 +89,10 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
 
         // batch get all ranges
         BatchGetValuesResponse batchGet = service.spreadsheets().values()
-            .batchGet(runContext.render(spreadsheetId))
+            .batchGet(runContext.render(spreadsheetId).as(String.class).orElseThrow())
             .setRanges(ranges)
-            .set("valueRenderOption", this.valueRender.name())
-            .set("dateTimeRenderOption", this.dateTimeRender.name())
+            .set("valueRenderOption", runContext.render(this.valueRender).as(ValueRender.class).orElseThrow().name())
+            .set("dateTimeRenderOption", runContext.render(this.dateTimeRender).as(DateTimeRender.class).orElseThrow().name())
             .execute();
 
         // read values
@@ -107,9 +107,9 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
             logger.info("Fetch {} rows from range '{}'", valueRange.getValues().size(), valueRange.getRange());
             rowsCount.addAndGet(valueRange.getValues().size());
 
-            List<Object> values = this.transform(valueRange.getValues());
+            List<Object> values = this.transform(valueRange.getValues(), runContext);
 
-            if (this.fetch) {
+            if (runContext.render(this.fetch).as(Boolean.class).orElseThrow()) {
                 rows.put(sheet.getProperties().getTitle(), values);
             } else {
                 uris.put(sheet.getProperties().getTitle(), runContext.storage().putFile(this.store(runContext, values)));
@@ -119,7 +119,7 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
         Output.OutputBuilder builder = Output.builder()
             .size(rowsCount.get());
 
-        if (this.fetch) {
+        if (runContext.render(this.fetch).as(Boolean.class).orElseThrow()) {
             builder.rows(rows);
         } else {
             builder.uris(uris);

@@ -10,6 +10,7 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.Task;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.serializers.JacksonMapper;
@@ -30,17 +31,17 @@ import java.util.Map;
 public abstract class AbstractTask extends Task implements GcpInterface {
     protected static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 
-    protected String serviceAccount;
+    protected Property<String> serviceAccount;
 
     @Builder.Default
-    protected Integer readTimeout = 120;
+    protected Property<Integer> readTimeout = Property.of(120);
 
 
     protected HttpCredentialsAdapter credentials(RunContext runContext) throws IllegalVariableEvaluationException, IOException {
         GoogleCredentials credentials;
 
         if (serviceAccount != null) {
-            String serviceAccount = runContext.render(this.serviceAccount);
+            String serviceAccount = runContext.render(this.serviceAccount).as(String.class).orElseThrow();
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(serviceAccount.getBytes());
             credentials = ServiceAccountCredentials.fromStream(byteArrayInputStream);
             Logger logger = runContext.logger();
@@ -56,16 +57,18 @@ public abstract class AbstractTask extends Task implements GcpInterface {
             credentials = GoogleCredentials.getApplicationDefault();
         }
 
-        if (this.getScopes() != null) {
-            credentials = credentials.createScoped(runContext.render(this.getScopes()));
+        var renderedScopes = runContext.render(this.getScopes()).asList(String.class);
+        if (!renderedScopes.isEmpty()) {
+            credentials = credentials.createScoped(renderedScopes);
         }
 
+        var renderedTiemout = runContext.render(this.readTimeout).as(Integer.class).orElseThrow();
         return new HttpCredentialsAdapter(credentials) {
             @Override
             public void initialize(HttpRequest request) throws IOException {
                 super.initialize(request);
 
-                request.setReadTimeout(readTimeout * 1000);
+                request.setReadTimeout(renderedTiemout * 1000);
             }
         };
     }

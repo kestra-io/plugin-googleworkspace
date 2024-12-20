@@ -1,5 +1,6 @@
 package io.kestra.plugin.googleworkspace.drive;
 
+import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.utils.TestsUtils;
 import io.kestra.plugin.googleworkspace.UtilsTest;
@@ -22,8 +23,8 @@ class ListTest {
         List task = List.builder()
             .id(ListTest.class.getSimpleName())
             .type(List.class.getName())
-            .query("'1YgHpphjepA8gAme1J04ftxVf7j80XABU' in parents")
-            .serviceAccount(UtilsTest.serviceAccount())
+            .query(Property.of("'1YgHpphjepA8gAme1J04ftxVf7j80XABU' in parents"))
+            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
             .build();
 
         List.Output run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));

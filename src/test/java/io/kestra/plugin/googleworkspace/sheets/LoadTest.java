@@ -1,6 +1,7 @@
 package io.kestra.plugin.googleworkspace.sheets;
 
 import io.kestra.core.junit.annotations.KestraTest;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.storages.StorageInterface;
@@ -49,9 +50,9 @@ class LoadTest {
 
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(serviceAccount)
-            .spreadsheetId(spreadsheetId)
-            .from(getSource(".csv"))
+            .serviceAccount(Property.of(serviceAccount))
+            .spreadsheetId(Property.of(spreadsheetId))
+            .from(Property.of(getSource(".csv").toString()))
             .build();
 
         Load.Output run = task.run(runContext);
@@ -71,9 +72,9 @@ class LoadTest {
         URI source = getSource(".json");
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(serviceAccount)
-            .spreadsheetId(spreadsheetId)
-            .from(source)
+            .serviceAccount(Property.of(serviceAccount))
+            .spreadsheetId(Property.of(spreadsheetId))
+            .from(Property.of(source.toString()))
             .build();
 
         Load.Output run = task.run(runContext);
@@ -94,10 +95,10 @@ class LoadTest {
 
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(serviceAccount)
-            .spreadsheetId(spreadsheetId)
-            .from(source)
-            .header(true)
+            .serviceAccount(Property.of(serviceAccount))
+            .spreadsheetId(Property.of(spreadsheetId))
+            .from(Property.of(source.toString()))
+            .header(Property.of(true))
             .build();
 
         Load.Output run = task.run(runContext);
@@ -117,9 +118,9 @@ class LoadTest {
         URI source = getSource(".avro");
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(serviceAccount)
-            .spreadsheetId(spreadsheetId)
-            .from(source)
+            .serviceAccount(Property.of(serviceAccount))
+            .spreadsheetId(Property.of(spreadsheetId))
+            .from(Property.of(source.toString()))
             .build();
 
         Load.Output run = task.run(runContext);
@@ -140,10 +141,10 @@ class LoadTest {
 
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(serviceAccount)
-            .spreadsheetId(spreadsheetId)
-            .from(source)
-            .header(true)
+            .serviceAccount(Property.of(serviceAccount))
+            .spreadsheetId(Property.of(spreadsheetId))
+            .from(Property.of(source.toString()))
+            .header(Property.of(true))
             .build();
 
         Load.Output run = task.run(runContext);
@@ -163,9 +164,9 @@ class LoadTest {
         URI source = getSource(".orc");
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(serviceAccount)
-            .spreadsheetId(spreadsheetId)
-            .from(source)
+            .serviceAccount(Property.of(serviceAccount))
+            .spreadsheetId(Property.of(spreadsheetId))
+            .from(Property.of(source.toString()))
             .build();
 
         Load.Output run = task.run(runContext);
@@ -186,10 +187,10 @@ class LoadTest {
 
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(serviceAccount)
-            .spreadsheetId(spreadsheetId)
-            .from(source)
-            .header(true)
+            .serviceAccount(Property.of(serviceAccount))
+            .spreadsheetId(Property.of(spreadsheetId))
+            .from(Property.of(source.toString()))
+            .header(Property.of(true))
             .build();
 
         Load.Output run = task.run(runContext);
@@ -209,9 +210,9 @@ class LoadTest {
         URI source = getSource(".parquet");
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(serviceAccount)
-            .spreadsheetId(spreadsheetId)
-            .from(source)
+            .serviceAccount(Property.of(serviceAccount))
+            .spreadsheetId(Property.of(spreadsheetId))
+            .from(Property.of(source.toString()))
             .build();
 
         Load.Output run = task.run(runContext);
@@ -232,10 +233,10 @@ class LoadTest {
 
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(serviceAccount)
-            .spreadsheetId(spreadsheetId)
-            .from(source)
-            .header(true)
+            .serviceAccount(Property.of(serviceAccount))
+            .spreadsheetId(Property.of(spreadsheetId))
+            .from(Property.of(source.toString()))
+            .header(Property.of(true))
             .build();
 
         Load.Output run = task.run(runContext);
@@ -261,8 +262,8 @@ class LoadTest {
     private String createSpreadsheet(RunContext runContext) throws Exception {
         CreateSpreadsheet createTask = CreateSpreadsheet.builder()
             .id(LoadTest.class.getSimpleName())
-            .title("CSV Test Spreadsheet")
-            .serviceAccount(serviceAccount)
+            .title(Property.of("CSV Test Spreadsheet"))
+            .serviceAccount(Property.of(serviceAccount))
             .build();
 
         CreateSpreadsheet.Output createOutput = createTask.run(runContext);
@@ -275,8 +276,8 @@ class LoadTest {
     private void deleteSpreadsheet(RunContext runContext, String spreadsheetId) throws Exception {
         DeleteSpreadsheet deleteTask = DeleteSpreadsheet.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(serviceAccount)
-            .spreadsheetId(spreadsheetId)
+            .serviceAccount(Property.of(serviceAccount))
+            .spreadsheetId(Property.of(spreadsheetId))
             .build();
 
         DeleteSpreadsheet.Output deleteOutput = deleteTask.run(runContext);

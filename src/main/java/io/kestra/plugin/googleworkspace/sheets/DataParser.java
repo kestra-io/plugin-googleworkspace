@@ -39,7 +39,7 @@ public class DataParser {
 		List<List<Object>> result = new ArrayList<>();
 
 		Charset charset = Charset.forName(
-			runContext.render(csvOptions.getEncoding())
+			runContext.render(csvOptions.getEncoding()).as(String.class).orElse(null)
 		);
 
 		InputStreamReader reader = new InputStreamReader(inputStream, charset);
@@ -239,18 +239,18 @@ public class DataParser {
 		return CSVFormat.Builder.create()
 			.setDelimiter(
 				csvOptions.getFieldDelimiter() != null ?
-					runContext.render(csvOptions.getFieldDelimiter()) :
+					this.runContext.render(csvOptions.getFieldDelimiter()).as(String.class).orElseThrow() :
 					CSVFormat.DEFAULT.getDelimiterString()
 			)
 			.setQuote(
 				csvOptions.getQuote() != null ?
-					runContext.render(csvOptions.getQuote()).charAt(0) :
+					this.runContext.render(csvOptions.getQuote()).as(String.class).orElseThrow().charAt(0) :
 					CSVFormat.DEFAULT.getQuoteCharacter()
 			)
 			.setRecordSeparator(CSVFormat.DEFAULT.getRecordSeparator())
 			.setIgnoreEmptyLines(true)
 			.setAllowDuplicateHeaderNames(false)
-			.setSkipHeaderRecord(csvOptions.getSkipLeadingRows() != null && csvOptions.getSkipLeadingRows() > 0)
+			.setSkipHeaderRecord(csvOptions.getSkipLeadingRows() != null && runContext.render(csvOptions.getSkipLeadingRows()).as(Long.class).orElseThrow() > 0)
 			.build();
 	}
 

@@ -5,6 +5,7 @@ import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.executions.metrics.Counter;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -46,23 +47,21 @@ public class Export extends AbstractDrive implements RunnableTask<Export.Output>
     @Schema(
         title = "The file id to copy"
     )
-    @PluginProperty(dynamic = true)
     @NotNull
-    private String fileId;
+    private Property<String> fileId;
 
     @Schema(
         title = "The content-type of the file.",
         description = "a valid [RFC2045](https://datatracker.ietf.org/doc/html/rfc2045) like `text/csv`, `application/msword`, ... "
     )
-    @PluginProperty(dynamic = true)
     @NotNull
-    private String contentType;
+    private Property<String> contentType;
 
     @Override
     public Output run(RunContext runContext) throws Exception {
         Drive service = this.connection(runContext);
         Logger logger = runContext.logger();
-        String fileId = runContext.render(this.fileId);
+        String fileId = runContext.render(this.fileId).as(String.class).orElseThrow();
 
         File tempFile = runContext.workingDir().createTempFile().toFile();
 
@@ -73,7 +72,7 @@ public class Export extends AbstractDrive implements RunnableTask<Export.Output>
                 .setFields("id, name, size, version, createdTime, parents, trashed, mimeType")
                 .setSupportsTeamDrives(true)
                 .execute();
-            Drive.Files.Export export = service.files().export(fileId, runContext.render(contentType));
+            Drive.Files.Export export = service.files().export(fileId, runContext.render(contentType).as(String.class).orElseThrow());
 
             export.executeMediaAndDownloadTo(outputStream);
             outputStream.flush();
