@@ -70,7 +70,7 @@ public class Export extends AbstractDrive implements RunnableTask<Export.Output>
                 .files()
                 .get(fileId)
                 .setFields("id, name, size, version, createdTime, parents, trashed, mimeType")
-                .setSupportsTeamDrives(true)
+                .setSupportsAllDrives(true)
                 .execute();
             Drive.Files.Export export = service.files().export(fileId, runContext.render(contentType).as(String.class).orElseThrow());
 

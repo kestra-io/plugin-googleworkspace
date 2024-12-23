@@ -53,7 +53,7 @@ public class Delete extends AbstractDrive implements RunnableTask<Delete.Output>
         Void execute = service
             .files()
             .delete(id)
-            .setSupportsTeamDrives(true)
+            .setSupportsAllDrives(true)
             .execute();
 
         logger.debug("Deleted '{}'", id);
