@@ -33,6 +33,15 @@ tasks.withType(JavaCompile) {
     options.compilerArgs.add("-parameters")
 }
 
+configurations.all {
+    resolutionStrategy {
+        dependencySubstitution {
+            substitute module("com.google.protobuf:protobuf-java") using module("com.google.protobuf:protobuf-java:3.25.5")
+            substitute module("com.google.protobuf:protobuf-java-util") using module("com.google.protobuf:protobuf-java-util:3.25.5")
+        }
+    }
+}
+
 dependencies {
     // Platform
     annotationProcessor enforcedPlatform("io.kestra:platform:$kestraVersion")
