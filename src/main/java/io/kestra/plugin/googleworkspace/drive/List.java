@@ -99,7 +99,8 @@ public class List extends AbstractDrive implements RunnableTask<List.Output> {
         String pageToken = null;
         do {
             FileList fileList = list.setPageToken(pageToken)
-                .setSupportsTeamDrives(true)
+                .setSupportsAllDrives(true)
+                .setIncludeItemsFromAllDrives(true)
                 .execute();
 
             result.addAll(fileList
