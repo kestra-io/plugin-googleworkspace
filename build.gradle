@@ -63,7 +63,7 @@ dependencies {
     api('org.apache.parquet:parquet-hadoop:1.15.0')
 
     // For ORC parsing
-    api('org.apache.orc:orc-core:2.1.0')
+    api('org.apache.orc:orc-core:2.1.1')
     api('org.apache.orc:orc-mapreduce:2.1.0')
     api('org.apache.hive:hive-storage-api:4.0.1')
 
