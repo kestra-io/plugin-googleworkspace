@@ -49,6 +49,28 @@ import jakarta.validation.constraints.NotNull;
                     contentType: "text/csv"
                     mimeType: "application/vnd.google-apps.spreadsheet"
                 """
+        ),
+        @Example(
+            full = true,
+            title = "Upload file to Google Drive",
+            code = """
+                id: upload_google_drive
+                namespace: company.team
+                
+                tasks:
+                  - id: download
+                    type: io.kestra.plugin.core.http.Download
+                    uri: https://huggingface.co/datasets/kestra/datasets/raw/main/csv/orders.csv
+                
+                  - id: upload
+                    type: io.kestra.plugin.googleworkspace.drive.Upload
+                    from: "{{ outputs.download.uri }}"
+                    parents:
+                      - 15OENbAxvonlASDkYyfGBftV2c0fDTmnB
+                    name: Orders
+                    contentType: text/csv
+                    mimeType: application/vnd.google-apps.spreadsheet
+            """
         )
     }
 )
