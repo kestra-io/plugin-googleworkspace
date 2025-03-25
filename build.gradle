@@ -83,6 +83,10 @@ dependencies {
 
     // For CSV parsing
     api('org.apache.commons:commons-csv:1.13.0')
+
+    configurations.all {
+        exclude group: "org.slf4j", module: "slf4j-reload4j"
+    }
 }
 
 
