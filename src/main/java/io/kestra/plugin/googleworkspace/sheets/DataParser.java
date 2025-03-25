@@ -11,7 +11,6 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.csv.DuplicateHeaderMode;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -45,11 +44,11 @@ public class DataParser {
 
 		InputStreamReader reader = new InputStreamReader(inputStream, charset);
 		CSVFormat format = getCsvFormat(csvOptions);
-		try (CSVParser parser = CSVParser.builder().setFormat(format).setReader(reader).get()) {
-			for (CSVRecord csvRecord : parser) {
+		try (CSVParser parser = new CSVParser(reader, format)) {
+			for (CSVRecord record : parser) {
 				List<Object> row = new ArrayList<>();
 
-				csvRecord.forEach(row::add);
+				record.forEach(row::add);
 				result.add(row);
 			}
 			return result;
@@ -94,7 +93,7 @@ public class DataParser {
 			}
 
 			while (reader.hasNext()) {
-				GenericRecord genericRecord = reader.next();
+				GenericRecord record = reader.next();
 				List<Object> row = new ArrayList<>();
 
 				if (includeHeaders && !isHeaderIncluded) {
@@ -110,7 +109,7 @@ public class DataParser {
 				}
 
 				schema.getFields()
-					.forEach(field -> row.add(genericRecord.get(field.name()).toString()));
+					.forEach(field -> row.add(record.get(field.name()).toString()));
 
 				result.add(row);
 			}
@@ -135,13 +134,13 @@ public class DataParser {
 		try (ParquetReader<GenericRecord> reader = AvroParquetReader
 			.<GenericRecord>builder(inputFile).withConf(configuration).build()
 		) {
-			GenericRecord genericRecord;
-			while ((genericRecord = reader.read())!= null) {
+			GenericRecord record;
+			while ((record = reader.read())!= null) {
 				List<Object> row = new ArrayList<>();
 
 				if (includeHeaders && !isHeaderIncluded) {
-					List<Object> headers = new ArrayList<>(
-						genericRecord.getSchema()
+					List<Object> headers = new ArrayList<Object>(
+						record.getSchema()
 							.getFields()
 							.stream()
 							.map(Schema.Field::name)
@@ -152,8 +151,8 @@ public class DataParser {
 					result.add(headers);
 				}
 
-				GenericRecord finalRecord = genericRecord;
-				genericRecord.getSchema()
+				GenericRecord finalRecord = record;
+				record.getSchema()
 					.getFields()
 					.forEach(field -> row.add(
 						finalRecord.get(field.name()).toString())
@@ -186,7 +185,7 @@ public class DataParser {
 			try (RecordReader rows = reader.rows()) {
 				if (includeHeaders) {
 					result.add(
-						new ArrayList<>(
+						new ArrayList<Object>(
 							schema.getFieldNames()
 						)
 					);
@@ -194,15 +193,15 @@ public class DataParser {
 
 				while (rows.nextBatch(rowBatch)) {
 					for (int row = 0; row < rowBatch.size; row++) {
-						List<Object> records = new ArrayList<>();
+						List<Object> record = new ArrayList<>();
 
 						for (ColumnVector vector : rowBatch.cols) {
-							records.add(
+							record.add(
 								getValue(vector, row)
 							);
 						}
 
-						result.add(records);
+						result.add(record);
 					}
 				}
 			}
@@ -238,20 +237,21 @@ public class DataParser {
 
 	private CSVFormat getCsvFormat(AbstractLoad.CsvOptions csvOptions) throws IllegalVariableEvaluationException {
 		return CSVFormat.Builder.create()
-            .setDelimiter(
-                csvOptions.getFieldDelimiter() != null ?
-                    this.runContext.render(csvOptions.getFieldDelimiter()).as(String.class).orElseThrow() :
-                    CSVFormat.DEFAULT.getDelimiterString()
-            )
-            .setQuote(
-                csvOptions.getQuote() != null ?
-                    this.runContext.render(csvOptions.getQuote()).as(String.class).orElseThrow().charAt(0) :
-                    CSVFormat.DEFAULT.getQuoteCharacter()
-            )
-            .setRecordSeparator(CSVFormat.DEFAULT.getRecordSeparator())
-            .setIgnoreEmptyLines(true)
-            .setDuplicateHeaderMode(DuplicateHeaderMode.ALLOW_EMPTY)
-            .setSkipHeaderRecord(csvOptions.getSkipLeadingRows() != null && runContext.render(csvOptions.getSkipLeadingRows()).as(Long.class).orElseThrow() > 0).get();
+			.setDelimiter(
+				csvOptions.getFieldDelimiter() != null ?
+					this.runContext.render(csvOptions.getFieldDelimiter()).as(String.class).orElseThrow() :
+					CSVFormat.DEFAULT.getDelimiterString()
+			)
+			.setQuote(
+				csvOptions.getQuote() != null ?
+					this.runContext.render(csvOptions.getQuote()).as(String.class).orElseThrow().charAt(0) :
+					CSVFormat.DEFAULT.getQuoteCharacter()
+			)
+			.setRecordSeparator(CSVFormat.DEFAULT.getRecordSeparator())
+			.setIgnoreEmptyLines(true)
+			.setAllowDuplicateHeaderNames(false)
+			.setSkipHeaderRecord(csvOptions.getSkipLeadingRows() != null && runContext.render(csvOptions.getSkipLeadingRows()).as(Long.class).orElseThrow() > 0)
+			.build();
 	}
 
 }
