@@ -41,7 +41,8 @@ import jakarta.validation.constraints.NotNull;
     }
 )
 @Schema(
-    title = "Export a file in a Drive folder."
+    title = "Export a Google Workspace document into a downloadable file format, then download the file.",
+    description = "Possible Google Workspace documents to export include Google Docs, Sheets, and Slides, and they can be exported as Word, Excel, Powerpoint files, and more."
 )
 public class Export extends AbstractDrive implements RunnableTask<Export.Output> {
     @Schema(

@@ -47,7 +47,7 @@ import org.slf4j.Logger;
     }
 )
 @Schema(
-    title = "Insert event into Google Calendar."
+    title = "Insert an event into Google Calendar."
 )
 public class InsertEvent extends AbstractInsertEvent implements RunnableTask<InsertEvent.Output> {
     @Override

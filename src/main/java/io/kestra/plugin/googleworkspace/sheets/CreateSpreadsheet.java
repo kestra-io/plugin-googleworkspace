@@ -27,7 +27,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Create a spreadsheet in Google Workspace"
+    title = "Create a Google Sheet."
 )
 @Plugin(
     examples = {

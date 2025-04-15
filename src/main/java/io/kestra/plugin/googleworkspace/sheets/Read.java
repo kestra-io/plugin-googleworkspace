@@ -30,7 +30,7 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Read all sheets from a google Sheets"
+    title = "Read all sheets from a Google Sheet."
 )
 @Plugin(
     examples = {

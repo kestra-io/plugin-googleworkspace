@@ -23,7 +23,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Load data from a local file to a Google Workspace spreadsheet"
+    title = "Load data from a local file to a Google Sheet."
 )
 @Plugin(
 	examples = {

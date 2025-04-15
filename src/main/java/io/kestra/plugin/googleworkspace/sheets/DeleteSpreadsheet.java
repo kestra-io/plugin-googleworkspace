@@ -20,7 +20,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @NoArgsConstructor
 @Schema(
-	title = "Deletes a spreadsheet in Google Workspace"
+	title = "Delete a Google Sheet."
 )
 @Plugin(
     examples = {

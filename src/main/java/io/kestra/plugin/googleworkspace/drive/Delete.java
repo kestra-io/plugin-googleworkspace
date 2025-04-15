@@ -36,7 +36,7 @@ import jakarta.validation.constraints.NotNull;
     }
 )
 @Schema(
-    title = "Delete a file on a Drive folder."
+    title = "Delete a file from a Google Drive folder."
 )
 public class Delete extends AbstractDrive implements RunnableTask<Delete.Output> {
     @Schema(

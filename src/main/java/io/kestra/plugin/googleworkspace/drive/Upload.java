@@ -75,7 +75,7 @@ import jakarta.validation.constraints.NotNull;
     }
 )
 @Schema(
-    title = "Upload a file in a Drive folder."
+    title = "Upload a file to a Google Drive folder."
 )
 public class Upload extends AbstractCreate implements RunnableTask<Upload.Output> {
     @Schema(

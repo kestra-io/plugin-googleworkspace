@@ -39,7 +39,7 @@ import jakarta.validation.constraints.NotNull;
     }
 )
 @Schema(
-    title = "Download a file in a Drive folder."
+    title = "Download a file from a Google Drive folder."
 )
 public class Download extends AbstractDrive implements RunnableTask<Download.Output> {
     @Schema(

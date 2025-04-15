@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
     }
 )
 @Schema(
-    title = "List file on a Drive folder."
+    title = "List files in a Google Drive folder."
 )
 public class List extends AbstractDrive implements RunnableTask<List.Output> {
     @Schema(
