@@ -22,7 +22,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Read a range from a google Sheets"
+    title = "Read a range from a Google Sheet."
 )
 @Plugin(
     examples = {
