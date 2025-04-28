@@ -54,7 +54,7 @@ dependencies {
     api 'com.google.auth:google-auth-library-oauth2-http:1.33.1'
     api 'com.google.apis:google-api-services-drive:v3-rev20250220-2.0.0'
     api 'com.google.apis:google-api-services-sheets:v4-rev20250211-2.0.0'
-    api 'com.google.apis:google-api-services-calendar:v3-rev20250115-2.0.0'
+    api 'com.google.apis:google-api-services-calendar:v3-rev20250404-2.0.0'
 
     // Logs
     compileOnly'org.slf4j:slf4j-api'
