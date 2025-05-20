@@ -5,6 +5,7 @@ import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.storages.StorageInterface;
+import io.kestra.core.tenant.TenantService;
 import io.kestra.core.utils.IdUtils;
 import io.kestra.plugin.googleworkspace.UtilsTest;
 import jakarta.inject.Inject;
@@ -251,7 +252,7 @@ class LoadTest {
         URL resource = LoadTest.class.getClassLoader().getResource("examples/addresses"+extension);
 
         return storageInterface.put(
-            null,
+            TenantService.MAIN_TENANT,
             null,
             new URI("/" + IdUtils.create() + extension),
             new FileInputStream(new File(Objects.requireNonNull(resource)

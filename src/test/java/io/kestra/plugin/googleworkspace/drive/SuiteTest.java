@@ -4,6 +4,7 @@ import com.google.common.io.CharStreams;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.storages.StorageInterface;
+import io.kestra.core.tenant.TenantService;
 import io.kestra.core.utils.IdUtils;
 import io.kestra.core.utils.TestsUtils;
 import io.kestra.plugin.googleworkspace.UtilsTest;
@@ -35,7 +36,7 @@ class SuiteTest {
     @Test
     void run() throws Exception {
         URI source = storageInterface.put(
-            null,
+            TenantService.MAIN_TENANT,
             null,
             new URI("/" + IdUtils.create()),
             new FileInputStream(new File(Objects.requireNonNull(SuiteTest.class.getClassLoader()
@@ -44,7 +45,7 @@ class SuiteTest {
         );
 
         URI source2 = storageInterface.put(
-            null,
+            TenantService.MAIN_TENANT,
             null,
             new URI("/" + IdUtils.create()),
             new FileInputStream(new File(Objects.requireNonNull(SuiteTest.class.getClassLoader()
@@ -99,7 +100,7 @@ class SuiteTest {
         assertThat(exportRun.getFile().getParents().equals(uploadRun.getFile().getParents()), is(true));
         assertThat(exportRun.getFile().getTrashed(), is(uploadRun.getFile().getTrashed()));
 
-        InputStream get = storageInterface.get(null, null, exportRun.getUri());
+        InputStream get = storageInterface.get(TenantService.MAIN_TENANT, null, exportRun.getUri());
         String getContent = CharStreams.toString(new InputStreamReader(get));
 
         assertThat(getContent, containsString("John,Doe"));
@@ -139,7 +140,7 @@ class SuiteTest {
         assertThat(exportRun2.getFile().getParents().equals(upload2Run.getFile().getParents()), is(true));
         assertThat(exportRun2.getFile().getTrashed(), is(upload2Run.getFile().getTrashed()));
 
-        InputStream get2 = storageInterface.get(null, null, exportRun2.getUri());
+        InputStream get2 = storageInterface.get(TenantService.MAIN_TENANT, null, exportRun2.getUri());
         String getContent2 = CharStreams.toString(new InputStreamReader(get2));
 
         assertThat(getContent2, containsString("Jane,Doe"));
@@ -179,7 +180,7 @@ class SuiteTest {
             .toURI());
 
         URI source = storageInterface.put(
-            null,
+            TenantService.MAIN_TENANT,
             null,
             new URI("/" + IdUtils.create()),
             new FileInputStream(file)
@@ -216,7 +217,7 @@ class SuiteTest {
         assertThat(downloadRun.getFile().getParents().equals(uploadRun.getFile().getParents()), is(true));
         assertThat(downloadRun.getFile().getTrashed(), is(uploadRun.getFile().getTrashed()));
 
-        InputStream get = storageInterface.get(null, null, downloadRun.getUri());
+        InputStream get = storageInterface.get(TenantService.MAIN_TENANT, null, downloadRun.getUri());
 
         assertThat(
             CharStreams.toString(new InputStreamReader(get)),
