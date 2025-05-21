@@ -79,6 +79,8 @@ dependencies {
         exclude group: 'com.fasterxml.jackson.core'
     }
 
+    api('org.apache.hive:hive-exec:4.0.1')
+
     compileOnly 'com.fasterxml.jackson.core:jackson-databind'
 
     // For CSV parsing
