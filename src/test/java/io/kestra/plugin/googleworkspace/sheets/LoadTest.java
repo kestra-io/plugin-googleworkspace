@@ -249,7 +249,7 @@ class LoadTest {
     }
 
     private URI getSource(String extension) throws IOException, URISyntaxException {
-        URL resource = LoadTest.class.getClassLoader().getResource("examples/addresses"+extension);
+        URL resource = LoadTest.class.getClassLoader().getResource("examples/addresses" + extension);
 
         return storageInterface.put(
             TenantService.MAIN_TENANT,

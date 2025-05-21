@@ -135,7 +135,7 @@ public class DataParser {
 			.<GenericRecord>builder(inputFile).withConf(configuration).build()
 		) {
 			GenericRecord record;
-			while ((record = reader.read())!= null) {
+			while ((record = reader.read()) != null) {
 				List<Object> row = new ArrayList<>();
 
 				if (includeHeaders && !isHeaderIncluded) {
