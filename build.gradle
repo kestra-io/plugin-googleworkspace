@@ -50,7 +50,7 @@ dependencies {
 
     // Google libraries are managed by the the Kestra Platform so they are aligned on all plugins
     api platform('com.google.cloud:libraries-bom')
-    api 'com.google.api-client:google-api-client:2.7.1'
+    api 'com.google.api-client:google-api-client:2.8.0'
     api 'com.google.auth:google-auth-library-oauth2-http:1.36.0'
     api 'com.google.apis:google-api-services-drive:v3-rev20250511-2.0.0'
     api 'com.google.apis:google-api-services-sheets:v4-rev20250509-2.0.0'
