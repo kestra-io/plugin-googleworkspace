@@ -34,7 +34,7 @@ public abstract class AbstractTask extends Task implements GcpInterface {
     protected Property<String> serviceAccount;
 
     @Builder.Default
-    protected Property<Integer> readTimeout = Property.of(120);
+    protected Property<Integer> readTimeout = Property.ofValue(120);
 
 
     protected HttpCredentialsAdapter credentials(RunContext runContext) throws IllegalVariableEvaluationException, IOException {

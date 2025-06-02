@@ -64,7 +64,7 @@ public class Load extends AbstractLoad implements RunnableTask<Load.Output> {
 		title = "The sheet name or range to select."
 	)
 	@Builder.Default
-	private Property<String> range = Property.of("Sheet1");
+	private Property<String> range = Property.ofValue("Sheet1");
 
 	@Override
 	public Output run(RunContext runContext) throws Exception {
