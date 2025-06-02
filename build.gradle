@@ -79,7 +79,9 @@ dependencies {
         exclude group: 'com.fasterxml.jackson.core'
     }
 
-    api('org.apache.hive:hive-exec:4.0.1')
+    api('org.apache.hive:hive-exec:4.0.1') {
+        exclude group: 'org.apache.parquet', module: 'parquet-hadoop-bundle'
+    }
 
     compileOnly 'com.fasterxml.jackson.core:jackson-databind'
 
