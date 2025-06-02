@@ -90,6 +90,16 @@ dependencies {
 
     configurations.all {
         exclude group: "org.slf4j", module: "slf4j-reload4j"
+        exclude group: 'org.apache.parquet', module: "parquet-hadoop-bundle"
+
+        resolutionStrategy {
+            force 'org.apache.parquet:parquet-format-structures:1.15.2'
+            force 'org.apache.parquet:parquet-avro:1.15.2'
+            force 'org.apache.parquet:parquet-hadoop:1.15.2'
+            force 'org.apache.parquet:parquet-column:1.15.2'
+            force 'org.apache.parquet:parquet-common:1.15.2'
+            force 'org.apache.parquet:parquet-encoding:1.15.2'
+        }
     }
 }
 
