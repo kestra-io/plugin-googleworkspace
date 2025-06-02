@@ -36,7 +36,7 @@ public abstract class AbstractLoad extends AbstractSheet {
     @Schema(
         title = "Specifies if the first line should be the header (default: false)."
     )
-    protected final Property<Boolean> header = Property.of(false);
+    protected final Property<Boolean> header = Property.ofValue(false);
 
     @Schema(
         title = "Csv parsing options (Optional)."
@@ -115,7 +115,7 @@ public abstract class AbstractLoad extends AbstractSheet {
             title = "The separator for fields in a CSV file."
         )
         @Builder.Default
-        private Property<String> fieldDelimiter = Property.of(",");
+        private Property<String> fieldDelimiter = Property.ofValue(",");
 
         @Schema(
             title = "The number of rows at the top of a CSV file that will be skipped when reading the data.",
@@ -134,7 +134,7 @@ public abstract class AbstractLoad extends AbstractSheet {
             title = "The file encoding of CSV file."
         )
         @Builder.Default
-        private Property<String> encoding = Property.of("UTF-8");
+        private Property<String> encoding = Property.ofValue("UTF-8");
 
     }
 }

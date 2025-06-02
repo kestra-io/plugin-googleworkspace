@@ -22,7 +22,7 @@ import java.util.List;
 @NoArgsConstructor
 public abstract class AbstractDrive extends AbstractTask {
     @Builder.Default
-    protected Property<List<String>> scopes = Property.of(List.of(DriveScopes.DRIVE));
+    protected Property<List<String>> scopes = Property.ofValue(List.of(DriveScopes.DRIVE));
 
     Drive connection(RunContext runContext) throws IllegalVariableEvaluationException, IOException, GeneralSecurityException {
         HttpCredentialsAdapter credentials = this.credentials(runContext);

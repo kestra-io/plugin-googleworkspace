@@ -30,8 +30,8 @@ class DeleteSpreadsheetTest {
 
         CreateSpreadsheet createTask = CreateSpreadsheet.builder()
             .id(DeleteSpreadsheetTest.class.getSimpleName())
-            .title(Property.of("CSV Test Spreadsheet"))
-            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
+            .title(Property.ofValue("CSV Test Spreadsheet"))
+            .serviceAccount(Property.ofValue(UtilsTest.serviceAccount()))
             .build();
 
         CreateSpreadsheet.Output createOutput = createTask.run(runContext);
@@ -41,8 +41,8 @@ class DeleteSpreadsheetTest {
 
         DeleteSpreadsheet deleteTask = DeleteSpreadsheet.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
-            .spreadsheetId(Property.of(createOutput.getSpreadsheetId()))
+            .serviceAccount(Property.ofValue(UtilsTest.serviceAccount()))
+            .spreadsheetId(Property.ofValue(createOutput.getSpreadsheetId()))
             .build();
 
         DeleteSpreadsheet.Output deleteOutput = deleteTask.run(runContext);
@@ -56,8 +56,8 @@ class DeleteSpreadsheetTest {
 
         DeleteSpreadsheet deleteTask = DeleteSpreadsheet.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
-            .spreadsheetId(Property.of(IdUtils.create()))
+            .serviceAccount(Property.ofValue(UtilsTest.serviceAccount()))
+            .spreadsheetId(Property.ofValue(IdUtils.create()))
             .build();
 
         assertThrows(IllegalArgumentException.class, () -> deleteTask.run(runContext));

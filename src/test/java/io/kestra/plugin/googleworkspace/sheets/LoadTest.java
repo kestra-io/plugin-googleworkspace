@@ -51,9 +51,9 @@ class LoadTest {
 
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(Property.of(serviceAccount))
-            .spreadsheetId(Property.of(spreadsheetId))
-            .from(Property.of(getSource(".csv").toString()))
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .from(Property.ofValue(getSource(".csv").toString()))
             .build();
 
         Load.Output run = task.run(runContext);
@@ -73,9 +73,9 @@ class LoadTest {
         URI source = getSource(".json");
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(Property.of(serviceAccount))
-            .spreadsheetId(Property.of(spreadsheetId))
-            .from(Property.of(source.toString()))
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .from(Property.ofValue(source.toString()))
             .build();
 
         Load.Output run = task.run(runContext);
@@ -96,10 +96,10 @@ class LoadTest {
 
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(Property.of(serviceAccount))
-            .spreadsheetId(Property.of(spreadsheetId))
-            .from(Property.of(source.toString()))
-            .header(Property.of(true))
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .from(Property.ofValue(source.toString()))
+            .header(Property.ofValue(true))
             .build();
 
         Load.Output run = task.run(runContext);
@@ -119,9 +119,9 @@ class LoadTest {
         URI source = getSource(".avro");
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(Property.of(serviceAccount))
-            .spreadsheetId(Property.of(spreadsheetId))
-            .from(Property.of(source.toString()))
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .from(Property.ofValue(source.toString()))
             .build();
 
         Load.Output run = task.run(runContext);
@@ -142,10 +142,10 @@ class LoadTest {
 
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(Property.of(serviceAccount))
-            .spreadsheetId(Property.of(spreadsheetId))
-            .from(Property.of(source.toString()))
-            .header(Property.of(true))
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .from(Property.ofValue(source.toString()))
+            .header(Property.ofValue(true))
             .build();
 
         Load.Output run = task.run(runContext);
@@ -165,9 +165,9 @@ class LoadTest {
         URI source = getSource(".orc");
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(Property.of(serviceAccount))
-            .spreadsheetId(Property.of(spreadsheetId))
-            .from(Property.of(source.toString()))
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .from(Property.ofValue(source.toString()))
             .build();
 
         Load.Output run = task.run(runContext);
@@ -188,10 +188,10 @@ class LoadTest {
 
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(Property.of(serviceAccount))
-            .spreadsheetId(Property.of(spreadsheetId))
-            .from(Property.of(source.toString()))
-            .header(Property.of(true))
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .from(Property.ofValue(source.toString()))
+            .header(Property.ofValue(true))
             .build();
 
         Load.Output run = task.run(runContext);
@@ -211,9 +211,9 @@ class LoadTest {
         URI source = getSource(".parquet");
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(Property.of(serviceAccount))
-            .spreadsheetId(Property.of(spreadsheetId))
-            .from(Property.of(source.toString()))
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .from(Property.ofValue(source.toString()))
             .build();
 
         Load.Output run = task.run(runContext);
@@ -234,10 +234,10 @@ class LoadTest {
 
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(Property.of(serviceAccount))
-            .spreadsheetId(Property.of(spreadsheetId))
-            .from(Property.of(source.toString()))
-            .header(Property.of(true))
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .from(Property.ofValue(source.toString()))
+            .header(Property.ofValue(true))
             .build();
 
         Load.Output run = task.run(runContext);
@@ -263,8 +263,8 @@ class LoadTest {
     private String createSpreadsheet(RunContext runContext) throws Exception {
         CreateSpreadsheet createTask = CreateSpreadsheet.builder()
             .id(LoadTest.class.getSimpleName())
-            .title(Property.of("CSV Test Spreadsheet"))
-            .serviceAccount(Property.of(serviceAccount))
+            .title(Property.ofValue("CSV Test Spreadsheet"))
+            .serviceAccount(Property.ofValue(serviceAccount))
             .build();
 
         CreateSpreadsheet.Output createOutput = createTask.run(runContext);
@@ -277,8 +277,8 @@ class LoadTest {
     private void deleteSpreadsheet(RunContext runContext, String spreadsheetId) throws Exception {
         DeleteSpreadsheet deleteTask = DeleteSpreadsheet.builder()
             .id(LoadTest.class.getSimpleName())
-            .serviceAccount(Property.of(serviceAccount))
-            .spreadsheetId(Property.of(spreadsheetId))
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
             .build();
 
         DeleteSpreadsheet.Output deleteOutput = deleteTask.run(runContext);

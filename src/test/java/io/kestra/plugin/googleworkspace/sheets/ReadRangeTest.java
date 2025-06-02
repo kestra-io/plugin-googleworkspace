@@ -34,10 +34,10 @@ class ReadRangeTest {
         ReadRange task = ReadRange.builder()
             .id(ReadRangeTest.class.getSimpleName())
             .type(ReadRange.class.getName())
-            .spreadsheetId(Property.of("1Dkd7W0OQo-wxz9rrORLP7YGSj6EBLEg73fiTdbJUIQE"))
-            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
-            .range(Property.of("Class Data!A1:I"))
-            .fetch(Property.of(true))
+            .spreadsheetId(Property.ofValue("1Dkd7W0OQo-wxz9rrORLP7YGSj6EBLEg73fiTdbJUIQE"))
+            .serviceAccount(Property.ofValue(UtilsTest.serviceAccount()))
+            .range(Property.ofValue("Class Data!A1:I"))
+            .fetch(Property.ofValue(true))
             .build();
 
         ReadRange.Output run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));
@@ -52,9 +52,9 @@ class ReadRangeTest {
         ReadRange task = ReadRange.builder()
             .id(ReadRangeTest.class.getSimpleName())
             .type(ReadRange.class.getName())
-            .spreadsheetId(Property.of("1Dkd7W0OQo-wxz9rrORLP7YGSj6EBLEg73fiTdbJUIQE"))
-            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
-            .range(Property.of("Second One!A1:I"))
+            .spreadsheetId(Property.ofValue("1Dkd7W0OQo-wxz9rrORLP7YGSj6EBLEg73fiTdbJUIQE"))
+            .serviceAccount(Property.ofValue(UtilsTest.serviceAccount()))
+            .range(Property.ofValue("Second One!A1:I"))
             .build();
 
         ReadRange.Output run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));

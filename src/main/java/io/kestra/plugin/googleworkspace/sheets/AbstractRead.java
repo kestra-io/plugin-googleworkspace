@@ -37,7 +37,7 @@ public abstract class AbstractRead extends AbstractSheet {
     )
     @NotNull
     @Builder.Default
-    protected Property<ValueRender> valueRender = Property.of(ValueRender.UNFORMATTED_VALUE);
+    protected Property<ValueRender> valueRender = Property.ofValue(ValueRender.UNFORMATTED_VALUE);
 
     @Schema(
         title = "How dates, times, and durations should be represented in the output.",
@@ -46,25 +46,25 @@ public abstract class AbstractRead extends AbstractSheet {
     )
     @NotNull
     @Builder.Default
-    protected Property<DateTimeRender> dateTimeRender = Property.of(DateTimeRender.FORMATTED_STRING);
+    protected Property<DateTimeRender> dateTimeRender = Property.ofValue(DateTimeRender.FORMATTED_STRING);
 
     @Builder.Default
     @Schema(
         title = "Specifies if the first line should be the header (default: false)"
     )
-    protected final Property<Boolean> header = Property.of(true);
+    protected final Property<Boolean> header = Property.ofValue(true);
 
     @Schema(
         title = "Whether to Fetch the data from the query result to the task output"
     )
     @Builder.Default
-    protected final Property<Boolean> fetch = Property.of(false);
+    protected final Property<Boolean> fetch = Property.ofValue(false);
 
     @Schema(
         title = "Whether to store the data from the query result into an ion serialized data file"
     )
     @Builder.Default
-    protected final Property<Boolean> store = Property.of(true);
+    protected final Property<Boolean> store = Property.ofValue(true);
 
     protected List<Object> transform(List<List<Object>> values, RunContext runContext) throws IllegalVariableEvaluationException {
         List<Object> result = new ArrayList<>();
