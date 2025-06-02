@@ -23,8 +23,8 @@ class ListTest {
         List task = List.builder()
             .id(ListTest.class.getSimpleName())
             .type(List.class.getName())
-            .query(Property.of("'1YgHpphjepA8gAme1J04ftxVf7j80XABU' in parents"))
-            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
+            .query(Property.ofValue("'1YgHpphjepA8gAme1J04ftxVf7j80XABU' in parents"))
+            .serviceAccount(Property.ofValue(UtilsTest.serviceAccount()))
             .build();
 
         List.Output run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));

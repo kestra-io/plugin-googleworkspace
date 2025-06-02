@@ -22,7 +22,7 @@ import java.util.List;
 @NoArgsConstructor
 public abstract class AbstractSheet extends AbstractTask {
     @Builder.Default
-    protected Property<List<String>> scopes = Property.of(List.of(SheetsScopes.SPREADSHEETS));
+    protected Property<List<String>> scopes = Property.ofValue(List.of(SheetsScopes.SPREADSHEETS));
 
     protected Sheets connection(RunContext runContext) throws IllegalVariableEvaluationException, IOException, GeneralSecurityException {
         HttpCredentialsAdapter credentials = this.credentials(runContext);

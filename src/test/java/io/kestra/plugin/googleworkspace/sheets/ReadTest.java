@@ -26,9 +26,9 @@ class ReadTest {
         Read task = Read.builder()
             .id(ReadTest.class.getSimpleName())
             .type(ReadRange.class.getName())
-            .spreadsheetId(Property.of("1Dkd7W0OQo-wxz9rrORLP7YGSj6EBLEg73fiTdbJUIQE"))
-            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
-            .fetch(Property.of(true))
+            .spreadsheetId(Property.ofValue("1Dkd7W0OQo-wxz9rrORLP7YGSj6EBLEg73fiTdbJUIQE"))
+            .serviceAccount(Property.ofValue(UtilsTest.serviceAccount()))
+            .fetch(Property.ofValue(true))
             .build();
 
         Read.Output run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));
@@ -49,10 +49,10 @@ class ReadTest {
         Read task = Read.builder()
             .id(ReadTest.class.getSimpleName())
             .type(ReadRange.class.getName())
-            .spreadsheetId(Property.of("1Dkd7W0OQo-wxz9rrORLP7YGSj6EBLEg73fiTdbJUIQE"))
-            .serviceAccount(Property.of(UtilsTest.serviceAccount()))
-            .selectedSheetsTitle(Property.of(List.of("Second One")))
-            .fetch(Property.of(true))
+            .spreadsheetId(Property.ofValue("1Dkd7W0OQo-wxz9rrORLP7YGSj6EBLEg73fiTdbJUIQE"))
+            .serviceAccount(Property.ofValue(UtilsTest.serviceAccount()))
+            .selectedSheetsTitle(Property.ofValue(List.of("Second One")))
+            .fetch(Property.ofValue(true))
             .build();
 
         Read.Output run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));

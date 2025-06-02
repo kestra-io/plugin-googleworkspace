@@ -22,7 +22,7 @@ import java.util.List;
 @NoArgsConstructor
 public abstract class AbstractCalendar extends AbstractTask {
     @Builder.Default
-    protected Property<List<String>> scopes = Property.of(List.of(CalendarScopes.CALENDAR));
+    protected Property<List<String>> scopes = Property.ofValue(List.of(CalendarScopes.CALENDAR));
 
     protected Calendar connection(RunContext runContext) throws IllegalVariableEvaluationException, IOException, GeneralSecurityException {
         HttpCredentialsAdapter credentials = this.credentials(runContext);
