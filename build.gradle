@@ -51,7 +51,7 @@ dependencies {
     // Google libraries are managed by the the Kestra Platform so they are aligned on all plugins
     api platform('com.google.cloud:libraries-bom')
     api 'com.google.api-client:google-api-client:2.8.0'
-    api 'com.google.auth:google-auth-library-oauth2-http:1.36.0'
+    api 'com.google.auth:google-auth-library-oauth2-http:1.37.0'
     api 'com.google.apis:google-api-services-drive:v3-rev20250511-2.0.0'
     api 'com.google.apis:google-api-services-sheets:v4-rev20250513-2.0.0'
     api 'com.google.apis:google-api-services-calendar:v3-rev20250404-2.0.0'
@@ -82,7 +82,7 @@ dependencies {
     // for org.apache.hadoop.hive.ql.exec.vector following bump for orc-core and orc-mapreduce to 2.1.2
     // those 2 deps should maybe be removed after upgrading again orc deps in the future
     api('org.apache.hive:hive-storage-api:4.0.1') // for Parquet parsing
-    api('com.google.protobuf:protobuf-java:3.21.12') // for ORC parsing
+    api('com.google.protobuf:protobuf-java:4.31.1') // for ORC parsing
 
     compileOnly 'com.fasterxml.jackson.core:jackson-databind'
 
