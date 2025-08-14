@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
 import java.util.Objects;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -247,6 +248,123 @@ class LoadTest {
 
         deleteSpreadsheet(runContext, spreadsheetId);
     }
+
+    @Test
+    void loadWithOverwriteMode() throws Exception {
+        RunContext runContext = runContextFactory.of();
+        String spreadsheetId = createSpreadsheet(runContext);
+
+        URI source = storageInterface.put(
+            TenantService.MAIN_TENANT,
+            null,
+            new URI("/" + IdUtils.create() + ".csv"),
+            new FileInputStream(new File(Objects.requireNonNull(LoadTest.class.getClassLoader()
+                    .getResource("examples/addresses.csv"))
+                .toURI()))
+        );
+
+        URI source2 = storageInterface.put(
+            TenantService.MAIN_TENANT,
+            null,
+            new URI("/" + IdUtils.create() + ".csv"),
+            new FileInputStream(new File(Objects.requireNonNull(LoadTest.class.getClassLoader()
+                    .getResource("examples/addresses-small.csv"))
+                .toURI()))
+        );
+
+        Load load1 = Load.builder()
+            .id(LoadTest.class.getSimpleName())
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .from(Property.ofValue(source.toString()))
+            .range(Property.ofValue("Sheet1!A1:F6"))
+            .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
+            .build();
+
+        var out1 = load1.run(runContext);;
+        assertThat(out1.getRows(), is(notNullValue()));
+        assertThat(out1.getColumns(), is(notNullValue()));
+
+        Load load2 = Load.builder()
+            .id("overwrite_small")
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .from(Property.ofValue(source2.toString()))
+            .range(Property.ofValue("Sheet1!A1:F6"))
+            .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
+            .build();
+
+        var out2 = load2.run(runContext);;
+        assertThat(out2.getRows(), is(notNullValue()));
+        assertThat(out2.getColumns(), is(notNullValue()));
+
+        deleteSpreadsheet(runContext, spreadsheetId);
+    }
+
+    @Test
+    void loadWithAppendMode() throws Exception {
+        RunContext runContext = runContextFactory.of();
+        String spreadsheetId = createSpreadsheet(runContext);
+
+        URI source = storageInterface.put(
+            TenantService.MAIN_TENANT,
+            null,
+            new URI("/" + IdUtils.create() + ".csv"),
+            new FileInputStream(new File(Objects.requireNonNull(LoadTest.class.getClassLoader()
+                    .getResource("examples/addresses.csv"))
+                .toURI()))
+        );
+
+        URI source2 = storageInterface.put(
+            TenantService.MAIN_TENANT,
+            null,
+            new URI("/" + IdUtils.create() + ".csv"),
+            new FileInputStream(new File(Objects.requireNonNull(LoadTest.class.getClassLoader()
+                    .getResource("examples/addresses-small.csv"))
+                .toURI()))
+        );
+
+        Load load1 = Load.builder()
+            .id("load_append_ " + IdUtils.create())
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .from(Property.ofValue(source.toString()))
+            .range(Property.ofValue("Sheet1"))
+            .insertType(Property.ofValue(Load.InsertType.APPEND))
+            .build();
+
+        var out1 = load1.run(runContext);;
+        assertThat(out1.getRows(), is(notNullValue()));
+        assertThat(out1.getColumns(), is(notNullValue()));
+
+        Load load2 = Load.builder()
+            .id(LoadTest.class.getSimpleName())
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .from(Property.ofValue(source2.toString()))
+            .range(Property.ofValue("Sheet1"))
+            .insertType(Property.ofValue(Load.InsertType.APPEND))
+            .build();
+
+        var out2 = load2.run(runContext);;
+        assertThat(out2.getRows(), is(notNullValue()));
+        assertThat(out2.getColumns(), is(notNullValue()));
+
+        Read read = Read.builder()
+            .id(LoadTest.class.getSimpleName())
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .selectedSheetsTitle(Property.ofValue(List.of("Sheet1")))
+            .fetch(Property.ofValue(true))
+            .build();
+        Read.Output out = read.run(runContext);
+
+        assertThat(out.getSize(), is(9));
+        assertThat(out.getRows().containsKey("Sheet1"), is(true));
+
+        deleteSpreadsheet(runContext, spreadsheetId);
+    }
+
 
     private URI getSource(String extension) throws IOException, URISyntaxException {
         URL resource = LoadTest.class.getClassLoader().getResource("examples/addresses" + extension);
