@@ -52,8 +52,8 @@ public class Export extends AbstractDrive implements RunnableTask<Export.Output>
     private Property<String> fileId;
 
     @Schema(
-        title = "The content-type of the file.",
-        description = "a valid [RFC2045](https://datatracker.ietf.org/doc/html/rfc2045) like `text/csv`, `application/msword`, ... "
+        title = "The content-type of the file",
+        description = "a valid [RFC2045](https://datatracker.ietf.org/doc/html/rfc2045) like `text/csv`, `application/msword`, etc. "
     )
     @NotNull
     private Property<String> contentType;

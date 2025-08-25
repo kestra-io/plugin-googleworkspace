@@ -32,17 +32,17 @@ public abstract class AbstractRead extends AbstractSheet {
     protected Property<String> spreadsheetId;
 
     @Schema(
-        title = "Determines how values should be rendered in the output.",
-        description = "More details [here](https://developers.google.com/sheets/api/reference/rest/v4/ValueRenderOption)"
+        title = "Determines how values should be rendered in the output",
+        description = "For more details, refer to the [ValueRenderOption API](https://developers.google.com/sheets/api/reference/rest/v4/ValueRenderOption)."
     )
     @NotNull
     @Builder.Default
     protected Property<ValueRender> valueRender = Property.ofValue(ValueRender.UNFORMATTED_VALUE);
 
     @Schema(
-        title = "How dates, times, and durations should be represented in the output.",
+        title = "How dates, times, and durations should be represented in the output",
         description = "his is ignored if valueRender is `FORMATTED_VALUE`.\n" +
-            "More details [here](https://developers.google.com/sheets/api/reference/rest/v4/DateTimeRenderOption)"
+            "For more details, refer to the [DateTimeRenderOption API](https://developers.google.com/sheets/api/reference/rest/v4/DateTimeRenderOption)"
     )
     @NotNull
     @Builder.Default
@@ -61,7 +61,7 @@ public abstract class AbstractRead extends AbstractSheet {
     protected final Property<Boolean> fetch = Property.ofValue(false);
 
     @Schema(
-        title = "Whether to store the data from the query result into an ion serialized data file"
+        title = "Whether to store the data from the query result into an ION-serialized data file"
     )
     @Builder.Default
     protected final Property<Boolean> store = Property.ofValue(true);

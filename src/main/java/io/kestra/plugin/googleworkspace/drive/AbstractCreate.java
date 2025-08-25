@@ -32,13 +32,13 @@ public abstract class AbstractCreate extends AbstractDrive {
     protected Property<String> name;
 
     @Schema(
-        title = "A short description of the file."
+        title = "A short description of the file"
     )
     @PluginProperty(dynamic = true)
     protected String description;
 
     @Schema(
-        title = "The MIME type of the file.",
+        title = "The MIME type of the file",
         description = "Drive will attempt to automatically detect an appropriate value from uploaded content if no " +
             "value is provided. The value cannot be changed unless a new revision is uploaded. If a file is created " +
             "with a Google Doc MIME type, the uploaded content will be imported if possible. " +
@@ -47,7 +47,7 @@ public abstract class AbstractCreate extends AbstractDrive {
     protected Property<String> mimeType;
 
     @Schema(
-        title = "ID of the Team Drive the file resides in."
+        title = "ID of the Team Drive the file resides in"
     )
     protected Property<String> teamDriveId;
 

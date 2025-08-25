@@ -53,7 +53,7 @@ import java.util.List;
 public class CreateSpreadsheet extends AbstractSheet implements RunnableTask<CreateSpreadsheet.Output> {
 
 	@Schema(
-		title = "Spreadsheet title."
+		title = "Spreadsheet title"
 	)
 	@NotNull
 	private Property<String> title;
@@ -87,12 +87,12 @@ public class CreateSpreadsheet extends AbstractSheet implements RunnableTask<Cre
 	public static class Output implements io.kestra.core.models.tasks.Output {
 
 		@Schema(
-			title = "The spreadsheet id."
+			title = "The spreadsheet ID"
 		)
 		private String spreadsheetId;
 
 		@Schema(
-			title = "The spreadsheet url."
+			title = "The spreadsheet URL"
 		)
 		private String spreadsheetUrl;
 

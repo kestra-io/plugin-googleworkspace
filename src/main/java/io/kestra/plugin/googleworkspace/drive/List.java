@@ -49,13 +49,13 @@ import java.util.stream.Collectors;
 public class List extends AbstractDrive implements RunnableTask<List.Output> {
     @Schema(
         title = "Query operators to filter results",
-        description = "see details [here](https://developers.google.com/drive/api/v3/search-files)\n" +
-            "if not defined, will list all files that the service account have access"
+        description = "For more details refer to [Search Files API](https://developers.google.com/drive/api/v3/search-files).\n" +
+            "If not defined, the task will list all files that the service account have access."
     )
     private Property<String> query;
 
     @Schema(
-        title = "list of bodies of items (files/documents) to which the query applies.",
+        title = "List of bodies of items (files/documents) applicable to the query",
         description = "'allTeamDrives' must" +
             " be combined with 'user'; all other values must be used in isolation. Prefer 'user' or 'teamDrive' " +
             "to 'allTeamDrives' for efficiency."

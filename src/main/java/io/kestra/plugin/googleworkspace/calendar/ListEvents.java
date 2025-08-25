@@ -50,34 +50,34 @@ import java.util.Map;
     title = "List Google Calendar events using filters (range, keyword, etc.)."
 )
 public class ListEvents extends AbstractCalendar implements RunnableTask<ListEvents.Output> {
-    @Schema(title = "Calendar ID (e.g., 'primary' or a calendar email).")
+    @Schema(title = "Calendar ID (e.g., 'primary' or a calendar email)")
     @NotNull
     protected Property<String> calendarId;
 
-    @Schema(title = "Lower bound for an event's start time (RFC3339).")
+    @Schema(title = "Lower bound for an event's start time (RFC3339)")
     protected Property<String> timeMin;
 
-    @Schema(title = "Upper bound for an event's end time (RFC3339).")
+    @Schema(title = "Upper bound for an event's end time (RFC3339)")
     protected Property<String> timeMax;
 
-    @Schema(title = "Free-text search across title/description/location.")
+    @Schema(title = "Free-text search across title/description/location")
     protected Property<String> q;
 
-    @Schema(title = "Return single instances of recurring events.")
+    @Schema(title = "Return single instances of recurring events")
     @Builder.Default
     protected Property<Boolean> singleEvents = Property.ofValue(true);
 
-    @Schema(title = "Order by 'startTime' (requires singleEvents=true) or 'updated'.")
+    @Schema(title = "Order by 'startTime' (requires singleEvents=true) or 'updated'")
     protected Property<String> orderBy;
 
-    @Schema(title = "Include cancelled events.")
+    @Schema(title = "Include cancelled events")
     @Builder.Default
     protected Property<Boolean> showDeleted = Property.ofValue(false);
 
-    @Schema(title = "Max results (1–2500).")
+    @Schema(title = "Max results (1–2500)")
     protected Property<Integer> maxResults;
 
-    @Schema(title = "Page token for pagination.")
+    @Schema(title = "Page token for pagination")
     protected Property<String> pageToken;
 
     @Override
@@ -149,13 +149,13 @@ public class ListEvents extends AbstractCalendar implements RunnableTask<ListEve
     @Builder
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
-        @Schema(title = "Matched events (typed, convenient).")
+        @Schema(title = "Matched events (typed, convenient)")
         private final List<io.kestra.plugin.googleworkspace.calendar.models.Event> events;
 
-        @Schema(title = "Full Google events (raw metadata, 1:1).")
+        @Schema(title = "Full Google events (raw metadata, 1:1)")
         private final List<Map<String, Object>> metadataList;
 
-        @Schema(title = "Pagination token for fetching the next page, if any.")
+        @Schema(title = "Pagination token for fetching the next page, if any")
         private final String nextPageToken;
     }
 }

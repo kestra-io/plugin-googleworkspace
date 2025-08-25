@@ -42,18 +42,18 @@ import java.util.Map;
 )
 @Schema(title = "Fetch a Google Calendar event by ID.")
 public class GetEvent extends AbstractCalendar implements RunnableTask<GetEvent.Output> {
-    @Schema(title = "Calendar ID (e.g., 'primary' or a calendar email).")
+    @Schema(title = "Calendar ID (e.g., 'primary' or a calendar email)")
     @NotNull
     protected Property<String> calendarId;
 
-    @Schema(title = "Event ID.")
+    @Schema(title = "Event ID")
     @NotNull
     protected Property<String> eventId;
 
-    @Schema(title = "Upper bound on the number of attendees to include.")
+    @Schema(title = "Upper bound on the number of attendees to include")
     protected Property<Integer> maxAttendees;
 
-    @Schema(title = "Whether to include the email of the organizer/attendees in the response.")
+    @Schema(title = "Whether to include the email of the organizer/attendees in the response")
     @Builder.Default
     protected Property<Boolean> alwaysIncludeEmail = Property.ofValue(false);
 
@@ -88,7 +88,7 @@ public class GetEvent extends AbstractCalendar implements RunnableTask<GetEvent.
     @Builder
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
-        @Schema(title = "Full Google Calendar event resource (wrapped).")
+        @Schema(title = "Full Google Calendar event resource (wrapped)")
         private final io.kestra.plugin.googleworkspace.calendar.models.Event event;
 
         @Schema(title = "Complete metadata of Google Calendar event resource")

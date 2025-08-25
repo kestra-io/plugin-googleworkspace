@@ -98,7 +98,7 @@ public class ReadRange extends AbstractRead implements RunnableTask<ReadRange.Ou
         private int size;
 
         @Schema(
-            title = "The uri of store result",
+            title = "The URI of store result",
             description = "Only populated if 'store' is set to true."
         )
         private URI uri;

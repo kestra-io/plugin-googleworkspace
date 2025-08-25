@@ -42,11 +42,11 @@ import org.slf4j.Logger;
 )
 @Schema(title = "Delete a Google Calendar event.")
 public class DeleteEvent extends AbstractCalendar implements RunnableTask<VoidOutput> {
-    @Schema(title = "Calendar ID.")
+    @Schema(title = "Calendar ID")
     @NotNull
     protected Property<String> calendarId;
 
-    @Schema(title = "Event ID.")
+    @Schema(title = "Event ID")
     @NotNull
     protected Property<String> eventId;
 
