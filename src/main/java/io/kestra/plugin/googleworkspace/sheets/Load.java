@@ -58,18 +58,18 @@ public class Load extends AbstractLoad implements RunnableTask<Load.Output> {
     private static final String VALUE_INPUT_OPTION = "RAW";
 
 	@Schema(
-		title = "The URI of the Kestra's internal storage file."
+		title = "The URI of the Kestra's internal storage file"
 	)
 	private Property<String> from;
 
 	@Schema(
-		title = "The sheet name or range to select."
+		title = "The sheet name or range to select"
 	)
 	@Builder.Default
 	private Property<String> range = Property.ofValue("Sheet1");
 
     @Schema(
-        title = "How to write the data into the sheet.",
+        title = "How to write the data into the sheet",
         description = """
             UPDATE (default): write values to the given range; does not clear extra old data outside the written area.
             OVERWRITE: clear the target range first, then write values.

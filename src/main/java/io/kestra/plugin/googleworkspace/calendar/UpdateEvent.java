@@ -56,11 +56,11 @@ import java.util.List;
     title = "Update a Google Calendar event."
 )
 public class UpdateEvent extends AbstractCalendar implements RunnableTask<UpdateEvent.Output> {
-    @Schema(title = "Calendar ID.")
+    @Schema(title = "Calendar ID")
     @NotNull
     protected Property<String> calendarId;
 
-    @Schema(title = "Event ID.")
+    @Schema(title = "Event ID")
     @NotNull
     protected Property<String> eventId;
 
@@ -72,21 +72,21 @@ public class UpdateEvent extends AbstractCalendar implements RunnableTask<Update
     @Builder.Default
     protected Property<String> sendUpdates = Property.ofValue("none");
 
-    @Schema(title = "Title.")
+    @Schema(title = "Title")
     protected Property<String> summary;
 
-    @Schema(title = "Description.")
+    @Schema(title = "Description")
     @io.kestra.core.models.annotations.PluginProperty(dynamic = true)
     protected String description;
 
-    @Schema(title = "Location (free-form).")
+    @Schema(title = "Location (free-form)")
     protected Property<String> location;
 
-    @Schema(title = "New start time.")
+    @Schema(title = "New start time")
     @io.kestra.core.models.annotations.PluginProperty
     protected AbstractInsertEvent.CalendarTime startTime;
 
-    @Schema(title = "New end time.")
+    @Schema(title = "New end time")
     @io.kestra.core.models.annotations.PluginProperty
     protected AbstractInsertEvent.CalendarTime endTime;
 
@@ -94,7 +94,7 @@ public class UpdateEvent extends AbstractCalendar implements RunnableTask<Update
     @io.kestra.core.models.annotations.PluginProperty
     protected List<AbstractInsertEvent.Attendee> attendees;
 
-    @Schema(title = "Event status: confirmed | tentative | cancelled.")
+    @Schema(title = "Event status: confirmed | tentative | cancelled")
     protected Property<String> status;
 
     @Override

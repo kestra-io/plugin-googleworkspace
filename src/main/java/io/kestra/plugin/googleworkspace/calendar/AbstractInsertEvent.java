@@ -26,50 +26,50 @@ import com.google.api.services.calendar.model.Event.Creator;
 public abstract class AbstractInsertEvent extends AbstractCalendar {
 
     @Schema(
-        title = "Calendar ID."
+        title = "Calendar ID"
     )
     @NotNull
     protected Property<String> calendarId;
 
     @Schema(
-        title = "Title of the event."
+        title = "Title of the event"
     )
     @NotNull
     protected Property<String> summary;
 
     @Schema(
-        title = "Description of the event."
+        title = "Description of the event"
     )
     @PluginProperty(dynamic = true)
     protected String description;
 
     @Schema(
-        title = "Geographic location of the event as free-form text."
+        title = "Geographic location of the event as free-form text"
     )
     protected Property<String> location;
 
     @Schema(
-        title = "Start time of the event."
+        title = "Start time of the event"
     )
     @NotNull
     @PluginProperty
     protected CalendarTime startTime;
 
     @Schema(
-        title = "End time of the event."
+        title = "End time of the event"
     )
     @NotNull
     @PluginProperty
     protected CalendarTime endTime;
 
     @Schema(
-        title = "Creator of the event."
+        title = "Creator of the event"
     )
     @PluginProperty
     protected Attendee creator;
 
     @Schema(
-        title = "List of attendees in the event."
+        title = "List of attendees in the event"
     )
     @PluginProperty
     protected List<Attendee> attendees;
@@ -82,12 +82,12 @@ public abstract class AbstractInsertEvent extends AbstractCalendar {
     @AllArgsConstructor
     public static class CalendarTime {
         @Schema(
-            title = "Time of the event in the ISO 8601 Datetime format, for example, `2024-11-28T09:00:00-07:00`."
+            title = "Time of the event in the ISO 8601 Datetime format, for example, `2024-11-28T09:00:00-07:00`"
         )
         protected Property<String> dateTime;
 
         @Schema(
-            title = "Timezone associated with the dateTime, for example, `America/Los_Angeles`."
+            title = "Timezone associated with the dateTime, for example, `America/Los_Angeles`"
         )
         protected Property<String> timeZone;
     }
@@ -100,12 +100,12 @@ public abstract class AbstractInsertEvent extends AbstractCalendar {
     @AllArgsConstructor
     public static class Attendee {
         @Schema(
-            title = "Display name of the attendee."
+            title = "Display name of the attendee"
         )
         protected Property<String> displayName;
 
         @Schema(
-            title = "Email of the attendee."
+            title = "Email of the attendee"
         )
         protected Property<String> email;
     }

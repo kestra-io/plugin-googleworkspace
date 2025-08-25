@@ -86,13 +86,13 @@ public class Upload extends AbstractCreate implements RunnableTask<Upload.Output
 
     @Schema(
         title = "The file id to update",
-        description = "If not provided, it will create a new file"
+        description = "If not provided, the task will create a new file."
     )
     private Property<String> fileId;
 
     @Schema(
-        title = "The content-type of the file.",
-        description = "a valid [RFC2045](https://datatracker.ietf.org/doc/html/rfc2045) like `text/csv`, `application/msword`, ... "
+        title = "The content-type of the file",
+        description = "a valid [RFC2045](https://datatracker.ietf.org/doc/html/rfc2045) like `text/csv`, `application/msword`, etc. "
     )
     @NotNull
     private Property<String> contentType;

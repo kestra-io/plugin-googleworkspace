@@ -76,7 +76,7 @@ public class InsertEvent extends AbstractInsertEvent implements RunnableTask<Ins
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
         @Schema(
-            title = "Event ID of the inserted event."
+            title = "Event ID of the inserted event"
         )
         private final io.kestra.plugin.googleworkspace.calendar.models.Event event;
     }

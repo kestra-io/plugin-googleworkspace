@@ -27,31 +27,31 @@ public abstract class AbstractLoad extends AbstractSheet {
     private final static ObjectMapper ION_MAPPER = JacksonMapper.ofIon();
 
     @Schema(
-        title = "The spreadsheet unique id."
+        title = "The spreadsheet unique id"
     )
     @NotNull
     protected Property<String> spreadsheetId;
 
     @Builder.Default
     @Schema(
-        title = "Specifies if the first line should be the header (default: false)."
+        title = "Specifies if the first line should be the header (default: false)"
     )
     protected final Property<Boolean> header = Property.ofValue(false);
 
     @Schema(
-        title = "Csv parsing options (Optional)."
+        title = "CSV parsing options (Optional)"
     )
     @Builder.Default
     private CsvOptions csvOptions = CsvOptions.builder().build();
 
     @Schema(
-        title = "Schema for avro objects (Optional).",
+        title = "Schema for avro objects (Optional)",
         description = "If provided, the task will read avro objects using this schema."
     )
     private Property<String> avroSchema;
 
     @Schema(
-        title = "Format of the input file.",
+        title = "Format of the input file",
         description = "If not provided, the task will programmatically try to find the correct format based on the extension."
     )
     private Property<Format> format;
@@ -112,13 +112,13 @@ public abstract class AbstractLoad extends AbstractSheet {
     public static class CsvOptions {
 
         @Schema(
-            title = "The separator for fields in a CSV file."
+            title = "The separator for fields in a CSV file"
         )
         @Builder.Default
         private Property<String> fieldDelimiter = Property.ofValue(",");
 
         @Schema(
-            title = "The number of rows at the top of a CSV file that will be skipped when reading the data.",
+            title = "The number of rows at the top of a CSV file that will be skipped when reading the data",
             description = "The default value is 0. This property is useful if you have header rows in the file" +
                 " that should be skipped."
         )
@@ -126,12 +126,12 @@ public abstract class AbstractLoad extends AbstractSheet {
         private Property<Long> skipLeadingRows;
 
         @Schema(
-            title = "The quote character in a CSV file."
+            title = "The quote character in a CSV file"
         )
         private Property<String> quote;
 
         @Schema(
-            title = "The file encoding of CSV file."
+            title = "The file encoding of CSV file"
         )
         @Builder.Default
         private Property<String> encoding = Property.ofValue("UTF-8");

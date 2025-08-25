@@ -137,20 +137,20 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
         @Schema(
             title = "List containing the fetched data",
             description = "Only populated if 'fetch' parameter is set to true.\n" +
-                "The key is the name of the sheet"
+                "The key is the name of the sheet."
         )
         @PluginProperty(additionalProperties = List.class)
         private Map<String, List<Object>> rows;
 
         @Schema(
-            title = "The size of the rows fetch"
+            title = "The size of the rows fetched"
         )
         private int size;
 
         @Schema(
-            title = "The uri of store result",
+            title = "The URI of store result",
             description = "The keyOnly populated if 'store' is set to true.\n" +
-                "The key is the name of the sheet"
+                "The key is the name of the sheet."
         )
         @PluginProperty(additionalProperties = URI.class)
         private Map<String, URI> uris;

@@ -47,7 +47,7 @@ import lombok.experimental.SuperBuilder;
 public class DeleteSpreadsheet extends AbstractSheet implements RunnableTask<DeleteSpreadsheet.Output> {
 
 	@Schema(
-		title = "Spreadsheet ID."
+		title = "Spreadsheet ID"
 	)
 	@NotNull
 	private Property<String> spreadsheetId;
@@ -83,7 +83,7 @@ public class DeleteSpreadsheet extends AbstractSheet implements RunnableTask<Del
 	public static class Output implements io.kestra.core.models.tasks.Output {
 
 		@Schema(
-			title = "The spreadsheet id."
+			title = "The spreadsheet ID"
 		)
 		private String spreadsheetId;
 
