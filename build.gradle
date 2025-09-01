@@ -67,14 +67,14 @@ dependencies {
     api('org.apache.orc:orc-mapreduce:2.1.3')
 
     // Additional libraries for Parquet, Avro, ORC parsers
-    api('org.apache.hadoop:hadoop-hdfs-client:3.4.1') {
+    api('org.apache.hadoop:hadoop-hdfs-client:3.4.2') {
         exclude group: 'com.fasterxml.jackson.core'
     }
-    api('org.apache.hadoop:hadoop-common:3.4.1') {
+    api('org.apache.hadoop:hadoop-common:3.4.2') {
         exclude group: 'com.fasterxml.jackson.core'
         exclude group: 'org.apache.zookeeper'
     }
-    api('org.apache.hadoop:hadoop-mapreduce-client-core:3.4.1') {
+    api('org.apache.hadoop:hadoop-mapreduce-client-core:3.4.2') {
         exclude group: 'com.fasterxml.jackson.core'
     }
 
