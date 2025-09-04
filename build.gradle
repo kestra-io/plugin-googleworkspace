@@ -49,9 +49,9 @@ dependencies {
 
     // Google libraries are managed by the the Kestra Platform so they are aligned on all plugins
     api platform('com.google.cloud:libraries-bom')
-    api 'com.google.api-client:google-api-client:2.8.0'
-    api 'com.google.auth:google-auth-library-oauth2-http:1.37.1'
-    api 'com.google.apis:google-api-services-drive:v3-rev20250701-2.0.0'
+    api 'com.google.api-client:google-api-client:2.8.1'
+    api 'com.google.auth:google-auth-library-oauth2-http:1.38.0'
+    api 'com.google.apis:google-api-services-drive:v3-rev20250819-2.0.0'
     api 'com.google.apis:google-api-services-sheets:v4-rev20250616-2.0.0'
     api 'com.google.apis:google-api-services-calendar:v3-rev20250404-2.0.0'
 
@@ -59,34 +59,34 @@ dependencies {
     compileOnly'org.slf4j:slf4j-api'
 
     // For Parquet and Avro parsing
-    api('org.apache.parquet:parquet-avro:1.15.2')
-    api('org.apache.parquet:parquet-hadoop:1.15.2')
+    api('org.apache.parquet:parquet-avro:1.16.0')
+    api('org.apache.parquet:parquet-hadoop:1.16.0')
 
     // For ORC parsing
-    api('org.apache.orc:orc-core:2.1.3')
-    api('org.apache.orc:orc-mapreduce:2.1.3')
+    api('org.apache.orc:orc-core:2.2.0')
+    api('org.apache.orc:orc-mapreduce:2.2.0')
 
     // Additional libraries for Parquet, Avro, ORC parsers
-    api('org.apache.hadoop:hadoop-hdfs-client:3.4.1') {
+    api('org.apache.hadoop:hadoop-hdfs-client:3.4.2') {
         exclude group: 'com.fasterxml.jackson.core'
     }
-    api('org.apache.hadoop:hadoop-common:3.4.1') {
+    api('org.apache.hadoop:hadoop-common:3.4.2') {
         exclude group: 'com.fasterxml.jackson.core'
         exclude group: 'org.apache.zookeeper'
     }
-    api('org.apache.hadoop:hadoop-mapreduce-client-core:3.4.1') {
+    api('org.apache.hadoop:hadoop-mapreduce-client-core:3.4.2') {
         exclude group: 'com.fasterxml.jackson.core'
     }
 
     // for org.apache.hadoop.hive.ql.exec.vector following bump for orc-core and orc-mapreduce to 2.1.2
     // those 2 deps should maybe be removed after upgrading again orc deps in the future
-    api('org.apache.hive:hive-storage-api:4.0.1') // for Parquet parsing
-    api('com.google.protobuf:protobuf-java:4.31.1') // for ORC parsing
+    api('org.apache.hive:hive-storage-api:4.1.0') // for Parquet parsing
+    api('com.google.protobuf:protobuf-java:4.32.0') // for ORC parsing
 
     compileOnly 'com.fasterxml.jackson.core:jackson-databind'
 
     // For CSV parsing
-    api('org.apache.commons:commons-csv:1.14.0')
+    api('org.apache.commons:commons-csv:1.14.1')
 
     configurations.all {
         exclude group: "org.slf4j", module: "slf4j-reload4j"
