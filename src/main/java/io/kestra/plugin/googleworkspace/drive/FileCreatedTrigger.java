@@ -231,13 +231,6 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
             .thumbnailLink(firstFile.getThumbnailLink())
             .build();
 
-//        Execution execution = Execution.builder()
-//                .id(runContext.getTriggerExecutionId())
-//                    .namespace(context.getNamespace())
-//                        .flowId(context.getFlowId())
-//                            .state(new State())
-//                                .trigger(ExecutionTrigger.of(this,output))
-//                                    .build();
         Execution execution = TriggerService.generateExecution(this,conditionContext,context,output);
 
 
@@ -267,7 +260,14 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
 
         // Filter by owner
         var renderedOwnerEmail = runContext.render(ownerEmail).as(String.class);
-        renderedOwnerEmail.ifPresent(s -> queryParts.add("'" + s + "' in owners"));
+        if (renderedOwnerEmail.isPresent()) {
+            String email = renderedOwnerEmail.get();
+            if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+                throw new IllegalArgumentException("Invalid ownerEmail: " + email);
+            }
+            queryParts.add("'" + email + "' in owners");
+        }
+
 
         // Filter by creation time (only get files created after last check)
         if (lastCreatedTime != null) {
