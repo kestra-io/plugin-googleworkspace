@@ -174,7 +174,6 @@ public class FileCreatedTrigger extends AbstractTrigger implements PollingTrigge
         // Create Drive connection
         Drive driveService = DriveService.from(runContext, this.serviceAccount);
 
-        // Get the last processed timestamp from state
         Instant lastCreatedTime = context.getNextExecutionDate() != null
             ? context.getNextExecutionDate().toInstant().minus((TemporalAmount) this.interval)
             : Instant.now().minus((TemporalAmount) this.interval);;
