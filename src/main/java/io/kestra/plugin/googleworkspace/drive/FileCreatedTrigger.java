@@ -112,7 +112,7 @@ import java.util.stream.Collectors;
         )
     }
 )
-public class FileCreatedTrigger extends AbstractTrigger implements PollingTriggerInterface, TriggerOutput<FileCreatedTrigger.Output> {
+public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingTriggerInterface, TriggerOutput<FileCreatedTrigger.Output> {
 
     @Schema(
         title = "The Google Cloud service account key",
@@ -178,7 +178,7 @@ public class FileCreatedTrigger extends AbstractTrigger implements PollingTrigge
         Logger logger = runContext.logger();
 
         // Create Drive connection
-        Drive driveService = AbstractDriveTrigger.from(runContext, this.serviceAccount);
+        Drive driveService = from(runContext, this.serviceAccount);
 
         Instant lastCreatedTime = context.getNextExecutionDate() != null
             ? context.getNextExecutionDate().toInstant().minus((TemporalAmount) this.interval)
