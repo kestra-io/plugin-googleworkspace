@@ -15,10 +15,13 @@ import io.kestra.core.models.property.Property;
 import io.kestra.core.models.triggers.*;
 import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.slf4j.Logger;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -115,6 +118,7 @@ public class FileCreatedTrigger extends AbstractTrigger implements PollingTrigge
         title = "The Google Cloud service account key",
         description = "Service account JSON key with access to Google Drive API"
     )
+    @NotNull
     protected String serviceAccount;
 
     @Schema(
@@ -129,6 +133,7 @@ public class FileCreatedTrigger extends AbstractTrigger implements PollingTrigge
         description = "If not provided, monitors the entire Drive accessible by the service account. " +
             "You can find the folder ID in the Google Drive URL."
     )
+    @NotNull
     protected Property<String> folderId;
 
     @Schema(
@@ -143,6 +148,7 @@ public class FileCreatedTrigger extends AbstractTrigger implements PollingTrigge
         title = "Filter by file owner email address",
         description = "Only files owned by this email address will trigger events"
     )
+    @Email
     protected Property<String> ownerEmail;
 
     @Schema(
@@ -157,7 +163,7 @@ public class FileCreatedTrigger extends AbstractTrigger implements PollingTrigge
         description = "How frequently to check for new files. Must be at least PT1M (1 minute)."
     )
     @Builder.Default
-    protected Property<String> interval = Property.ofValue("PT5M");
+    protected Duration interval = Duration.ofHours(1);
 
     @Schema(
         title = "Maximum number of files to process per poll",
@@ -172,7 +178,7 @@ public class FileCreatedTrigger extends AbstractTrigger implements PollingTrigge
         Logger logger = runContext.logger();
 
         // Create Drive connection
-        Drive driveService = DriveService.from(runContext, this.serviceAccount);
+        Drive driveService = AbstractDriveTrigger.from(runContext, this.serviceAccount);
 
         Instant lastCreatedTime = context.getNextExecutionDate() != null
             ? context.getNextExecutionDate().toInstant().minus((TemporalAmount) this.interval)
