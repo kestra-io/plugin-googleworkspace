@@ -148,7 +148,6 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
         title = "Filter by file owner email address",
         description = "Only files owned by this email address will trigger events"
     )
-    @Email
     protected Property<String> ownerEmail;
 
     @Schema(
@@ -232,13 +231,15 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
             .thumbnailLink(firstFile.getThumbnailLink())
             .build();
 
-        Execution execution = Execution.builder()
-                .id(runContext.getTriggerExecutionId())
-                    .namespace(context.getNamespace())
-                        .flowId(context.getFlowId())
-                            .state(new State())
-                                .trigger(ExecutionTrigger.of(this,output))
-                                    .build();
+//        Execution execution = Execution.builder()
+//                .id(runContext.getTriggerExecutionId())
+//                    .namespace(context.getNamespace())
+//                        .flowId(context.getFlowId())
+//                            .state(new State())
+//                                .trigger(ExecutionTrigger.of(this,output))
+//                                    .build();
+        Execution execution = TriggerService.generateExecution(this,conditionContext,context,output);
+
 
         logger.info("Triggering execution for file: {} ({})", firstFile.getName(), firstFile.getId());
 
