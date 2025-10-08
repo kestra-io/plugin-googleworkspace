@@ -215,38 +215,46 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
         newState.put("lastCreatedTime", newLastCreatedTime);
 
         // Process first file and create execution
-        File firstFile = files.getFirst();
+        List<Output.FileMetadata> outputFiles = new ArrayList<>();
 
-        URI kestraUri = null;
-        try{
-            InputStream fileContent = driveService.files()
-                .get(firstFile.getId())
-                .executeMediaAsInputStream();
+        for (File file: files) {
+            URI kestraUri = null;
+            try{
+                InputStream fileContent = driveService.files()
+                    .get(file.getId())
+                    .executeMediaAsInputStream();
+                kestraUri = runContext.storage().putFile(fileContent, file.getName());
 
-            kestraUri = runContext.storage().putFile(fileContent,firstFile.getName());
-            logger.debug("File stored in Kestra storage: {}", kestraUri);
-        } catch (Exception e) {
-            logger.warn("Failed to download file {} for storage: {}", firstFile.getId(), e.getMessage());
+                logger.debug("Stored file {} in Kestra storage", file.getName());
+            } catch (Exception e) {
+                logger.warn("Failed to download file {}: {}", file.getId(), e.getMessage());
+            }
+
+            outputFiles.add(
+                Output.FileMetadata.builder()
+                    .id(file.getId())
+                    .name(file.getName())
+                    .mimeType(file.getMimeType())
+                    .createdTime(parseDateTime(file.getCreatedTime()))
+                    .modifiedTime(parseDateTime(file.getModifiedTime()))
+                    .owners(file.getOwners())
+                    .parents(file.getParents())
+                    .size(file.getSize())
+                    .webViewLink(file.getWebViewLink())
+                    .iconLink(file.getIconLink())
+                    .thumbnailLink(file.getThumbnailLink())
+                    .kestraFileUri(kestraUri != null ? kestraUri.toString() : null)
+                    .build()
+            );
         }
+
         Output output = Output.builder()
-            .id(firstFile.getId())
-            .name(firstFile.getName())
-            .mimeType(firstFile.getMimeType())
-            .createdTime(parseDateTime(firstFile.getCreatedTime()))
-            .modifiedTime(parseDateTime(firstFile.getModifiedTime()))
-            .owners(firstFile.getOwners())
-            .parents(firstFile.getParents())
-            .size(firstFile.getSize())
-            .webViewLink(firstFile.getWebViewLink())
-            .iconLink(firstFile.getIconLink())
-            .thumbnailLink(firstFile.getThumbnailLink())
-            .kestraFileUri(kestraUri != null ? kestraUri.toString() : null)
+            .files(outputFiles)
             .build();
 
-        Execution execution = TriggerService.generateExecution(this,conditionContext,context,output);
+        Execution execution = TriggerService.generateExecution(this, conditionContext, context, output);
 
-
-        logger.info("Triggering execution for file: {} ({})", firstFile.getName(), firstFile.getId());
+        logger.info("Triggering execution with {} new files", outputFiles.size());
 
         return Optional.of(execution);
     }
@@ -303,65 +311,75 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
         @Schema(
-            title = "The file ID"
+            title = "List of new files found during the poll",
+            description = "All new files created since the last polling interval."
         )
-        private String id;
+        private List<FileMetadata> files;
 
-        @Schema(
-            title = "The name of the file"
-        )
-        private String name;
+        @Builder
+        @Getter
+        private static class FileMetadata {
+            @Schema(
+                title = "The file ID"
+            )
+            private String id;
 
-        @Schema(
-            title = "The MIME type of the file"
-        )
-        private String mimeType;
+            @Schema(
+                title = "The name of the file"
+            )
+            private String name;
 
-        @Schema(
-            title = "The time the file was created"
-        )
-        private ZonedDateTime createdTime;
+            @Schema(
+                title = "The MIME type of the file"
+            )
+            private String mimeType;
 
-        @Schema(
-            title = "The time the file was last modified"
-        )
-        private ZonedDateTime modifiedTime;
+            @Schema(
+                title = "The time the file was created"
+            )
+            private ZonedDateTime createdTime;
 
-        @Schema(
-            title = "The owners of the file"
-        )
-        private List<User> owners;
+            @Schema(
+                title = "The time the file was last modified"
+            )
+            private ZonedDateTime modifiedTime;
 
-        @Schema(
-            title = "The parent folder IDs"
-        )
-        private List<String> parents;
+            @Schema(
+                title = "The owners of the file"
+            )
+            private List<User> owners;
 
-        @Schema(
-            title = "The size of the file in bytes"
-        )
-        private Long size;
+            @Schema(
+                title = "The parent folder IDs"
+            )
+            private List<String> parents;
 
-        @Schema(
-            title = "A link for opening the file in a browser"
-        )
-        private String webViewLink;
+            @Schema(
+                title = "The size of the file in bytes"
+            )
+            private Long size;
 
-        @Schema(
-            title = "A link to the file's icon"
-        )
-        private String iconLink;
+            @Schema(
+                title = "A link for opening the file in a browser"
+            )
+            private String webViewLink;
 
-        @Schema(
-            title = "A link to the file's thumbnail"
-        )
-        private String thumbnailLink;
+            @Schema(
+                title = "A link to the file's icon"
+            )
+            private String iconLink;
 
-        @Schema(
-            title = "Kestra file URI",
-            description = "The URI where the file content is stored in Kestra's internal storage." +
-                "This URI can be used to access the file content in subsequent tasks"
-        )
-        private String kestraFileUri;
+            @Schema(
+                title = "A link to the file's thumbnail"
+            )
+            private String thumbnailLink;
+
+            @Schema(
+                title = "Kestra file URI",
+                description = "The URI where the file content is stored in Kestra's internal storage." +
+                    "This URI can be used to access the file content in subsequent tasks"
+            )
+            private String kestraFileUri;
+        }
     }
 }

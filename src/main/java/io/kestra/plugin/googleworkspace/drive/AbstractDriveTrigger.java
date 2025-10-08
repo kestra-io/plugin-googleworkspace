@@ -25,8 +25,6 @@ import java.util.Collections;
 public abstract class AbstractDriveTrigger extends AbstractTrigger {
     private static final String APPLICATION_NAME = "Kestra";
     private static final String DRIVE_SCOPE = "https://www.googleapis.com/auth/drive";
-
-
     public static Drive from(RunContext runContext, String serviceAccountJson) throws Exception {
         String renderedServiceAccount = runContext.render(serviceAccountJson);
 
