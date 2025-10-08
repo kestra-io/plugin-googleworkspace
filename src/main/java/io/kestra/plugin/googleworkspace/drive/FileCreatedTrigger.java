@@ -9,18 +9,17 @@ import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.conditions.ConditionContext;
 import io.kestra.core.models.executions.Execution;
-import io.kestra.core.models.executions.ExecutionTrigger;
-import io.kestra.core.models.flows.State;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.triggers.*;
 import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.slf4j.Logger;
 
+import java.io.InputStream;
+import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -217,6 +216,18 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
 
         // Process first file and create execution
         File firstFile = files.getFirst();
+
+        URI kestraUri = null;
+        try{
+            InputStream fileContent = driveService.files()
+                .get(firstFile.getId())
+                .executeMediaAsInputStream();
+
+            kestraUri = runContext.storage().putFile(fileContent,firstFile.getName());
+            logger.debug("File stored in Kestra storage: {}", kestraUri);
+        } catch (Exception e) {
+            logger.warn("Failed to download file {} for storage: {}", firstFile.getId(), e.getMessage());
+        }
         Output output = Output.builder()
             .id(firstFile.getId())
             .name(firstFile.getName())
@@ -229,6 +240,7 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
             .webViewLink(firstFile.getWebViewLink())
             .iconLink(firstFile.getIconLink())
             .thumbnailLink(firstFile.getThumbnailLink())
+            .kestraFileUri(kestraUri != null ? kestraUri.toString() : null)
             .build();
 
         Execution execution = TriggerService.generateExecution(this,conditionContext,context,output);
@@ -344,5 +356,12 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
             title = "A link to the file's thumbnail"
         )
         private String thumbnailLink;
+
+        @Schema(
+            title = "Kestra file URI",
+            description = "The URI where the file content is stored in Kestra's internal storage." +
+                "This URI can be used to access the file content in subsequent tasks"
+        )
+        private String kestraFileUri;
     }
 }
