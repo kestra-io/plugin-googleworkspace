@@ -1,8 +1,8 @@
 package io.kestra.plugin.googleworkspace.sheets;
 
 import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.model.Change;
-import com.google.api.services.drive.model.ChangeList;
+import com.google.api.client.util.DateTime;
+import com.google.api.services.drive.model.File;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import io.kestra.core.models.annotations.Example;
@@ -90,37 +90,17 @@ public class SheetModifiedTrigger extends AbstractSheetTrigger implements Pollin
         Drive drive = driveFrom(runContext, this.serviceAccount, renderedScopes);
 
         String spreadsheetId = runContext.render(this.spreadsheetId).as(String.class).orElseThrow();
+        // Detect modification via Drive file modifiedTime compared to last check window
+        java.time.Instant lastCheck = context.getNextExecutionDate() != null
+            ? context.getNextExecutionDate().toInstant().minus(this.interval)
+            : java.time.Instant.now().minus(this.interval);
 
-        // Retrieve and persist Drive changes pageToken in trigger state
-        Map<String, Object> state = context.getState();
-        String savedToken = state != null ? (String) state.get("pageToken") : null;
-        String startPageToken = savedToken != null ? savedToken : drive.changes().getStartPageToken().execute().getStartPageToken();
-
-        ChangeList changeList = drive.changes().list(startPageToken)
-            .setPageSize(100)
-            .setFields("newStartPageToken,nextPageToken,changes(fileId,file,name,trashed,file.mimeType)")
+        File file = drive.files().get(spreadsheetId)
+            .setFields("id, name, modifiedTime")
             .execute();
 
-        boolean spreadsheetChanged = false;
-        if (changeList.getChanges() != null) {
-            for (Change c : changeList.getChanges()) {
-                if (c.getFileId() != null && c.getFileId().equals(spreadsheetId)) {
-                    spreadsheetChanged = true;
-                    break;
-                }
-            }
-        }
-
-        String newToken = changeList.getNewStartPageToken() != null ? changeList.getNewStartPageToken() : changeList.getNextPageToken();
-        if (newToken == null) {
-            return Optional.empty();
-        }
-
-        // Update state regardless to advance the token
-        Map<String, Object> newState = new HashMap<>();
-        newState.put("pageToken", newToken);
-
-        if (!spreadsheetChanged) {
+        DateTime modified = file.getModifiedTime();
+        if (modified == null || modified.getValue() <= lastCheck.toEpochMilli()) {
             return Optional.empty();
         }
 
@@ -133,12 +113,9 @@ public class SheetModifiedTrigger extends AbstractSheetTrigger implements Pollin
             .get(spreadsheetId, effectiveRange != null ? effectiveRange : "")
             .execute();
 
-        @SuppressWarnings("unchecked")
-        List<List<Object>> previous = state != null && state.get("previousValues") != null ? (List<List<Object>>) state.get("previousValues") : null;
         List<List<Object>> current = valueRange.getValues();
 
-        Map<String, Object> diff = computeDiff(previous, current);
-        newState.put("previousValues", current);
+        Map<String, Object> diff = computeDiff(null, current);
 
         Output output = Output.builder()
             .spreadsheetId(spreadsheetId)
@@ -147,7 +124,7 @@ public class SheetModifiedTrigger extends AbstractSheetTrigger implements Pollin
             .diff(diff)
             .build();
 
-        return Optional.of(TriggerService.generateExecution(this, conditionContext, context.withState(newState), output));
+        return Optional.of(TriggerService.generateExecution(this, conditionContext, context, output));
     }
 
     private Map<String, Object> computeDiff(List<List<Object>> previous, List<List<Object>> current) {

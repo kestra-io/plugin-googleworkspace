@@ -9,6 +9,7 @@ import io.kestra.core.utils.TestsUtils;
 import io.kestra.plugin.googleworkspace.UtilsTest;
 import io.kestra.core.junit.annotations.KestraTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIf;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -21,6 +22,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 @KestraTest
+@DisabledIf(
+    value = "isServiceAccountNotExists",
+    disabledReason = "Disabled for CI/CD"
+)
 class ReadRangeTest {
     @Inject
     private RunContextFactory runContextFactory;
@@ -66,5 +71,11 @@ class ReadRangeTest {
 
         assertThat(((Map<String, Object>) result.get(0)).get("Student Name"), is("Alexandra"));
         assertThat(((Map<String, Object>) result.get(0)).get("Formula"), is("Female"));
+    }
+
+    private static boolean isServiceAccountNotExists() {
+        return io.kestra.plugin.googleworkspace.UtilsTest.class
+            .getClassLoader()
+            .getResource(".gcp-service-account.json") == null;
     }
 }
