@@ -2,6 +2,7 @@ package io.kestra.plugin.googleworkspace.drive;
 
 import com.google.api.services.drive.Drive;
 import io.kestra.core.models.annotations.Example;
+import io.kestra.core.models.annotations.Metric;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.executions.metrics.Counter;
@@ -37,6 +38,14 @@ import jakarta.validation.constraints.NotNull;
                     type: io.kestra.plugin.googleworkspace.drive.Export
                     fileId: "1Dkd3W0OQo-wxz1rrORLP7YGSj6EBLEg74fiTdbJUIQE"
                 """
+        )
+    },
+    metrics = {
+        @Metric(
+            name = "size",
+            type = COUNTER.type,
+            unit = "count",
+            description = "Number of files returned by the list query"
         )
     }
 )
