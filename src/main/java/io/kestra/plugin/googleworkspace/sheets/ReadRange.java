@@ -3,6 +3,7 @@ package io.kestra.plugin.googleworkspace.sheets;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import io.kestra.core.models.annotations.Example;
+import io.kestra.core.models.annotations.Metric;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.executions.metrics.Counter;
 import io.kestra.core.models.property.Property;
@@ -40,6 +41,14 @@ import java.util.List;
                     store: true
                     valueRender: FORMATTED_VALUE
                 """
+        )
+    },
+    metrics = {
+        @Metric(
+            name = "rows",
+            type = Counter.TYPE,
+            unit = "count",
+            description = "Number of rows fetched across all sheets"
         )
     }
 )
