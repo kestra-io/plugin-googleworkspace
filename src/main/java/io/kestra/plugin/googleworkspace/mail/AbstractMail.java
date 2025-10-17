@@ -17,6 +17,7 @@ import io.kestra.core.models.tasks.Task;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.googleworkspace.OAuthInterface;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -36,22 +37,25 @@ public abstract class AbstractMail extends Task implements OAuthInterface {
         title = "OAuth 2.0 Client ID",
         description = "The OAuth 2.0 client ID from Google Cloud Console"
     )
+    @NotNull
     protected Property<String> clientId;
 
     @Schema(
         title = "OAuth 2.0 Client Secret",
         description = "The OAuth 2.0 client secret from Google Cloud Console"
     )
+    @NotNull
     protected Property<String> clientSecret;
 
     @Schema(
         title = "OAuth 2.0 Refresh Token",
         description = "The OAuth 2.0 refresh token obtained through the authorization flow"
     )
+    @NotNull
     protected Property<String> refreshToken;
 
     @Schema(
-        title = "OAuth 2.0 Access Token", 
+        title = "OAuth 2.0 Access Token",
         description = "The OAuth 2.0 access token (optional, will be generated from refresh token if not provided)"
     )
     protected Property<String> accessToken;
@@ -68,7 +72,7 @@ public abstract class AbstractMail extends Task implements OAuthInterface {
 
     protected Gmail connection(RunContext runContext) throws IllegalVariableEvaluationException, IOException, GeneralSecurityException {
         HttpCredentialsAdapter credentials = this.oauthCredentials(runContext);
-        
+
         return new Gmail.Builder(this.netHttpTransport(), JSON_FACTORY, credentials)
             .setApplicationName("Kestra")
             .build();
@@ -82,32 +86,32 @@ public abstract class AbstractMail extends Task implements OAuthInterface {
             .orElseThrow(() -> new IllegalArgumentException("clientSecret is required for OAuth authentication"));
         String rRefreshToken = runContext.render(this.refreshToken).as(String.class)
             .orElseThrow(() -> new IllegalArgumentException("refreshToken is required for OAuth authentication"));
-        
+
         // Optional access token
         String rAccessToken = runContext.render(this.accessToken).as(String.class).orElse(null);
-        
+
         runContext.logger().debug("Setting up OAuth credentials for Gmail API");
-        
+
         // Create UserCredentials for OAuth
         UserCredentials.Builder credentialsBuilder = UserCredentials.newBuilder()
             .setClientId(rClientId)
             .setClientSecret(rClientSecret)
             .setRefreshToken(rRefreshToken);
-        
+
         if (rAccessToken != null && !rAccessToken.trim().isEmpty()) {
             credentialsBuilder.setAccessToken(new AccessToken(rAccessToken, null));
             runContext.logger().debug("Using provided access token for authentication");
         }
-        
+
         GoogleCredentials credentials = credentialsBuilder.build();
-        
+
         // Apply scopes if specified
         var rScopes = runContext.render(this.scopes).asList(String.class);
         if (rScopes != null && !rScopes.isEmpty()) {
             credentials = credentials.createScoped(rScopes);
             runContext.logger().debug("Applied {} OAuth scopes", rScopes.size());
         }
-        
+
         var rTimeout = runContext.render(this.readTimeout).as(Integer.class).orElse(120);
         return new HttpCredentialsAdapter(credentials) {
             @Override
@@ -117,7 +121,7 @@ public abstract class AbstractMail extends Task implements OAuthInterface {
             }
         };
     }
-    
+
     protected NetHttpTransport netHttpTransport() throws GeneralSecurityException, IOException {
         return GoogleNetHttpTransport.newTrustedTransport();
     }

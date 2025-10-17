@@ -270,9 +270,9 @@ public class MailReceived extends AbstractTrigger implements PollingTriggerInter
 
         // Add the full messages list
         triggerVars.put("messages", newMessages);
-        
+
         if (!newMessages.isEmpty()) {
-            Output.EmailMetadata firstMessage = newMessages.get(0);
+            Output.EmailMetadata firstMessage = newMessages.getFirst();
             triggerVars.put("id", firstMessage.getId());
             triggerVars.put("threadId", firstMessage.getThreadId());
             triggerVars.put("subject", firstMessage.getSubject());
@@ -421,7 +421,7 @@ public class MailReceived extends AbstractTrigger implements PollingTriggerInter
         String afterDate = dayBeforeCutoff.toString().substring(0, 10).replace("-", "/");
         queryParts.add("after:" + afterDate);
 
-        return queryParts.isEmpty() ? null : String.join(" ", queryParts);
+        return String.join(" ", queryParts);
     }
 
     private Output.EmailMetadata convertToEmailMetadata(Message message) {
