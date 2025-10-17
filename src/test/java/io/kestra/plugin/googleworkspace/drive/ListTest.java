@@ -6,6 +6,7 @@ import io.kestra.core.utils.TestsUtils;
 import io.kestra.plugin.googleworkspace.UtilsTest;
 import io.kestra.core.junit.annotations.KestraTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIf;
 
 import java.util.Map;
 import jakarta.inject.Inject;
@@ -14,6 +15,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 @KestraTest
+@DisabledIf(
+    value = "isServiceAccountNotExists",
+    disabledReason = "Disabled for CI/CD"
+)
 class ListTest {
     @Inject
     private RunContextFactory runContextFactory;
@@ -30,5 +35,11 @@ class ListTest {
         List.Output run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));
 
         assertThat(run.getFiles().size(), is(151));
+    }
+
+    private static boolean isServiceAccountNotExists() {
+        return io.kestra.plugin.googleworkspace.UtilsTest.class
+            .getClassLoader()
+            .getResource(".gcp-service-account.json") == null;
     }
 }
