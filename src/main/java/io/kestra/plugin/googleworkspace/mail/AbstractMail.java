@@ -12,7 +12,6 @@ import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.UserCredentials;
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
-import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.Task;
 import io.kestra.core.runners.RunContext;
@@ -37,28 +36,24 @@ public abstract class AbstractMail extends Task implements OAuthInterface {
         title = "OAuth 2.0 Client ID",
         description = "The OAuth 2.0 client ID from Google Cloud Console"
     )
-    @PluginProperty(dynamic = true)
     protected Property<String> clientId;
 
     @Schema(
         title = "OAuth 2.0 Client Secret",
         description = "The OAuth 2.0 client secret from Google Cloud Console"
     )
-    @PluginProperty(dynamic = true)
     protected Property<String> clientSecret;
 
     @Schema(
         title = "OAuth 2.0 Refresh Token",
         description = "The OAuth 2.0 refresh token obtained through the authorization flow"
     )
-    @PluginProperty(dynamic = true)
     protected Property<String> refreshToken;
 
     @Schema(
         title = "OAuth 2.0 Access Token", 
         description = "The OAuth 2.0 access token (optional, will be generated from refresh token if not provided)"
     )
-    @PluginProperty(dynamic = true)
     protected Property<String> accessToken;
 
     @Builder.Default
@@ -81,40 +76,44 @@ public abstract class AbstractMail extends Task implements OAuthInterface {
 
     protected HttpCredentialsAdapter oauthCredentials(RunContext runContext) throws IllegalVariableEvaluationException, IOException {
         // Get OAuth parameters
-        String clientId = runContext.render(this.clientId).as(String.class)
+        String rClientId = runContext.render(this.clientId).as(String.class)
             .orElseThrow(() -> new IllegalArgumentException("clientId is required for OAuth authentication"));
-        String clientSecret = runContext.render(this.clientSecret).as(String.class)
+        String rClientSecret = runContext.render(this.clientSecret).as(String.class)
             .orElseThrow(() -> new IllegalArgumentException("clientSecret is required for OAuth authentication"));
-        String refreshToken = runContext.render(this.refreshToken).as(String.class)
+        String rRefreshToken = runContext.render(this.refreshToken).as(String.class)
             .orElseThrow(() -> new IllegalArgumentException("refreshToken is required for OAuth authentication"));
         
         // Optional access token
-        String accessToken = runContext.render(this.accessToken).as(String.class).orElse(null);
+        String rAccessToken = runContext.render(this.accessToken).as(String.class).orElse(null);
+        
+        runContext.logger().debug("Setting up OAuth credentials for Gmail API");
         
         // Create UserCredentials for OAuth
         UserCredentials.Builder credentialsBuilder = UserCredentials.newBuilder()
-            .setClientId(clientId)
-            .setClientSecret(clientSecret)
-            .setRefreshToken(refreshToken);
+            .setClientId(rClientId)
+            .setClientSecret(rClientSecret)
+            .setRefreshToken(rRefreshToken);
         
-        if (accessToken != null && !accessToken.trim().isEmpty()) {
-            credentialsBuilder.setAccessToken(new AccessToken(accessToken, null));
+        if (rAccessToken != null && !rAccessToken.trim().isEmpty()) {
+            credentialsBuilder.setAccessToken(new AccessToken(rAccessToken, null));
+            runContext.logger().debug("Using provided access token for authentication");
         }
         
         GoogleCredentials credentials = credentialsBuilder.build();
         
         // Apply scopes if specified
-        var renderedScopes = runContext.render(this.scopes).asList(String.class);
-        if (renderedScopes != null && !renderedScopes.isEmpty()) {
-            credentials = credentials.createScoped(renderedScopes);
+        var rScopes = runContext.render(this.scopes).asList(String.class);
+        if (rScopes != null && !rScopes.isEmpty()) {
+            credentials = credentials.createScoped(rScopes);
+            runContext.logger().debug("Applied {} OAuth scopes", rScopes.size());
         }
         
-        var renderedTimeout = runContext.render(this.readTimeout).as(Integer.class).orElse(120);
+        var rTimeout = runContext.render(this.readTimeout).as(Integer.class).orElse(120);
         return new HttpCredentialsAdapter(credentials) {
             @Override
             public void initialize(HttpRequest request) throws IOException {
                 super.initialize(request);
-                request.setReadTimeout(renderedTimeout * 1000);
+                request.setReadTimeout(rTimeout * 1000);
             }
         };
     }

@@ -5,13 +5,13 @@ import com.google.api.services.gmail.model.ListMessagesResponse;
 import com.google.api.services.gmail.model.Message;
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
-import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.ArrayList;
 
@@ -28,28 +28,38 @@ import java.util.ArrayList;
     examples = {
         @Example(
             title = "List all messages in inbox",
-            code = {
-                "- id: list_messages",
-                "  type: io.kestra.plugin.googleworkspace.mail.List",
-                "  clientId: \"{{ secret('GMAIL_CLIENT_ID') }}\"",
-                "  clientSecret: \"{{ secret('GMAIL_CLIENT_SECRET') }}\"",
-                "  refreshToken: \"{{ secret('GMAIL_REFRESH_TOKEN') }}\"",
-                "  maxResults: 10"
-            }
+            full = true,
+            code = """
+                id: list_messages
+                namespace: company.team
+
+                tasks:
+                  - id: list_messages
+                    type: io.kestra.plugin.googleworkspace.mail.List
+                    clientId: "{{ secret('GMAIL_CLIENT_ID') }}"
+                    clientSecret: "{{ secret('GMAIL_CLIENT_SECRET') }}"
+                    refreshToken: "{{ secret('GMAIL_REFRESH_TOKEN') }}"
+                    maxResults: 10
+                """
         ),
         @Example(
             title = "List unread messages",
-            code = {
-                "- id: list_unread",
-                "  type: io.kestra.plugin.googleworkspace.mail.List", 
-                "  clientId: \"{{ secret('GMAIL_CLIENT_ID') }}\"",
-                "  clientSecret: \"{{ secret('GMAIL_CLIENT_SECRET') }}\"",
-                "  refreshToken: \"{{ secret('GMAIL_REFRESH_TOKEN') }}\"",
-                "  query: is:unread",
-                "  labelIds:",
-                "    - INBOX",
-                "  maxResults: 50"
-            }
+            full = true,
+            code = """
+                id: list_unread_messages
+                namespace: company.team
+
+                tasks:
+                  - id: list_unread
+                    type: io.kestra.plugin.googleworkspace.mail.List
+                    clientId: "{{ secret('GMAIL_CLIENT_ID') }}"
+                    clientSecret: "{{ secret('GMAIL_CLIENT_SECRET') }}"
+                    refreshToken: "{{ secret('GMAIL_REFRESH_TOKEN') }}"
+                    query: is:unread
+                    labelIds:
+                      - INBOX
+                    maxResults: 50
+                """
         )
     }
 )
@@ -58,21 +68,18 @@ public class List extends AbstractMail implements RunnableTask<List.Output> {
         title = "Gmail search query",
         description = "Search query using Gmail search syntax (e.g., 'is:unread', 'from:sender@example.com', 'subject:important')"
     )
-    @PluginProperty(dynamic = true)
     private Property<String> query;
 
     @Schema(
         title = "Label IDs to filter messages",
         description = "List of label IDs to restrict the search (e.g., INBOX, SENT, DRAFT, UNREAD)"
     )
-    @PluginProperty(dynamic = true)
     private Property<java.util.List<String>> labelIds;
 
     @Schema(
         title = "Maximum number of results",
         description = "Maximum number of messages to return (default: 100, max: 500)"
     )
-    @PluginProperty(dynamic = true)
     @Builder.Default
     private Property<Integer> maxResults = Property.ofValue(100);
 
@@ -80,7 +87,6 @@ public class List extends AbstractMail implements RunnableTask<List.Output> {
         title = "Include spam and trash",
         description = "Whether to include messages from SPAM and TRASH in the results"
     )
-    @PluginProperty(dynamic = true)
     @Builder.Default
     private Property<Boolean> includeSpamTrash = Property.ofValue(false);
 
@@ -91,21 +97,21 @@ public class List extends AbstractMail implements RunnableTask<List.Output> {
         Gmail.Users.Messages.List request = gmail.users().messages().list("me");
 
         // Set query parameters
-        var renderedQuery = runContext.render(this.query).as(String.class).orElse(null);
-        if (renderedQuery != null && !renderedQuery.trim().isEmpty()) {
-            request.setQ(renderedQuery);
+        var rQuery = runContext.render(this.query).as(String.class).orElse(null);
+        if (rQuery != null && !rQuery.trim().isEmpty()) {
+            request.setQ(rQuery);
         }
 
-        var renderedLabelIds = runContext.render(this.labelIds).asList(String.class);
-        if (renderedLabelIds != null && !renderedLabelIds.isEmpty()) {
-            request.setLabelIds(renderedLabelIds);
+        var rLabelIds = runContext.render(this.labelIds).asList(String.class);
+        if (rLabelIds != null && !rLabelIds.isEmpty()) {
+            request.setLabelIds(rLabelIds);
         }
 
-        var renderedMaxResults = runContext.render(this.maxResults).as(Integer.class).orElse(100);
-        request.setMaxResults((long) Math.min(renderedMaxResults, 500)); // Gmail API limit is 500
+        var rMaxResults = runContext.render(this.maxResults).as(Integer.class).orElse(100);
+        request.setMaxResults((long) Math.min(rMaxResults, 500)); // Gmail API limit is 500
 
-        var renderedIncludeSpamTrash = runContext.render(this.includeSpamTrash).as(Boolean.class).orElse(false);
-        request.setIncludeSpamTrash(renderedIncludeSpamTrash);
+        var rIncludeSpamTrash = runContext.render(this.includeSpamTrash).as(Boolean.class).orElse(false);
+        request.setIncludeSpamTrash(rIncludeSpamTrash);
 
         // Execute the request
         ListMessagesResponse response = request.execute();
@@ -115,7 +121,6 @@ public class List extends AbstractMail implements RunnableTask<List.Output> {
             messages = new ArrayList<>();
         }
 
-        runContext.logger().info("Retrieved {} messages", messages.size());
 
         return Output.builder()
             .messages(messages.stream()

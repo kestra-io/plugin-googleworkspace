@@ -7,7 +7,6 @@ import com.google.api.services.gmail.model.MessagePartHeader;
 import com.google.api.client.util.Base64;
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
-import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
@@ -15,6 +14,7 @@ import io.kestra.plugin.googleworkspace.mail.models.Attachment;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import jakarta.validation.constraints.NotNull;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -34,26 +34,43 @@ import java.util.stream.Collectors;
     examples = {
         @Example(
             title = "Get a message by ID",
-            code = {
-                "- id: get_message",
-                "  type: io.kestra.plugin.googleworkspace.mail.Get",
-                "  clientId: \"{{ secret('GMAIL_CLIENT_ID') }}\"",
-                "  clientSecret: \"{{ secret('GMAIL_CLIENT_SECRET') }}\"",
-                "  refreshToken: \"{{ secret('GMAIL_REFRESH_TOKEN') }}\"",
-                "  messageId: \"{{ outputs.list_messages.messages[0].id }}\""
-            }
+            full = true,
+            code = """
+                id: get_gmail_message
+                namespace: company.team
+
+                tasks:
+                  - id: list_messages
+                    type: io.kestra.plugin.googleworkspace.mail.List
+                    clientId: "{{ secret('GMAIL_CLIENT_ID') }}"
+                    clientSecret: "{{ secret('GMAIL_CLIENT_SECRET') }}"
+                    refreshToken: "{{ secret('GMAIL_REFRESH_TOKEN') }}"
+                    maxResults: 1
+
+                  - id: get_message
+                    type: io.kestra.plugin.googleworkspace.mail.Get
+                    clientId: "{{ secret('GMAIL_CLIENT_ID') }}"
+                    clientSecret: "{{ secret('GMAIL_CLIENT_SECRET') }}"
+                    refreshToken: "{{ secret('GMAIL_REFRESH_TOKEN') }}"
+                    messageId: "{{ outputs.list_messages.messages[0].id }}"
+                """
         ),
         @Example(
             title = "Get message with specific format",
-            code = {
-                "- id: get_full_message",
-                "  type: io.kestra.plugin.googleworkspace.mail.Get",
-                "  clientId: \"{{ secret('GMAIL_CLIENT_ID') }}\"",
-                "  clientSecret: \"{{ secret('GMAIL_CLIENT_SECRET') }}\"",
-                "  refreshToken: \"{{ secret('GMAIL_REFRESH_TOKEN') }}\"",
-                "  messageId: \"1a2b3c4d5e6f7890\"",
-                "  format: full"
-            }
+            full = true,
+            code = """
+                id: get_message_metadata
+                namespace: company.team
+
+                tasks:
+                  - id: get_full_message
+                    type: io.kestra.plugin.googleworkspace.mail.Get
+                    clientId: "{{ secret('GMAIL_CLIENT_ID') }}"
+                    clientSecret: "{{ secret('GMAIL_CLIENT_SECRET') }}"
+                    refreshToken: "{{ secret('GMAIL_REFRESH_TOKEN') }}"
+                    messageId: "1a2b3c4d5e6f7890"
+                    format: full
+                """
         )
     }
 )
@@ -62,14 +79,13 @@ public class Get extends AbstractMail implements RunnableTask<Get.Output> {
         title = "Message ID",
         description = "The ID of the message to retrieve"
     )
-    @PluginProperty(dynamic = true)
+    @NotNull
     private Property<String> messageId;
 
     @Schema(
         title = "Message format",
-        description = "The format to return the message in (minimal, full, raw, metadata)"
+        description = "The format to return the message payload in (options: minimal, full, raw, metadata)"
     )
-    @PluginProperty(dynamic = true)
     @Builder.Default
     private Property<String> format = Property.ofValue("full");
 
@@ -77,17 +93,16 @@ public class Get extends AbstractMail implements RunnableTask<Get.Output> {
     public Output run(RunContext runContext) throws Exception {
         Gmail gmail = this.connection(runContext);
 
-        var renderedMessageId = runContext.render(this.messageId).as(String.class)
+        var rMessageId = runContext.render(this.messageId).as(String.class)
             .orElseThrow(() -> new IllegalArgumentException("messageId is required"));
         
-        var renderedFormat = runContext.render(this.format).as(String.class).orElse("full");
+        var rFormat = runContext.render(this.format).as(String.class).orElse("full");
 
-        Gmail.Users.Messages.Get request = gmail.users().messages().get("me", renderedMessageId);
-        request.setFormat(renderedFormat);
+        Gmail.Users.Messages.Get request = gmail.users().messages().get("me", rMessageId);
+        request.setFormat(rFormat);
 
         Message message = request.execute();
 
-        runContext.logger().info("Retrieved message: {}", message.getId());
 
         return Output.builder()
             .message(convertMessage(message))
