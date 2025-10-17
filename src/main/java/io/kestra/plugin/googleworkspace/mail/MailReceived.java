@@ -266,15 +266,11 @@ public class MailReceived extends AbstractTrigger implements PollingTriggerInter
 
         logger.info("Found {} new message(s) after {}", newMessages.size(), cutoffTime);
 
-        // Create trigger variables - flatten first message for backward compatibility
-        // This allows {{ trigger.from }}, {{ trigger.subject }}, etc. to work
         Map<String, Object> triggerVars = new HashMap<>();
 
         // Add the full messages list
         triggerVars.put("messages", newMessages);
-
-        // For convenience, also expose first message fields at root level
-        // This maintains backward compatibility with examples
+        
         if (!newMessages.isEmpty()) {
             Output.EmailMetadata firstMessage = newMessages.get(0);
             triggerVars.put("id", firstMessage.getId());
