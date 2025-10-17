@@ -53,13 +53,13 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
     metrics = {
         @Metric(
             name = "rows",
-            type = COUNTER.type,
+            type = Counter.TYPE,
             unit = "count",
             description = "Number of rows fetched across all sheets"
         ),
         @Metric(
             name = "sheets",
-            type = COUNTER.type,
+            type = Counter.TYPE,
             unit = "count",
             description = "Number of sheets processed in the spreadsheet"
         )

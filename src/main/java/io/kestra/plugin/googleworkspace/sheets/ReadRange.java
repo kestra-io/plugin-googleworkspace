@@ -46,7 +46,7 @@ import java.util.List;
     metrics = {
         @Metric(
             name = "rows",
-            type = COUNTER.type,
+            type = Counter.TYPE,
             unit = "count",
             description = "Number of rows fetched across all sheets"
         )

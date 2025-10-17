@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
     metrics = {
         @Metric(
             name= "size",
-            type= COUNTER.type,
+            type= Counter.TYPE,
             unit= "count",
             description = "Number of files returned by the list query"
         )
