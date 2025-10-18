@@ -1,0 +1,24 @@
+id: drive-file-listen
+namespace: io.kestra.tests
+
+tasks:
+  - id: log
+    type: io.kestra.plugin.core.log.Log
+    message: "New files detected: {{ trigger.files | length }}"
+
+triggers:
+  - id: watch
+    type: io.kestra.plugin.googleworkspace.drive.FileCreatedTrigger
+    serviceAccount: |
+      {
+        "type": "service_account",
+        "project_id": "test-project",
+        "private_key_id": "test-key-id",
+        "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC5test\n-----END PRIVATE KEY-----\n",
+        "client_email": "test@test-project.iam.gserviceaccount.com",
+        "client_id": "123456789012345678901",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token"
+      }
+    folderId: "1YgHpphjepA8gAme1J04ftxVf7j80XABU"
+    interval: PT10S

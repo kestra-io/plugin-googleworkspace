@@ -7,3 +7,7 @@ kestra:
     type: local
     local:
       base-path: /tmp/unittest
+  tasks:
+    googleworkspace:
+      drive:
+        test-folder-id: 1YgHpphjepA8gAme1J04ftxVf7j80XABU
