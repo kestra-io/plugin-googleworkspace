@@ -4,6 +4,7 @@ import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import io.kestra.core.models.annotations.Example;
+import io.kestra.core.models.annotations.Metric;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.executions.metrics.Counter;
@@ -71,6 +72,14 @@ import jakarta.validation.constraints.NotNull;
                     contentType: text/csv
                     mimeType: application/vnd.google-apps.spreadsheet
                 """
+        )
+    },
+    metrics = {
+        @Metric(
+            name = "size",
+            type = Counter.TYPE,
+            unit = "count",
+            description = "Number of files returned by the list query"
         )
     }
 )

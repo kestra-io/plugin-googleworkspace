@@ -3,6 +3,7 @@ package io.kestra.plugin.googleworkspace.drive;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.FileList;
 import io.kestra.core.models.annotations.Example;
+import io.kestra.core.models.annotations.Metric;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.executions.metrics.Counter;
@@ -40,6 +41,14 @@ import java.util.stream.Collectors;
                       mimeType = 'application/vnd.google-apps.folder'
                       and '1z2GZgLEX12BN9zbVE6TodrCHyTRMj_ka' in parents
                 """
+        )
+    },
+    metrics = {
+        @Metric(
+            name= "size",
+            type= Counter.TYPE,
+            unit= "count",
+            description = "Number of files returned by the list query"
         )
     }
 )
