@@ -97,6 +97,6 @@ class GetTest {
     private static boolean isServiceAccountNotExists() {
         return UtilsTest.class
             .getClassLoader()
-            .getResource("isServiceAccountNotExists") == null;
+            .getResource(".gcp-service-account.json") == null;
     }
 }
