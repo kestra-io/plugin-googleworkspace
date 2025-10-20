@@ -95,7 +95,7 @@ public class Get extends AbstractMail implements RunnableTask<Get.Output> {
 
         var rMessageId = runContext.render(this.messageId).as(String.class)
             .orElseThrow(() -> new IllegalArgumentException("messageId is required"));
-        
+
         var rFormat = runContext.render(this.format).as(String.class).orElse("full");
 
         Gmail.Users.Messages.Get request = gmail.users().messages().get("me", rMessageId);
@@ -133,21 +133,21 @@ public class Get extends AbstractMail implements RunnableTask<Get.Output> {
                     headers.put(header.getName().toLowerCase(), header.getValue());
                 }
                 builder.headers(headers);
-                
+
                 // Extract common headers
                 builder.subject(headers.get("subject"));
                 builder.from(headers.get("from"));
-                
+
                 String toHeader = headers.get("to");
                 if (toHeader != null) {
                     builder.to(parseEmailList(toHeader));
                 }
-                
+
                 String ccHeader = headers.get("cc");
                 if (ccHeader != null) {
                     builder.cc(parseEmailList(ccHeader));
                 }
-                
+
                 String bccHeader = headers.get("bcc");
                 if (bccHeader != null) {
                     builder.bcc(parseEmailList(bccHeader));
@@ -169,7 +169,7 @@ public class Get extends AbstractMail implements RunnableTask<Get.Output> {
         if (emailHeader == null || emailHeader.trim().isEmpty()) {
             return Collections.emptyList();
         }
-        
+
         return Arrays.stream(emailHeader.split(","))
             .map(String::trim)
             .filter(email -> !email.isEmpty())
@@ -178,7 +178,7 @@ public class Get extends AbstractMail implements RunnableTask<Get.Output> {
 
     private String[] extractBodyAndAttachments(MessagePart part, java.util.List<Attachment> attachments) {
         String[] result = new String[2]; // [textPlain, textHtml]
-        
+
         if (part.getParts() != null) {
             // Multipart message
             for (MessagePart subPart : part.getParts()) {
@@ -210,7 +210,7 @@ public class Get extends AbstractMail implements RunnableTask<Get.Output> {
                 }
             }
         }
-        
+
         return result;
     }
 
@@ -218,17 +218,17 @@ public class Get extends AbstractMail implements RunnableTask<Get.Output> {
         if (part.getFilename() != null && !part.getFilename().isEmpty()) {
             return true;
         }
-        
+
         java.util.List<MessagePartHeader> headers = part.getHeaders();
         if (headers != null) {
             for (MessagePartHeader header : headers) {
-                if ("Content-Disposition".equalsIgnoreCase(header.getName()) && 
+                if ("Content-Disposition".equalsIgnoreCase(header.getName()) &&
                     header.getValue() != null && header.getValue().contains("attachment")) {
                     return true;
                 }
             }
         }
-        
+
         return false;
     }
 
@@ -236,7 +236,7 @@ public class Get extends AbstractMail implements RunnableTask<Get.Output> {
         if (part.getFilename() != null && !part.getFilename().isEmpty()) {
             return part.getFilename();
         }
-        
+
         java.util.List<MessagePartHeader> headers = part.getHeaders();
         if (headers != null) {
             for (MessagePartHeader header : headers) {
@@ -253,7 +253,7 @@ public class Get extends AbstractMail implements RunnableTask<Get.Output> {
                 }
             }
         }
-        
+
         return null;
     }
 
