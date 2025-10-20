@@ -115,6 +115,6 @@ class MailReceivedTriggerTest {
     private static boolean isServiceAccountNotExists() {
         return UtilsTest.class
             .getClassLoader()
-            .getResource(".gmail-oauth.json") == null;
+            .getResource("isServiceAccountNotExists") == null;
     }
 }

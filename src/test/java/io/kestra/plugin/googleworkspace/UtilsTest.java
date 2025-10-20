@@ -31,7 +31,7 @@ public class UtilsTest {
         return getOAuthCredential("refresh_token");
     }
     
-    private static String getOAuthCredential(String key) throws Exception {
+    public static String getOAuthCredential(String key) throws Exception {
         File file = new File(Objects.requireNonNull(UtilsTest.class.getClassLoader()
                 .getResource(".gmail-oauth.json"))
             .toURI());

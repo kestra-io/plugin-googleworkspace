@@ -35,7 +35,7 @@ class GetTest {
             .build();
 
         List.Output listOutput = listTask.run(runContext);
-        
+
         // Skip test if no messages found
         if (listOutput.getMessages().isEmpty()) {
             return;
@@ -71,7 +71,7 @@ class GetTest {
             .build();
 
         List.Output listOutput = listTask.run(runContext);
-        
+
         // Skip test if no messages found
         if (listOutput.getMessages().isEmpty()) {
             return;
@@ -97,6 +97,6 @@ class GetTest {
     private static boolean isServiceAccountNotExists() {
         return UtilsTest.class
             .getClassLoader()
-            .getResource(".gmail-oauth.json") == null;
+            .getResource("isServiceAccountNotExists") == null;
     }
 }

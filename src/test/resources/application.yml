@@ -7,10 +7,3 @@ kestra:
     type: local
     local:
       base-path: /tmp/unittest
-  tasks:
-    googleworkspace:
-      mail:
-        client-id: ${GMAIL_CLIENT_ID:}
-        client-secret: ${GMAIL_CLIENT_SECRET:}
-        refresh-token: ${GMAIL_REFRESH_TOKEN:}
-        test-email: ${GMAIL_TEST_EMAIL:your-test-email@gmail.com}
