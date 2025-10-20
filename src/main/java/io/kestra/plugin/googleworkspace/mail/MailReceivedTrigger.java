@@ -20,6 +20,7 @@ import io.kestra.core.models.property.Property;
 import io.kestra.core.models.triggers.*;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.googleworkspace.OAuthInterface;
+import io.kestra.plugin.googleworkspace.mail.models.EmailMetadata;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -59,7 +60,7 @@ import java.util.List;
 
                 triggers:
                   - id: watch_inbox
-                    type: io.kestra.plugin.googleworkspace.mail.MailReceived
+                    type: io.kestra.plugin.googleworkspace.mail.MailReceivedTrigger
                     clientId: "{{ secret('GMAIL_CLIENT_ID') }}"
                     clientSecret: "{{ secret('GMAIL_CLIENT_SECRET') }}"
                     refreshToken: "{{ secret('GMAIL_REFRESH_TOKEN') }}"
@@ -84,7 +85,7 @@ import java.util.List;
 
                 triggers:
                   - id: watch_urgent
-                    type: io.kestra.plugin.googleworkspace.mail.MailReceived
+                    type: io.kestra.plugin.googleworkspace.mail.MailReceivedTrigger
                     clientId: "{{ secret('GMAIL_CLIENT_ID') }}"
                     clientSecret: "{{ secret('GMAIL_CLIENT_SECRET') }}"
                     refreshToken: "{{ secret('GMAIL_REFRESH_TOKEN') }}"
@@ -97,7 +98,7 @@ import java.util.List;
         )
     }
 )
-public class MailReceived extends AbstractTrigger implements PollingTriggerInterface, TriggerOutput<MailReceived.Output>, OAuthInterface {
+public class MailReceivedTrigger extends AbstractTrigger implements PollingTriggerInterface, TriggerOutput<MailReceivedTrigger.Output>, OAuthInterface {
 
     @Schema(
         title = "OAuth 2.0 Client ID",
@@ -255,7 +256,7 @@ public class MailReceived extends AbstractTrigger implements PollingTriggerInter
         logger.debug("Found {} candidate message(s), filtering by timestamp", candidateMessages.size());
 
         // Filter messages by precise timestamp and fetch full details
-        List<Output.EmailMetadata> newMessages = filterAndEnrichMessages(
+        List<EmailMetadata> newMessages = filterAndEnrichMessages(
             gmail, candidateMessages, cutoffTime, runContext, logger
         );
 
@@ -272,7 +273,7 @@ public class MailReceived extends AbstractTrigger implements PollingTriggerInter
         triggerVars.put("messages", newMessages);
 
         if (!newMessages.isEmpty()) {
-            Output.EmailMetadata firstMessage = newMessages.getFirst();
+            EmailMetadata firstMessage = newMessages.getFirst();
             triggerVars.put("id", firstMessage.getId());
             triggerVars.put("threadId", firstMessage.getThreadId());
             triggerVars.put("subject", firstMessage.getSubject());
@@ -362,9 +363,9 @@ public class MailReceived extends AbstractTrigger implements PollingTriggerInter
         return allMessages;
     }
 
-    private List<Output.EmailMetadata> filterAndEnrichMessages(Gmail gmail, List<Message> messages,
+    private List<EmailMetadata> filterAndEnrichMessages(Gmail gmail, List<Message> messages,
                                                                Instant cutoffTime, RunContext runContext, Logger logger) throws Exception {
-        List<Output.EmailMetadata> newMessages = new ArrayList<>();
+        List<EmailMetadata> newMessages = new ArrayList<>();
         int maxMessages = runContext.render(this.maxMessagesPerPoll).as(Integer.class).orElse(50);
 
         for (Message message : messages) {
@@ -424,8 +425,8 @@ public class MailReceived extends AbstractTrigger implements PollingTriggerInter
         return String.join(" ", queryParts);
     }
 
-    private Output.EmailMetadata convertToEmailMetadata(Message message) {
-        Output.EmailMetadata.EmailMetadataBuilder builder = Output.EmailMetadata.builder()
+    private EmailMetadata convertToEmailMetadata(Message message) {
+        EmailMetadata.EmailMetadataBuilder builder = EmailMetadata.builder()
             .id(message.getId())
             .threadId(message.getThreadId())
             .labelIds(message.getLabelIds())
@@ -473,49 +474,5 @@ public class MailReceived extends AbstractTrigger implements PollingTriggerInter
                 "For convenience, if only one message is found, its fields are also available directly as trigger.subject, trigger.from, etc."
         )
         private List<EmailMetadata> messages;
-
-        @Builder
-        @Getter
-        @Jacksonized
-        public static class EmailMetadata {
-            @Schema(title = "The immutable ID of the message")
-            private String id;
-
-            @Schema(title = "The ID of the thread the message belongs to")
-            private String threadId;
-
-            @Schema(title = "List of IDs of labels applied to this message")
-            private List<String> labelIds;
-
-            @Schema(title = "A short part of the message text")
-            private String snippet;
-
-            @Schema(title = "The ID of the last history record that modified this message")
-            private String historyId;
-
-            @Schema(title = "The internal message creation timestamp")
-            private Instant internalDate;
-
-            @Schema(title = "Estimated size in bytes of the message")
-            private Long sizeEstimate;
-
-            @Schema(title = "The parsed headers of the message")
-            private Map<String, String> headers;
-
-            @Schema(title = "The message subject")
-            private String subject;
-
-            @Schema(title = "The sender email address")
-            private String from;
-
-            @Schema(title = "The recipient email addresses")
-            private List<String> to;
-
-            @Schema(title = "The CC recipient email addresses")
-            private List<String> cc;
-
-            @Schema(title = "The BCC recipient email addresses")
-            private List<String> bcc;
-        }
     }
 }
