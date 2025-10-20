@@ -6,11 +6,13 @@ import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.utils.IdUtils;
 import io.kestra.core.utils.TestsUtils;
+import io.kestra.plugin.googleworkspace.UtilsTest;
 import io.kestra.plugin.googleworkspace.mail.models.EmailMetadata;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIf;
 
 import java.time.Duration;
 import java.util.List;
@@ -20,6 +22,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 @KestraTest
+@DisabledIf(
+    value = "isServiceAccountNotExists",
+    disabledReason = "Disabled for CI/CD"
+)
 class MailReceivedTriggerTest {
 
     @Inject
@@ -104,5 +110,11 @@ class MailReceivedTriggerTest {
         Optional<Execution> execution = trigger.evaluate(context.getKey(), context.getValue());
 
         assertThat(execution.isPresent(), is(false));
+    }
+
+    private static boolean isServiceAccountNotExists() {
+        return UtilsTest.class
+            .getClassLoader()
+            .getResource(".gmail-oauth.json") == null;
     }
 }
