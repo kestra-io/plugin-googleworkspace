@@ -18,24 +18,24 @@ public class UtilsTest {
 
         return CharStreams.toString(new InputStreamReader(new FileInputStream(file)));
     }
-    
+
     public static String oauthClientId() throws Exception {
         return getOAuthCredential("client_id");
     }
-    
+
     public static String oauthClientSecret() throws Exception {
         return getOAuthCredential("client_secret");
     }
-    
+
     public static String oauthRefreshToken() throws Exception {
         return getOAuthCredential("refresh_token");
     }
-    
+
     public static String getOAuthCredential(String key) throws Exception {
         File file = new File(Objects.requireNonNull(UtilsTest.class.getClassLoader()
-                .getResource(".gmail-oauth.json"))
+                .getResource(".gcp-service-account.json"))
             .toURI());
-            
+
         String content = CharStreams.toString(new InputStreamReader(new FileInputStream(file)));
         Map<String, String> credentials = JacksonMapper.ofJson().readValue(content, new TypeReference<>() {});
         return credentials.get(key);
