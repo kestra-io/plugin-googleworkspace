@@ -318,7 +318,7 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
 
         @Builder
         @Getter
-        private static class FileMetadata {
+        public static class FileMetadata {
             @Schema(
                 title = "The file ID"
             )
