@@ -148,7 +148,6 @@ dependencies {
     testImplementation "org.mockito:mockito-core"
     testImplementation "org.mockito:mockito-junit-jupiter"
     testImplementation group: 'com.devskiller.friendly-id', name: 'friendly-id'
-
 }
 
 /**********************************************************************************************************************\
