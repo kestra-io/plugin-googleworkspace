@@ -3,6 +3,7 @@ package io.kestra.plugin.googleworkspace.sheets;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.*;
 import io.kestra.core.models.annotations.Example;
+import io.kestra.core.models.annotations.Metric;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.executions.metrics.Counter;
@@ -47,6 +48,20 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
                     store: true
                     valueRender: FORMATTED_VALUE
                 """
+        )
+    },
+    metrics = {
+        @Metric(
+            name = "rows",
+            type = Counter.TYPE,
+            unit = "count",
+            description = "Number of rows fetched across all sheets"
+        ),
+        @Metric(
+            name = "sheets",
+            type = Counter.TYPE,
+            unit = "count",
+            description = "Number of sheets processed in the spreadsheet"
         )
     }
 )
