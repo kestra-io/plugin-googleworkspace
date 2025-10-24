@@ -3,7 +3,6 @@ package io.kestra.plugin.googleworkspace.drive;
 import com.google.api.services.drive.Drive;
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
-import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
@@ -11,8 +10,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.slf4j.Logger;
-
-import jakarta.validation.constraints.NotNull;
 
 @SuperBuilder
 @ToString
@@ -50,8 +47,7 @@ public class Delete extends AbstractDrive implements RunnableTask<Delete.Output>
         Logger logger = runContext.logger();
         String id = runContext.render(this.fileId).as(String.class).orElse(null);
 
-        Void execute = service
-            .files()
+        service.files()
             .delete(id)
             .setSupportsAllDrives(true)
             .execute();

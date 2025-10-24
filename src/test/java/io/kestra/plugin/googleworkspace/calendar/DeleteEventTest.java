@@ -1,8 +1,5 @@
 package io.kestra.plugin.googleworkspace.calendar;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-
 import io.kestra.core.junit.annotations.KestraTest;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
@@ -13,13 +10,17 @@ import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIf;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
+
 @KestraTest
 @DisabledIf(
     value = "isServiceAccountNotExists",
     disabledReason = "Disabled for CI/CD"
 )
 class DeleteEventTest {
-    @Inject private RunContextFactory runContextFactory;
+    @Inject
+    private RunContextFactory runContextFactory;
 
     @Test
     void shouldDeleteEvent() throws Exception {
@@ -46,7 +47,7 @@ class DeleteEventTest {
         String eventId = insertOut.getEvent().getId();
         assertThat(eventId, notNullValue());
 
-        io.kestra.plugin.googleworkspace.calendar.DeleteEvent delete = io.kestra.plugin.googleworkspace.calendar.DeleteEvent.builder()
+        DeleteEvent delete = DeleteEvent.builder()
             .calendarId(Property.ofValue("primary"))
             .eventId(Property.ofValue(eventId))
             .sendUpdates(Property.ofValue("none"))

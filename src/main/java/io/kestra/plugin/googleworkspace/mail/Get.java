@@ -103,7 +103,6 @@ public class Get extends AbstractMail implements RunnableTask<Get.Output> {
 
         Message message = request.execute();
 
-
         return Output.builder()
             .message(convertMessage(message))
             .build();
