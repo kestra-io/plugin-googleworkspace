@@ -2,10 +2,8 @@ package io.kestra.plugin.googleworkspace.calendar;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.Events;
 import io.kestra.core.junit.annotations.KestraTest;
 import io.kestra.core.models.conditions.ConditionContext;
-import io.kestra.core.models.executions.Execution;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.triggers.TriggerContext;
 import io.kestra.core.runners.RunContext;
@@ -16,11 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIf;
 
 import java.time.Duration;
-import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -38,7 +33,7 @@ class EventCreatedTriggerTest {
         var trigger = EventCreatedTrigger.builder()
             .id(IdUtils.create())
             .serviceAccount(Property.ofValue(serviceAccount()))
-            .calendarId(Property.ofValue("primary"))
+            .calendarIds(Property.ofValue(List.of("primary")))
             .interval(Duration.ofMinutes(5))
             .build();
 
@@ -63,7 +58,7 @@ class EventCreatedTriggerTest {
         var trigger = EventCreatedTrigger.builder()
             .id(IdUtils.create())
             .serviceAccount(Property.ofValue(serviceAccount()))
-            .calendarId(Property.ofValue("primary"))
+            .calendarIds(Property.ofValue(List.of("primary")))
             .interval(Duration.ofSeconds(30)) // Invalid 
             .build();
 
@@ -83,32 +78,6 @@ class EventCreatedTriggerTest {
     }
 
     @Test
-    void shouldRejectBothCalendarIdAndCalendarIds() {
-        // Test configuration with both calendarId and calendarIds
-        var trigger = EventCreatedTrigger.builder()
-            .id(IdUtils.create())
-            .serviceAccount(Property.ofValue(serviceAccount()))
-            .calendarId(Property.ofValue("primary"))
-            .calendarIds(Property.ofValue(List.of("calendar1@example.com", "calendar2@example.com")))
-            .interval(Duration.ofMinutes(5))
-            .build();
-
-        RunContext runContext = runContextFactory.of(Map.of());
-        ConditionContext conditionContext = ConditionContext.builder()
-            .runContext(runContext)
-            .build();
-        
-        TriggerContext triggerContext = TriggerContext.builder()
-            .triggerId(trigger.getId())
-            .build();
-
-        // This should throw during evaluation due to invalid configuration
-        assertThrows(IllegalArgumentException.class, () -> {
-            trigger.evaluate(conditionContext, triggerContext);
-        });
-    }
-
-    @Test
     void shouldUseDefaultCalendarWhenNoneSpecified() throws Exception {
         var trigger = EventCreatedTrigger.builder()
             .id(IdUtils.create())
@@ -119,8 +88,7 @@ class EventCreatedTriggerTest {
 
         RunContext runContext = runContextFactory.of(Map.of());
 
-        // I test it by making sure the trigger builds correctly
-        assertThat(trigger.getCalendarId(), nullValue());
+        // I test it by making sure the trigger builds correctly and will default to primary
         assertThat(trigger.getCalendarIds(), nullValue());
         assertThat(trigger.getInterval(), equalTo(Duration.ofMinutes(5)));
     }
@@ -138,7 +106,6 @@ class EventCreatedTriggerTest {
         
         // Validate configuration
         assertThat(trigger.getCalendarIds(), notNullValue());
-        assertThat(trigger.getCalendarId(), nullValue());
     }
 
     @Test
@@ -146,7 +113,7 @@ class EventCreatedTriggerTest {
         var trigger = EventCreatedTrigger.builder()
             .id(IdUtils.create())
             .serviceAccount(Property.ofValue(serviceAccount()))
-            .calendarId(Property.ofValue("primary"))
+            .calendarIds(Property.ofValue(List.of("primary")))
             .build();
 
         // Create a mock Google Calendar Event
@@ -200,7 +167,7 @@ class EventCreatedTriggerTest {
         var trigger = EventCreatedTrigger.builder()
             .id(IdUtils.create())
             .serviceAccount(Property.ofValue(serviceAccount()))
-            .calendarId(Property.ofValue("primary"))
+            .calendarIds(Property.ofValue(List.of("primary")))
             .interval(Duration.ofMinutes(5))
             .build();
 
@@ -218,6 +185,6 @@ class EventCreatedTriggerTest {
     }
 
     private static String serviceAccount() {
-        return System.getenv("GOOGLE_SERVICE_ACCOUNT_JSON");
+        return System.getenv("GOOGLE_SERVICE_ACCOUNT");
     }
 }

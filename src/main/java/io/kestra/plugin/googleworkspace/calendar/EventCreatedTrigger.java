@@ -14,7 +14,6 @@ import io.kestra.core.models.triggers.TriggerContext;
 import io.kestra.core.models.triggers.TriggerOutput;
 import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.slf4j.Logger;
@@ -25,7 +24,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @SuperBuilder
 @ToString
@@ -34,8 +32,17 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @Schema(
     title = "Trigger that listens for new events created in a Google Calendar",
-    description = "Monitors specified calendar(s) for newly created events and emits an event for each new event detected. " +
-        "The trigger uses polling to check for new events based on their creation time."
+    description = "Monitors one or multiple Google Calendars for newly created events and emits a Kestra execution when new events are detected. " +
+        "The trigger polls calendars at regular intervals and detects events based on their creation time. " +
+        "\n\n" +
+        "**Authentication:** Requires a Google Cloud service account with Calendar API access (scope: `https://www.googleapis.com/auth/calendar`). " +
+        "Share the target calendars with the service account email address. " +
+        "\n\n" +
+        "**Configuration:** Specify one or more calendar IDs in `calendarIds` (defaults to 'primary' if not specified). " +
+        "Set a polling `interval` (minimum PT1M). Optionally filter events by keywords (`searchQuery`), organizer email, or status. " +
+        "\n\n" +
+        "**Performance:** Each calendar requires a separate API call. Use filters to reduce processing load and set `maxEventsPerPoll` to avoid overwhelming the system. " +
+        "The trigger automatically handles errors and continues monitoring if one calendar fails."
 )
 @Plugin(
     examples = {
@@ -55,7 +62,8 @@ import java.util.stream.Collectors;
                   - id: watch_calendar
                     type: io.kestra.plugin.googleworkspace.calendar.EventCreatedTrigger
                     serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
-                    calendarId: primary
+                    calendarIds:
+                      - primary
                     interval: PT5M
                 """
         ),
@@ -79,8 +87,9 @@ import java.util.stream.Collectors;
                   - id: watch_meetings
                     type: io.kestra.plugin.googleworkspace.calendar.EventCreatedTrigger
                     serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
-                    calendarId: "team-calendar@company.com"
-                    q: "meeting"
+                    calendarIds:
+                      - "team-calendar@company.com"
+                    searchQuery: "meeting"
                     interval: PT10M
                 """
         ),
@@ -112,30 +121,27 @@ import java.util.stream.Collectors;
 )
 public class EventCreatedTrigger extends AbstractCalendarTrigger implements PollingTriggerInterface, TriggerOutput<EventCreatedTrigger.EventMetadata> {
 
-    @Schema(
-        title = "The Google Cloud service account key",
-        description = "Service account JSON key with access to Google Calendar API"
-    )
-    @NotNull
-    protected Property<String> serviceAccount;
+    private static final int MAX_EVENTS_PER_POLL = 2500; // Google Calendar API maximum
+
+    public enum EventStatus {
+        CONFIRMED,
+        TENTATIVE,
+        CANCELLED
+    }
 
     @Schema(
-        title = "Calendar ID to monitor",
-        description = "Calendar ID (e.g., 'primary' or a calendar email). Use this OR calendarIds, not both."
-    )
-    protected Property<String> calendarId;
-
-    @Schema(
-        title = "Multiple Calendar IDs to monitor",
-        description = "List of calendar IDs to monitor. Use this OR calendarId, not both."
+        title = "Calendar IDs to monitor",
+        description = "List of calendar IDs to monitor (e.g., 'primary' for your main calendar, or calendar emails like 'team@company.com'). " +
+            "If not specified, defaults to ['primary']."
     )
     protected Property<List<String>> calendarIds;
 
     @Schema(
         title = "Free-text search filter",
-        description = "Only events matching this search term will trigger. Searches across title, description, and location."
+        description = "Only events matching this search term will trigger an execution. " +
+            "The search applies to event title, description, and location fields."
     )
-    protected Property<String> q;
+    protected Property<String> searchQuery;
 
     @Schema(
         title = "Organizer email filter",
@@ -145,9 +151,9 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
 
     @Schema(
         title = "Event status filter",
-        description = "Only events with this status will trigger. Options: confirmed, tentative, cancelled"
+        description = "Only events with this status will trigger executions."
     )
-    protected Property<String> eventStatus;
+    protected Property<EventStatus> eventStatus;
 
     @Schema(
         title = "The polling interval",
@@ -158,7 +164,8 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
 
     @Schema(
         title = "Maximum number of events to process per poll",
-        description = "Limits the number of new events processed in a single poll to avoid overwhelming the system"
+        description = "Limits the number of new events processed in a single poll to avoid overwhelming the system. " +
+            "Valid range: 1-" + MAX_EVENTS_PER_POLL + " (Google Calendar API maximum). Default is 100."
     )
     @Builder.Default
     protected Property<Integer> maxEventsPerPoll = Property.ofValue(100);
@@ -251,18 +258,6 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
     }
 
     private void validateConfiguration(RunContext runContext) throws Exception {
-        // Make sure only calendarId or calendarIds is specified
-        boolean hasCalendarId = this.calendarId != null && 
-            runContext.render(this.calendarId).as(String.class).isPresent();
-        boolean hasCalendarIds = this.calendarIds != null && 
-            !runContext.render(this.calendarIds).asList(String.class).isEmpty();
-
-        if (hasCalendarId && hasCalendarIds) {
-            throw new IllegalArgumentException(
-                "Cannot specify both 'calendarId' and 'calendarIds'. Use only one of them."
-            );
-        }
-
         // Validate interval minimum
         if (this.interval.toMillis() < Duration.ofMinutes(1).toMillis()) {
             throw new IllegalArgumentException(
@@ -271,34 +266,25 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
         }
 
         // Validate max events per poll
-        Integer maxEvents = runContext.render(this.maxEventsPerPoll).as(Integer.class).orElse(100);
-        if (maxEvents < 1 || maxEvents > 2500) {
+        Integer rMaxEvents = runContext.render(this.maxEventsPerPoll).as(Integer.class).orElse(100);
+        if (rMaxEvents < 1 || rMaxEvents > MAX_EVENTS_PER_POLL) {
             throw new IllegalArgumentException(
-                "maxEventsPerPoll must be between 1 and 2500"
+                "maxEventsPerPoll must be between 1 and " + MAX_EVENTS_PER_POLL
             );
         }
     }
 
     protected List<String> getCalendarsToMonitor(RunContext runContext) throws Exception {
-        List<String> calendars = new ArrayList<>();
-        
-        if (this.calendarId != null) {
-            String renderedCalendarId = runContext.render(this.calendarId).as(String.class).orElse(null);
-            if (renderedCalendarId != null) {
-                calendars.add(renderedCalendarId);
+        if (this.calendarIds != null) {
+            List<String> rCalendars = runContext.render(this.calendarIds).asList(String.class);
+            if (!rCalendars.isEmpty()) {
+                return rCalendars;
             }
         }
         
-        if (this.calendarIds != null) {
-            List<String> renderedCalendarIds = runContext.render(this.calendarIds).asList(String.class);
-            calendars.addAll(renderedCalendarIds);
-        }
-        
-        if (calendars.isEmpty()) {
-            calendars.add("primary"); // Default to primary calendar
-        }
-        
-        return calendars;
+        // Default to "primary" - a special Google Calendar API keyword for the user's main calendar
+        // See: https://developers.google.com/calendar/api/v3/reference/events/list
+        return List.of("primary");
     }
 
     private List<EventMetadata> checkCalendarForNewEvents(
@@ -319,10 +305,10 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
             .setMaxResults(runContext.render(this.maxEventsPerPoll).as(Integer.class).orElse(100));
 
         // Add search filter if specified
-        if (this.q != null) {
-            String searchQuery = runContext.render(this.q).as(String.class).orElse(null);
-            if (searchQuery != null && !searchQuery.trim().isEmpty()) {
-                request.setQ(searchQuery);
+        if (this.searchQuery != null) {
+            String rQuery = runContext.render(this.searchQuery).as(String.class).orElse(null);
+            if (rQuery != null && !rQuery.trim().isEmpty()) {
+                request.setQ(rQuery);
             }
         }
 
@@ -339,7 +325,7 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
         return eventList.stream()
             .filter(event -> isNewEvent(event, lastCreatedTime, runContext))
             .map(this::convertToEventMetadata)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     protected boolean isNewEvent(Event event, Instant lastCreatedTime, RunContext runContext) {
@@ -354,16 +340,16 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
 
             // Filter by organizer email if specified
             if (this.organizerEmail != null && event.getOrganizer() != null) {
-                String filterEmail = runContext.render(this.organizerEmail).as(String.class).orElse(null);
-                if (filterEmail != null && !filterEmail.equalsIgnoreCase(event.getOrganizer().getEmail())) {
+                String rOrganizerEmail = runContext.render(this.organizerEmail).as(String.class).orElse(null);
+                if (rOrganizerEmail != null && !rOrganizerEmail.equalsIgnoreCase(event.getOrganizer().getEmail())) {
                     return false;
                 }
             }
 
             // Filter by event status if specified
             if (this.eventStatus != null) {
-                String filterStatus = runContext.render(this.eventStatus).as(String.class).orElse(null);
-                if (filterStatus != null && !filterStatus.equalsIgnoreCase(event.getStatus())) {
+                EventStatus rEventStatus = runContext.render(this.eventStatus).as(EventStatus.class).orElse(null);
+                if (rEventStatus != null && !rEventStatus.name().equalsIgnoreCase(event.getStatus())) {
                     return false;
                 }
             }
