@@ -38,8 +38,8 @@ public abstract class AbstractCalendarTrigger extends AbstractTrigger implements
     protected Property<String> serviceAccount;
 
     protected Calendar connection(RunContext runContext) throws Exception {
-        String renderedServiceAccount = runContext.render(this.serviceAccount).as(String.class).orElseThrow();
-        var renderedScopes = runContext.render(this.getScopes()).asList(String.class);
+        String rServiceAccount = runContext.render(this.serviceAccount).as(String.class).orElseThrow();
+        var rScopes = runContext.render(this.getScopes()).asList(String.class);
 
         GoogleCredentials credentials = GoogleCredentials
             .fromStream(new ByteArrayInputStream(renderedServiceAccount.getBytes(StandardCharsets.UTF_8)))
