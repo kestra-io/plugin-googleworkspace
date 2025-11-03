@@ -1,0 +1,27 @@
+name: Memory Usage Debug
+
+on:
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  memory-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+
+      - name: Check memory before build
+        run: free -h
+
+      - name: Gradle Check with memory stats
+        run: /usr/bin/time -v ./gradlew check --no-daemon
+
+      - name: Check memory after build
+        run: free -h
