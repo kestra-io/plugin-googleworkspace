@@ -1,0 +1,8 @@
+group: io.kestra.plugin.googleworkspace
+name: "googleworkspace"
+title: "Google Workspace"
+description: "Harness Google Workspace APIs within Kestra data orchestration."
+body: ""
+videos: []
+createdBy: "Kestra Core Team"
+managedBy: "Kestra Core Team"
