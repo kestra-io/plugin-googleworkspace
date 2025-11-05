@@ -42,8 +42,8 @@ public abstract class AbstractCalendarTrigger extends AbstractTrigger implements
         var rScopes = runContext.render(this.getScopes()).asList(String.class);
 
         GoogleCredentials credentials = GoogleCredentials
-            .fromStream(new ByteArrayInputStream(renderedServiceAccount.getBytes(StandardCharsets.UTF_8)))
-            .createScoped(renderedScopes);
+            .fromStream(new ByteArrayInputStream(rServiceAccount.getBytes(StandardCharsets.UTF_8)))
+            .createScoped(rScopes);
 
         return new Calendar.Builder(
             GoogleNetHttpTransport.newTrustedTransport(),

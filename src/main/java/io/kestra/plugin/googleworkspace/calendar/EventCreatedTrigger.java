@@ -12,6 +12,7 @@ import io.kestra.core.models.property.Property;
 import io.kestra.core.models.triggers.PollingTriggerInterface;
 import io.kestra.core.models.triggers.TriggerContext;
 import io.kestra.core.models.triggers.TriggerOutput;
+import io.kestra.core.models.triggers.TriggerService;
 import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -24,6 +25,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.*;
+
 
 @SuperBuilder
 @ToString
@@ -54,9 +56,16 @@ import java.util.*;
                 namespace: company.team
 
                 tasks:
-                  - id: process_event
+                  - id: process_events
                     type: io.kestra.plugin.core.log.Log
-                    message: "New event created: {{ trigger.summary }} ({{ trigger.id }})"
+                    message: "Found {{ trigger.events | length }} new event(s)"
+                  - id: log_each_event
+                    type: io.kestra.plugin.core.flow.ForEach
+                    values: "{{ trigger.events }}"
+                    tasks:
+                      - id: log_event
+                        type: io.kestra.plugin.core.log.Log
+                        message: "Event: {{ taskrun.value.summary }} ({{ taskrun.value.id }})"
 
                 triggers:
                   - id: watch_calendar
@@ -75,13 +84,17 @@ import java.util.*;
                 namespace: company.team
 
                 tasks:
-                  - id: notify_meeting
-                    type: io.kestra.plugin.notifications.slack.SlackIncomingWebhook
-                    url: "{{ secret('SLACK_WEBHOOK') }}"
-                    payload: |
-                      {
-                        "text": "New meeting scheduled: {{ trigger.summary }} on {{ trigger.start.dateTime }}"
-                      }
+                  - id: notify_meetings
+                    type: io.kestra.plugin.core.flow.ForEach
+                    values: "{{ trigger.events }}"
+                    tasks:
+                      - id: send_notification
+                        type: io.kestra.plugin.notifications.slack.SlackIncomingWebhook
+                        url: "{{ secret('SLACK_WEBHOOK') }}"
+                        payload: |
+                          {
+                            "text": "New meeting scheduled: {{ taskrun.value.summary }} on {{ taskrun.value.start.dateTime }}"
+                          }
 
                 triggers:
                   - id: watch_meetings
@@ -101,9 +114,13 @@ import java.util.*;
                 namespace: company.team
 
                 tasks:
-                  - id: log_event
-                    type: io.kestra.plugin.core.log.Log
-                    message: "Event by {{ trigger.organizer.email }}: {{ trigger.summary }}"
+                  - id: log_events
+                    type: io.kestra.plugin.core.flow.ForEach
+                    values: "{{ trigger.events }}"
+                    tasks:
+                      - id: log_event
+                        type: io.kestra.plugin.core.log.Log
+                        message: "Event by {{ taskrun.value.organizer.email }}: {{ taskrun.value.summary }}"
 
                 triggers:
                   - id: watch_multiple_calendars
@@ -119,7 +136,7 @@ import java.util.*;
         )
     }
 )
-public class EventCreatedTrigger extends AbstractCalendarTrigger implements PollingTriggerInterface, TriggerOutput<EventCreatedTrigger.EventMetadata> {
+public class EventCreatedTrigger extends AbstractCalendarTrigger implements PollingTriggerInterface, TriggerOutput<EventCreatedTrigger.Output> {
 
     private static final int MAX_EVENTS_PER_POLL = 2500; // Google Calendar API maximum
 
@@ -224,35 +241,12 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
 
         logger.info("Found {} new event(s)", allNewEvents.size());
 
-        // Create an execution with the first event as variables
-        EventMetadata firstEvent = allNewEvents.get(0);
-        
-        // Build execution with event data as variables
-        Execution execution = conditionContext.getExecution().toBuilder()
-            .variables(Map.of(
-                "eventId", firstEvent.getId(),
-                "summary", firstEvent.getSummary() != null ? firstEvent.getSummary() : "",
-                "description", firstEvent.getDescription() != null ? firstEvent.getDescription() : "",
-                "location", firstEvent.getLocation() != null ? firstEvent.getLocation() : "",
-                "status", firstEvent.getStatus() != null ? firstEvent.getStatus() : "",
-                "htmlLink", firstEvent.getHtmlLink() != null ? firstEvent.getHtmlLink() : "",
-                "organizer", firstEvent.getOrganizer() != null ? 
-                    Map.of(
-                        "email", firstEvent.getOrganizer().getEmail() != null ? firstEvent.getOrganizer().getEmail() : "",
-                        "displayName", firstEvent.getOrganizer().getDisplayName() != null ? firstEvent.getOrganizer().getDisplayName() : ""
-                    ) : Map.of(),
-                "start", firstEvent.getStart() != null ?
-                    Map.of(
-                        "dateTime", firstEvent.getStart().getDateTime() != null ? firstEvent.getStart().getDateTime().toString() : "",
-                        "timeZone", firstEvent.getStart().getTimeZone() != null ? firstEvent.getStart().getTimeZone() : ""
-                    ) : Map.of(),
-                "end", firstEvent.getEnd() != null ?
-                    Map.of(
-                        "dateTime", firstEvent.getEnd().getDateTime() != null ? firstEvent.getEnd().getDateTime().toString() : "",
-                        "timeZone", firstEvent.getEnd().getTimeZone() != null ? firstEvent.getEnd().getTimeZone() : ""
-                    ) : Map.of()
-            ))
+        // Build output with all events
+        Output output = Output.builder()
+            .events(allNewEvents)
             .build();
+
+        Execution execution = TriggerService.generateExecution(this, conditionContext, context, output);
             
         return Optional.of(execution);
     }
