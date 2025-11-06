@@ -5,7 +5,7 @@ plugins {
     id "idea"
     id 'jacoco'
     id "com.adarshr.test-logger" version "4.0.0"
-    id "org.sonarqube" version "7.0.0.6105"
+    id "org.sonarqube" version "7.0.1.6134"
     id "com.gradleup.shadow" version "9.2.2"
     id 'signing'
     id "com.github.ben-manes.versions" version "0.53.0"
@@ -54,10 +54,10 @@ dependencies {
     api platform('com.google.cloud:libraries-bom')
     api 'com.google.api-client:google-api-client:2.8.1'
     api 'com.google.auth:google-auth-library-oauth2-http:1.40.0'
-    api 'com.google.apis:google-api-services-drive:v3-rev20251013-2.0.0'
+    api 'com.google.apis:google-api-services-drive:v3-rev20251019-2.0.0'
     api 'com.google.apis:google-api-services-sheets:v4-rev20250616-2.0.0'
     api 'com.google.apis:google-api-services-calendar:v3-rev20250404-2.0.0'
-    api 'com.google.apis:google-api-services-gmail:v1-rev20250331-2.0.0'
+    api 'com.google.apis:google-api-services-gmail:v1-rev20250630-2.0.0'
     api 'javax.mail:javax.mail-api:1.6.2'
     api 'com.sun.mail:javax.mail:1.6.2'
     api 'javax.activation:activation:1.1.1'
