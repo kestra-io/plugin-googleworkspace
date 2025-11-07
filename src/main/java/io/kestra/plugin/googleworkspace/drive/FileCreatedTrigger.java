@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
                 tasks:
                   - id: process_file
                     type: io.kestra.plugin.core.log.Log
-                    message: "New file created: {{ trigger.name }} ({{ trigger.id }})"
+                    message: "New file created: {{ trigger.files[0].name }}"
 
                 triggers:
                   - id: watch_folder
@@ -72,7 +72,7 @@ import java.util.stream.Collectors;
                   - id: download_pdf
                     type: io.kestra.plugin.googleworkspace.drive.Download
                     serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT') }}"
-                    fileId: "{{ trigger.id }}"
+                    fileId: "{{ trigger.files[0].id }}"
 
                 triggers:
                   - id: watch_pdfs
@@ -98,7 +98,7 @@ import java.util.stream.Collectors;
                     url: "{{ secret('SLACK_WEBHOOK') }}"
                     payload: |
                       {
-                        "text": "New file by {{ trigger.owners[0].displayName }}: {{ trigger.name }}"
+                        "text": "New file by {{ trigger.files[0].owners[0].displayName }}: {{ trigger.files[0].name }}"
                       }
 
                 triggers:
@@ -223,9 +223,10 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
                 InputStream fileContent = driveService.files()
                     .get(file.getId())
                     .executeMediaAsInputStream();
-                kestraUri = runContext.storage().putFile(fileContent, file.getName());
+                String sanitizedFilename = sanitizeFilename(file.getName());
+                kestraUri = runContext.storage().putFile(fileContent, sanitizedFilename);
 
-                logger.debug("Stored file {} in Kestra storage", file.getName());
+                logger.info("Stored file '{}' (sanitized as '{}') in Kestra storage", file.getName(), sanitizedFilename);
             } catch (Exception e) {
                 logger.warn("Failed to download file {}: {}", file.getId(), e.getMessage());
             }
@@ -305,6 +306,38 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
             Instant.ofEpochMilli(dateTime.getValue()),
             ZoneId.systemDefault()
         );
+    }
+
+    private String sanitizeFilename(String filename) {
+        if (filename == null || filename.isEmpty()) {
+            return "unnamed_file";
+        }
+
+        // Split filename and extension
+        String name = filename;
+        String extension = "";
+        int lastDotIndex = filename.lastIndexOf('.');
+        if (lastDotIndex > 0 && lastDotIndex < filename.length() - 1) {
+            name = filename.substring(0, lastDotIndex);
+            extension = filename.substring(lastDotIndex);
+        }
+
+        // Replace problematic characters with underscores
+        // Keep alphanumeric, dash, underscore, and dot
+        name = name.replaceAll("[^a-zA-Z0-9._-]", "_");
+
+        // Remove consecutive underscores
+        name = name.replaceAll("_+", "_");
+
+        // Remove leading/trailing underscores
+        name = name.replaceAll("^_+|_+$", "");
+
+        // If name becomes empty after sanitization, use a default
+        if (name.isEmpty()) {
+            name = "file";
+        }
+
+        return name + extension;
     }
 
     @Builder
