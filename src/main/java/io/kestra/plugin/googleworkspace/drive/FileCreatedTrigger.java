@@ -223,10 +223,10 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
                 InputStream fileContent = driveService.files()
                     .get(file.getId())
                     .executeMediaAsInputStream();
-                String sanitizedFilename = sanitizeFilename(file.getName());
-                kestraUri = runContext.storage().putFile(fileContent, sanitizedFilename);
+                kestraUri = runContext.storage().putFile(fileContent, file.getName());
 
-                logger.info("Stored file '{}' (sanitized as '{}') in Kestra storage", file.getName(), sanitizedFilename);
+                logger.debug("Stored file {} in Kestra storage", file.getName());
+
             } catch (Exception e) {
                 logger.warn("Failed to download file {}: {}", file.getId(), e.getMessage());
             }
@@ -306,38 +306,6 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
             Instant.ofEpochMilli(dateTime.getValue()),
             ZoneId.systemDefault()
         );
-    }
-
-    private String sanitizeFilename(String filename) {
-        if (filename == null || filename.isEmpty()) {
-            return "unnamed_file";
-        }
-
-        // Split filename and extension
-        String name = filename;
-        String extension = "";
-        int lastDotIndex = filename.lastIndexOf('.');
-        if (lastDotIndex > 0 && lastDotIndex < filename.length() - 1) {
-            name = filename.substring(0, lastDotIndex);
-            extension = filename.substring(lastDotIndex);
-        }
-
-        // Replace problematic characters with underscores
-        // Keep alphanumeric, dash, underscore, and dot
-        name = name.replaceAll("[^a-zA-Z0-9._-]", "_");
-
-        // Remove consecutive underscores
-        name = name.replaceAll("_+", "_");
-
-        // Remove leading/trailing underscores
-        name = name.replaceAll("^_+|_+$", "");
-
-        // If name becomes empty after sanitization, use a default
-        if (name.isEmpty()) {
-            name = "file";
-        }
-
-        return name + extension;
     }
 
     @Builder
