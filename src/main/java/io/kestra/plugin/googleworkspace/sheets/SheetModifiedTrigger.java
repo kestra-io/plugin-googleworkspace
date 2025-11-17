@@ -72,7 +72,7 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
 
                 triggers:
                   - id: watch_sheet
-                    type: io.kestra.plugin.googleworkspace.sheets.SheetModified
+                    type: io.kestra.plugin.googleworkspace.sheets.SheetModifiedTrigger
                     interval: PT5M
                     spreadsheetId: "1U4AoiUrqiVaSIVcm_TwDc9RoKOdCULNGWxuC1vmDT_A"
                     serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
@@ -96,7 +96,7 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
 
                 triggers:
                   - id: watch_orders
-                    type: io.kestra.plugin.googleworkspace.sheets.SheetModified
+                    type: io.kestra.plugin.googleworkspace.sheets.SheetModifiedTrigger
                     interval: PT2M
                     spreadsheetId: "1U4AoiUrqiVaSIVcm_TwDc9RoKOdCULNGWxuC1vmDT_A"
                     serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
@@ -123,7 +123,7 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
 
                 triggers:
                   - id: watch
-                    type: io.kestra.plugin.googleworkspace.sheets.SheetModified
+                    type: io.kestra.plugin.googleworkspace.sheets.SheetModifiedTrigger
                     interval: PT1M
                     spreadsheetId: "{{ vars.spreadsheet_id }}"
                     serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
