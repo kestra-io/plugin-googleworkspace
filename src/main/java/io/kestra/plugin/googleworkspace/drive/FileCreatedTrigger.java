@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
                 tasks:
                   - id: process_file
                     type: io.kestra.plugin.core.log.Log
-                    message: "New file created: {{ trigger.name }} ({{ trigger.id }})"
+                    message: "New file created: {{ trigger.files[0].name }}"
 
                 triggers:
                   - id: watch_folder
@@ -72,7 +72,7 @@ import java.util.stream.Collectors;
                   - id: download_pdf
                     type: io.kestra.plugin.googleworkspace.drive.Download
                     serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT') }}"
-                    fileId: "{{ trigger.id }}"
+                    fileId: "{{ trigger.files[0].id }}"
 
                 triggers:
                   - id: watch_pdfs
@@ -98,7 +98,7 @@ import java.util.stream.Collectors;
                     url: "{{ secret('SLACK_WEBHOOK') }}"
                     payload: |
                       {
-                        "text": "New file by {{ trigger.owners[0].displayName }}: {{ trigger.name }}"
+                        "text": "New file by {{ trigger.files[0].owners[0].displayName }}: {{ trigger.files[0].name }}"
                       }
 
                 triggers:
@@ -226,6 +226,7 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
                 kestraUri = runContext.storage().putFile(fileContent, file.getName());
 
                 logger.debug("Stored file {} in Kestra storage", file.getName());
+
             } catch (Exception e) {
                 logger.warn("Failed to download file {}: {}", file.getId(), e.getMessage());
             }
