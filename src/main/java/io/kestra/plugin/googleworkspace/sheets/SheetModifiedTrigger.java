@@ -21,7 +21,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
 import java.time.Duration;
@@ -188,13 +187,6 @@ public class SheetModifiedTrigger extends AbstractTrigger implements PollingTrig
     ));
 
     @Schema(
-        title = "Read timeout",
-        description = "Read timeout for API requests in seconds"
-    )
-    @Builder.Default
-    private Property<Integer> readTimeout = Property.ofValue(120);
-
-    @Schema(
         title = "State key",
         description = "Custom key for state storage. Defaults to trigger ID."
     )
@@ -230,7 +222,6 @@ public class SheetModifiedTrigger extends AbstractTrigger implements PollingTrig
         String rRange = range != null ? runContext.render(range).as(String.class).orElse(null) : null;
         Boolean rIncludeDetails = runContext.render(includeDetails).as(Boolean.class).orElse(false);
         List<String> rScopes = runContext.render(scopes).asList(String.class);
-        Integer rReadTimeout = runContext.render(readTimeout).as(Integer.class).orElse(120);
 
         logger.debug("Checking spreadsheet {} for modification", rSpreadsheetId);
 
@@ -281,10 +272,6 @@ public class SheetModifiedTrigger extends AbstractTrigger implements PollingTrig
 
         Map<String, Entry> state = readState(runContext, rStateKey, rStateTtl);
 
-        String finalRSheetName = rSheetName;
-        String finalRange = rRange;
-        Boolean finalRIncludeDetails = rIncludeDetails;
-
         List<ModificationOutput> toFire = revisions.stream()
             .flatMap(throwFunction(revision -> {
                 String revisionUri = String.format("sheet://%s/revision/%s",rSpreadsheetId, revision.getId());
@@ -310,27 +297,27 @@ public class SheetModifiedTrigger extends AbstractTrigger implements PollingTrig
                         .spreadsheetId(rSpreadsheetId)
                         .lastModifyingUser(revision.getLastModifyingUser() != null ? revision.getLastModifyingUser().getDisplayName() : null);
 
-                    if (finalRSheetName != null) {
+                    if (rSheetName != null) {
                         Sheet targetSheet = spreadsheet.getSheets().stream()
-                            .filter(s -> s.getProperties().getTitle().equals(finalRSheetName))
+                            .filter(s -> s.getProperties().getTitle().equals(rSheetName))
                             .findFirst()
                             .orElse(null);
 
                         if (targetSheet == null) {
-                            logger.warn("Sheet '{}' not found in spreadsheet", finalRSheetName);
+                            logger.warn("Sheet '{}' not found in spreadsheet", rSheetName);
                             return Stream.empty();
                         }
 
-                        outputBuilder.sheetName(finalRSheetName);
+                        outputBuilder.sheetName(rSheetName);
                     }
 
-                    if (finalRIncludeDetails) {
+                    if (rIncludeDetails) {
                         try {
                             ChangeDetails details = fetchChangeDetails(
                                 sheets,
                                 rSpreadsheetId,
-                                finalRSheetName,
-                                finalRange,
+                                rSheetName,
+                                rRange,
                                 runContext
                             );
                             outputBuilder.changeDetails(details);
@@ -342,8 +329,6 @@ public class SheetModifiedTrigger extends AbstractTrigger implements PollingTrig
                     return Stream.of(outputBuilder.build());
                 }
                 return Stream.empty();
-
-
             }))
             .toList();
 
@@ -386,22 +371,6 @@ public class SheetModifiedTrigger extends AbstractTrigger implements PollingTrig
             .columnCount(maxCols)
             .hasData(rowCount > 0)
             .build();
-
-    }
-
-    @Override
-    public Property<On> getOn() {
-        return on;
-    }
-
-    @Override
-    public Property<String> getStateKey() {
-        return stateKey;
-    }
-
-    @Override
-    public Property<Duration> getStateTtl() {
-        return stateTtl;
     }
 
     @Builder
