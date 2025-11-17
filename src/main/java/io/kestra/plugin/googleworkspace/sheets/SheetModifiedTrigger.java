@@ -6,25 +6,34 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.Revision;
 import com.google.api.services.drive.model.RevisionList;
 import com.google.api.services.sheets.v4.Sheets;
+import com.google.api.services.sheets.v4.model.Sheet;
+import com.google.api.services.sheets.v4.model.Spreadsheet;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
+import io.kestra.core.models.annotations.Example;
+import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.conditions.ConditionContext;
 import io.kestra.core.models.executions.Execution;
 import io.kestra.core.models.property.Property;
-import io.kestra.core.models.triggers.AbstractTrigger;
-import io.kestra.core.models.triggers.StatefulTriggerInterface;
-import io.kestra.core.models.triggers.TriggerContext;
-import io.kestra.core.models.triggers.TriggerOutput;
+import io.kestra.core.models.triggers.*;
+import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
+
+import static io.kestra.core.models.triggers.StatefulTriggerService.*;
+import static io.kestra.core.utils.Rethrow.throwFunction;
 
 @SuperBuilder
 @NoArgsConstructor
@@ -32,9 +41,100 @@ import java.util.Optional;
 @ToString
 @Getter
 @Schema(
+    title = "Trigger on Google Sheet modifications",
+    description = """
+        Polls a Google Sheet at regular intervals and fires when content changes are detected.
+
+        Changes are tracked using Google Drive's revision system. The trigger detects:
+        - Cell value modifications
+        - Row/column additions or deletions
+        - Sheet tab additions or removals
+
+        Optionally filter by specific sheet names or cell ranges.
+
+        **Authentication**: Requires a GCP service account with both
+        Sheets API (spreadsheets.readonly) and Drive API (drive.metadata.readonly) access.
+        """
+)
+@Plugin(
+    examples = {
+        @Example(
+            title = "Monitor entire spreadsheet for changes",
+            full = true,
+            code = """
+                id: monitor_spreadsheet
+                namespace: company.team
+
+                tasks:
+                  - id: log_changes
+                    type: io.kestra.plugin.core.log.Log
+                    message: "Sheet '{{ trigger.sheetName }}' was modified: {{ trigger.modifications }}"
+
+                triggers:
+                  - id: watch_sheet
+                    type: io.kestra.plugin.googleworkspace.sheets.SheetModified
+                    interval: PT5M
+                    spreadsheetId: "1U4AoiUrqiVaSIVcm_TwDc9RoKOdCULNGWxuC1vmDT_A"
+                    serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
+                """
+        ),
+        @Example(
+            title = "Monitor specific sheet tab with range filter",
+            full = true,
+            code = """
+                id: monitor_orders_sheet
+                namespace: company.team
+
+                tasks:
+                  - id: process_changes
+                    type: io.kestra.plugin.core.debug.Return
+                    format: |
+                      Changes detected:
+                      - Modified at: {{ trigger.modifiedTime }}
+                      - Revision: {{ trigger.revisionId }}
+                      - Changed rows: {{ trigger.changedRows }}
+
+                triggers:
+                  - id: watch_orders
+                    type: io.kestra.plugin.googleworkspace.sheets.SheetModified
+                    interval: PT2M
+                    spreadsheetId: "1U4AoiUrqiVaSIVcm_TwDc9RoKOdCULNGWxuC1vmDT_A"
+                    serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
+                    sheetName: "Orders"
+                    range: "A1:F100"
+                    stateTtl: P7D
+                """
+        ),
+        @Example(
+            title = "Track only new revisions (CREATE mode)",
+            full = true,
+            code = """
+                id: track_new_revisions
+                namespace: company.team
+
+                tasks:
+                  - id: notify
+                    type: io.kestra.plugin.notifications.slack.SlackIncomingWebhook
+                    url: "{{ secret('SLACK_WEBHOOK') }}"
+                    payload: |
+                      {
+                        "text": "Spreadsheet '{{ trigger.spreadsheetTitle }}' was modified by {{ trigger.lastModifyingUser }}"
+                      }
+
+                triggers:
+                  - id: watch
+                    type: io.kestra.plugin.googleworkspace.sheets.SheetModified
+                    interval: PT1M
+                    spreadsheetId: "{{ vars.spreadsheet_id }}"
+                    serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
+                    on: CREATE
+                    includeDetails: true
+                """
+        )
+    }
 
 )
-public class SheetModifiedTrigger extends AbstractTrigger implements TriggerOutput<SheetModifiedTrigger.Output>, StatefulTriggerInterface {
+public class SheetModifiedTrigger extends AbstractTrigger implements PollingTriggerInterface, TriggerOutput<SheetModifiedTrigger.Output>, StatefulTriggerInterface {
 
     @Builder.Default
     @Schema(
@@ -129,10 +229,7 @@ public class SheetModifiedTrigger extends AbstractTrigger implements TriggerOutp
         String rSheetName = sheetName != null ? runContext.render(sheetName).as(String.class).orElse(null) : null;
         String rRange = range != null ? runContext.render(range).as(String.class).orElse(null) : null;
         Boolean rIncludeDetails = runContext.render(includeDetails).as(Boolean.class).orElse(false);
-        List<String> rScopes = runContext.render(scopes).asList(String.class).orElse(Arrays.asList(
-            "https://www.googleapis.com/auth/spreadsheets.readonly",
-            "https://www.googleapis.com/auth/drive.metadata.readonly"
-        ));
+        List<String> rScopes = runContext.render(scopes).asList(String.class);
         Integer rReadTimeout = runContext.render(readTimeout).as(Integer.class).orElse(120);
 
         logger.debug("Checking spreadsheet {} for modification", rSpreadsheetId);
@@ -179,8 +276,221 @@ public class SheetModifiedTrigger extends AbstractTrigger implements TriggerOutp
 
         logger.info("Found {} revision(s) for spreadsheet", revisions.size());
 
-        
+        var rStateKey = runContext.render(stateKey).as(String.class).orElse(defaultKey(context.getNamespace(), context.getFlowId(), id));
+        var rStateTtl = runContext.render(stateTtl).as(Duration.class);
+
+        Map<String, Entry> state = readState(runContext, rStateKey, rStateTtl);
+
+        String finalRSheetName = rSheetName;
+        String finalRange = rRange;
+        Boolean finalRIncludeDetails = rIncludeDetails;
+
+        List<ModificationOutput> toFire = revisions.stream()
+            .flatMap(throwFunction(revision -> {
+                String revisionUri = String.format("sheet://%s/revision/%s",rSpreadsheetId, revision.getId());
+
+                String version = revision.getId();
+
+                Instant modifiedAt = revision.getModifiedTime() != null ? Instant.ofEpochMilli(revision.getModifiedTime().getValue()) : Instant.now();
+
+                var candidate = Entry.candidate(revisionUri, version, modifiedAt);
+                var update = computeAndUpdateState(state, candidate, runContext.render(getOn()).as(On.class).orElse(On.CREATE));
+
+                if (update.fire()) {
+                    logger.debug("New revision detected: {}", revision.getId());
+
+                    Spreadsheet spreadsheet = sheets.spreadsheets()
+                        .get(rSpreadsheetId)
+                        .execute();
+
+                    ModificationOutput.ModificationOutputBuilder outputBuilder = ModificationOutput.builder()
+                        .revisionId(revision.getId())
+                        .modifiedTime(modifiedAt)
+                        .spreadsheetTitle(spreadsheet.getProperties().getTitle())
+                        .spreadsheetId(rSpreadsheetId)
+                        .lastModifyingUser(revision.getLastModifyingUser() != null ? revision.getLastModifyingUser().getDisplayName() : null);
+
+                    if (finalRSheetName != null) {
+                        Sheet targetSheet = spreadsheet.getSheets().stream()
+                            .filter(s -> s.getProperties().getTitle().equals(finalRSheetName))
+                            .findFirst()
+                            .orElse(null);
+
+                        if (targetSheet == null) {
+                            logger.warn("Sheet '{}' not found in spreadsheet", finalRSheetName);
+                            return Stream.empty();
+                        }
+
+                        outputBuilder.sheetName(finalRSheetName);
+                    }
+
+                    if (finalRIncludeDetails) {
+                        try {
+                            ChangeDetails details = fetchChangeDetails(
+                                sheets,
+                                rSpreadsheetId,
+                                finalRSheetName,
+                                finalRange,
+                                runContext
+                            );
+                            outputBuilder.changeDetails(details);
+                        } catch (Exception e) {
+                            logger.warn("Failed to fetch change details: {}", e.getMessage());
+                        }
+                    }
+
+                    return Stream.of(outputBuilder.build());
+                }
+                return Stream.empty();
 
 
+            }))
+            .toList();
+
+        writeState(runContext, rStateKey, state, rStateTtl);
+
+        if (toFire.isEmpty()) {
+            logger.debug("No new modifications detected after state evaluation");
+        }
+
+        logger.info("Triggering flow with {} modification(s)", toFire.size());
+
+        var output = Output.builder()
+            .modifications(toFire)
+            .count(toFire.size())
+            .build();
+
+        return Optional.of(TriggerService.generateExecution(this, conditionContext, context, output));
+    }
+
+    private ChangeDetails fetchChangeDetails(Sheets sheets, String rSpreadsheetId, String finalRSheetName, String finalRange, RunContext runContext) throws Exception{
+        String rangeSpec = finalRSheetName != null ?
+            (finalRange != null ? finalRSheetName + "!" + finalRange : finalRSheetName) :
+            finalRange;
+
+        var res = sheets.spreadsheets().values()
+            .get(rSpreadsheetId, rangeSpec != null ? rangeSpec : "")
+            .execute();
+
+        List<List<Object>> values = res.getValues();
+
+        int rowCount = values != null ? values.size() : 0;
+        int maxCols = values != null ? values.stream()
+            .mapToInt(List::size)
+            .max()
+            .orElse(0) : 0;
+
+        return ChangeDetails.builder()
+            .affectedRange(res.getRange())
+            .rowCount(rowCount)
+            .columnCount(maxCols)
+            .hasData(rowCount > 0)
+            .build();
+
+    }
+
+    @Override
+    public Property<On> getOn() {
+        return on;
+    }
+
+    @Override
+    public Property<String> getStateKey() {
+        return stateKey;
+    }
+
+    @Override
+    public Property<Duration> getStateTtl() {
+        return stateTtl;
+    }
+
+    @Builder
+    @Getter
+    public static class Output implements io.kestra.core.models.tasks.Output {
+        @Schema(
+            title = "List of sheet modifications",
+            description = "New revisions detected in this polling cycle"
+        )
+        private final List<ModificationOutput> modifications;
+
+        @Schema(
+            title = "Number of modifications",
+            description = "Count of new revisions detected"
+        )
+        private final Integer count;
+    }
+
+    @Builder
+    @Getter
+    public static class ModificationOutput {
+        @Schema(
+            title = "Revision ID",
+            description = "Google Drive revision identifier"
+        )
+        private final String revisionId;
+
+        @Schema(
+            title = "Modified time",
+            description = "When this revision was created"
+        )
+        private final Instant modifiedTime;
+
+        @Schema(
+            title = "Spreadsheet title",
+            description = "Name of the spreadsheet"
+        )
+        private final String spreadsheetTitle;
+
+        @Schema(
+            title = "Spreadsheet ID",
+            description = "Unique spreadsheet identifier"
+        )
+        private final String spreadsheetId;
+
+        @Schema(
+            title = "Last modifying user",
+            description = "Display name of the user who made the change"
+        )
+        private final String lastModifyingUser;
+
+        @Schema(
+            title = "Sheet name",
+            description = "Name of the modified sheet (tab), if filter was applied"
+        )
+        private final String sheetName;
+
+        @Schema(
+            title = "Change details",
+            description = "Detailed change information (if includeDetails=true)"
+        )
+        private final ChangeDetails changeDetails;
+    }
+
+    @Builder
+    @Getter
+    public static class ChangeDetails {
+        @Schema(
+            title = "Affected range",
+            description = "A1 notation of the range that was checked"
+        )
+        private final String affectedRange;
+
+        @Schema(
+            title = "Row count",
+            description = "Current number of rows in the range"
+        )
+        private final Integer rowCount;
+
+        @Schema(
+            title = "Column count",
+            description = "Current number of columns in the range"
+        )
+        private final Integer columnCount;
+
+        @Schema(
+            title = "Has data",
+            description = "Whether the range contains any data"
+        )
+        private final Boolean hasData;
     }
 }
