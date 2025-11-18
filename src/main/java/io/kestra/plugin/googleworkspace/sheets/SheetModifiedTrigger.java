@@ -1,15 +1,11 @@
 package io.kestra.plugin.googleworkspace.sheets;
 
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.Revision;
 import com.google.api.services.drive.model.RevisionList;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.Sheet;
 import com.google.api.services.sheets.v4.model.Spreadsheet;
-import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.auth.oauth2.GoogleCredentials;
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.conditions.ConditionContext;
@@ -22,10 +18,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.io.ByteArrayInputStream;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -133,7 +127,7 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
     }
 
 )
-public class SheetModifiedTrigger extends AbstractTrigger implements PollingTriggerInterface, TriggerOutput<SheetModifiedTrigger.Output>, StatefulTriggerInterface {
+public class SheetModifiedTrigger extends AbstractSheetTrigger implements PollingTriggerInterface, TriggerOutput<SheetModifiedTrigger.Output>, StatefulTriggerInterface {
 
     @Builder.Default
     @Schema(
@@ -149,13 +143,6 @@ public class SheetModifiedTrigger extends AbstractTrigger implements PollingTrig
     )
     @NotNull
     private Property<String> spreadsheetId;
-
-    @Schema(
-        title = "Service Account Json",
-        description = "GCP service account key in JSON format. "
-    )
-    @NotNull
-    private Property<String> serviceAccount;
 
     @Schema(
         title = "Sheet name filter",
@@ -175,16 +162,6 @@ public class SheetModifiedTrigger extends AbstractTrigger implements PollingTrig
     )
     @Builder.Default
     private Property<Boolean> includeDetails = Property.ofValue(false);
-
-    @Schema(
-        title = "API scopes",
-        description = "Google API OAuth scopes"
-    )
-    @Builder.Default
-    private Property<List<String>> scopes = Property.ofValue(Arrays.asList(
-        "https://www.googleapis.com/auth/spreadsheets.readonly",
-        "https://www.googleapis.com/auth/drive.metadata.readonly"
-    ));
 
     @Schema(
         title = "State key",
@@ -217,34 +194,14 @@ public class SheetModifiedTrigger extends AbstractTrigger implements PollingTrig
         var logger = runContext.logger();
 
         String rSpreadsheetId = runContext.render(spreadsheetId).as(String.class).orElseThrow();
-        String rServiceAccount = runContext.render(serviceAccount).as(String.class).orElseThrow();
         String rSheetName = sheetName != null ? runContext.render(sheetName).as(String.class).orElse(null) : null;
         String rRange = range != null ? runContext.render(range).as(String.class).orElse(null) : null;
         Boolean rIncludeDetails = runContext.render(includeDetails).as(Boolean.class).orElse(false);
-        List<String> rScopes = runContext.render(scopes).asList(String.class);
 
         logger.debug("Checking spreadsheet {} for modification", rSpreadsheetId);
 
-        GoogleCredentials credentials = GoogleCredentials.fromStream(
-            new ByteArrayInputStream(rServiceAccount.getBytes())
-        )
-            .createScoped(rScopes);
-
-        Drive drive = new Drive.Builder(
-            GoogleNetHttpTransport.newTrustedTransport(),
-            GsonFactory.getDefaultInstance(),
-            new HttpCredentialsAdapter(credentials)
-        )
-            .setApplicationName("kestra")
-            .build();
-
-        Sheets sheets = new Sheets.Builder(
-            GoogleNetHttpTransport.newTrustedTransport(),
-            GsonFactory.getDefaultInstance(),
-            new HttpCredentialsAdapter(credentials)
-        )
-            .setApplicationName("kestra")
-            .build();
+        Drive drive = this.driveConnection(runContext);
+        Sheets sheets = this.sheetsConnection(runContext);
 
         // Fetch revisions from drive API
         List<Revision> revisions;
