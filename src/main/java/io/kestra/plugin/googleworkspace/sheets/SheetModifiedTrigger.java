@@ -61,7 +61,7 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
                 tasks:
                   - id: log_changes
                     type: io.kestra.plugin.core.log.Log
-                    message: "Sheet '{{ trigger.sheetName }}' was modified: {{ trigger.modifications }}"
+                    message: "Spreadsheet '{{ trigger.modifications[0].spreadsheetTitle }}' was modified"
 
                 triggers:
                   - id: watch_sheet
@@ -83,9 +83,9 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
                     type: io.kestra.plugin.core.debug.Return
                     format: |
                       Changes detected:
-                      - Modified at: {{ trigger.modifiedTime }}
-                      - Revision: {{ trigger.revisionId }}
-                      - Changed rows: {{ trigger.changedRows }}
+                      - Sheet name: {{ trigger.modifications[0].sheetName }}
+                      - Modified at: {{ trigger.modifications[0].modifiedTime }}
+                      - Revision: {{ trigger.modifications[0].revisionId }}
 
                 triggers:
                   - id: watch_orders
@@ -94,8 +94,7 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
                     spreadsheetId: "1U4AoiUrqiVaSIVcm_TwDc9RoKOdCULNGWxuC1vmDT_A"
                     serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
                     sheetName: "Orders"
-                    range: "A1:F100"
-                    stateTtl: P7D
+                    includeDetails: true
                 """
         ),
         @Example(
@@ -111,7 +110,7 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
                     url: "{{ secret('SLACK_WEBHOOK') }}"
                     payload: |
                       {
-                        "text": "Spreadsheet '{{ trigger.spreadsheetTitle }}' was modified by {{ trigger.lastModifyingUser }}"
+                        "text": "Spreadsheet '{{ trigger.modifications[0].spreadsheetTitle }}' was modified by {{ trigger.modifications[0].lastModifyingUser }}"
                       }
 
                 triggers:
