@@ -114,13 +114,6 @@ import java.util.stream.Collectors;
 public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingTriggerInterface, TriggerOutput<FileCreatedTrigger.Output> {
 
     @Schema(
-        title = "The Google Cloud service account key",
-        description = "Service account JSON key with access to Google Drive API"
-    )
-    @NotNull
-    protected String serviceAccount;
-
-    @Schema(
         title = "The OAuth scopes to request",
         description = "List of OAuth scopes for Drive API access"
     )
@@ -175,18 +168,15 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
         RunContext runContext = conditionContext.getRunContext();
         Logger logger = runContext.logger();
 
-        // Create Drive connection
-        Drive driveService = from(runContext, this.serviceAccount);
+        Drive driveService = from(runContext);
 
         Instant lastCreatedTime = context.getNextExecutionDate() != null
             ? context.getNextExecutionDate().toInstant().minus((TemporalAmount) this.interval)
             : Instant.now().minus((TemporalAmount) this.interval);;
 
-        // Build query
         String query = buildQuery(runContext, String.valueOf(lastCreatedTime));
         logger.debug("Executing Drive query: {}", query);
 
-        // Fetch files
         FileList result = driveService.files().list()
             .setQ(query)
             .setPageSize(runContext.render(maxFilesPerPoll).as(Integer.class).orElse(100))
