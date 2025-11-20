@@ -37,7 +37,7 @@ class FileCreatedTriggerTest {
         FileCreatedTrigger trigger = FileCreatedTrigger.builder()
             .id(FileCreatedTriggerTest.class.getSimpleName() + IdUtils.create())
             .type(FileCreatedTrigger.class.getName())
-            .serviceAccount(mockServiceAccount)
+            .serviceAccount(Property.ofValue(mockServiceAccount))
             .folderId(Property.ofValue(testFolderId))
             .interval(Duration.ofMinutes(1))
             .build();
@@ -159,7 +159,7 @@ class FileCreatedTriggerTest {
         FileCreatedTrigger trigger1 = FileCreatedTrigger.builder()
             .id("trigger-1")
             .type(FileCreatedTrigger.class.getName())
-            .serviceAccount(mockServiceAccount)
+            .serviceAccount(Property.ofValue(mockServiceAccount))
             .folderId(Property.ofValue(folderId))
             .interval(Duration.ofMinutes(5))
             .build();
@@ -171,7 +171,7 @@ class FileCreatedTriggerTest {
         FileCreatedTrigger trigger2 = FileCreatedTrigger.builder()
             .id("trigger-2")
             .type(FileCreatedTrigger.class.getName())
-            .serviceAccount(mockServiceAccount)
+            .serviceAccount(Property.ofValue(mockServiceAccount))
             .folderId(Property.ofValue(folderId))
             .interval(Duration.ofSeconds(30))
             .build();

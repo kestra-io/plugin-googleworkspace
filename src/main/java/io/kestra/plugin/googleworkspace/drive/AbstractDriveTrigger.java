@@ -5,8 +5,10 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.models.triggers.AbstractTrigger;
 import io.kestra.core.runners.RunContext;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,14 +25,32 @@ import java.util.Collections;
 @Getter
 @NoArgsConstructor
 public abstract class AbstractDriveTrigger extends AbstractTrigger {
+
     private static final String APPLICATION_NAME = "Kestra";
     private static final String DRIVE_SCOPE = "https://www.googleapis.com/auth/drive";
-    public static Drive from(RunContext runContext, String serviceAccountJson) throws Exception {
-        String renderedServiceAccount = runContext.render(serviceAccountJson);
 
-        GoogleCredentials credentials = GoogleCredentials
-            .fromStream(new ByteArrayInputStream(renderedServiceAccount.getBytes(StandardCharsets.UTF_8)))
-            .createScoped(Collections.singleton(DRIVE_SCOPE));
+    @Schema(
+        title = "The Google Cloud service account key",
+        description = "Service account JSON key with access to Google Drive API"
+    )
+    protected Property<String> serviceAccount;
+
+    public Drive from(RunContext runContext) throws Exception {
+        GoogleCredentials credentials;
+
+        if (this.serviceAccount != null) {
+            String rServiceAccount = runContext.render(serviceAccount)
+                .as(String.class)
+                .orElseThrow();
+
+            credentials = GoogleCredentials.fromStream(
+                new ByteArrayInputStream(rServiceAccount.getBytes(StandardCharsets.UTF_8))
+            );
+        } else {
+            credentials = GoogleCredentials.getApplicationDefault();
+        }
+
+        credentials = credentials.createScoped(Collections.singleton(DRIVE_SCOPE));
 
         return new Drive.Builder(
             GoogleNetHttpTransport.newTrustedTransport(),

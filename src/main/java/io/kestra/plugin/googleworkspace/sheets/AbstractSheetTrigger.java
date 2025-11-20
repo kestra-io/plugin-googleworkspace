@@ -25,6 +25,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public abstract class AbstractSheetTrigger extends AbstractTrigger {
+
     private static final String APPLICATION_NAME = "Kestra";
 
     @Schema(
@@ -32,7 +33,6 @@ public abstract class AbstractSheetTrigger extends AbstractTrigger {
         description = "Service account JSON key with access to Google Sheets API and Drive API. " +
             "The service account must have spreadsheets.readonly and drive.metadata.readonly scopes."
     )
-    @NotNull
     protected Property<String> serviceAccount;
 
     @Schema(
@@ -46,12 +46,22 @@ public abstract class AbstractSheetTrigger extends AbstractTrigger {
     ));
 
     protected Sheets sheetsConnection(RunContext runContext) throws Exception {
-        String rServiceAccount = runContext.render(serviceAccount).as(String.class).orElseThrow();
-        var rScopes = runContext.render(scopes).asList(String.class);
+        GoogleCredentials credentials;
 
-        GoogleCredentials credentials = GoogleCredentials
-            .fromStream(new ByteArrayInputStream(rServiceAccount.getBytes(StandardCharsets.UTF_8)))
-            .createScoped(rScopes);
+        if (this.serviceAccount != null) {
+            String rServiceAccount = runContext.render(serviceAccount)
+                .as(String.class)
+                .orElseThrow();
+
+            credentials = GoogleCredentials.fromStream(
+                new ByteArrayInputStream(rServiceAccount.getBytes(StandardCharsets.UTF_8))
+            );
+        } else {
+            credentials = GoogleCredentials.getApplicationDefault();
+        }
+
+        var rScopes = runContext.render(scopes).asList(String.class);
+        credentials = credentials.createScoped(rScopes);
 
         return new Sheets.Builder(
             GoogleNetHttpTransport.newTrustedTransport(),
@@ -63,12 +73,22 @@ public abstract class AbstractSheetTrigger extends AbstractTrigger {
     }
 
     protected Drive driveConnection(RunContext runContext) throws Exception {
-        String rServiceAccount = runContext.render(serviceAccount).as(String.class).orElseThrow();
-        var rScopes = runContext.render(scopes).asList(String.class);
+        GoogleCredentials credentials;
 
-        GoogleCredentials credentials = GoogleCredentials
-            .fromStream(new ByteArrayInputStream(rServiceAccount.getBytes(StandardCharsets.UTF_8)))
-            .createScoped(rScopes);
+        if (this.serviceAccount != null) {
+            String rServiceAccount = runContext.render(serviceAccount)
+                .as(String.class)
+                .orElseThrow();
+
+            credentials = GoogleCredentials.fromStream(
+                new ByteArrayInputStream(rServiceAccount.getBytes(StandardCharsets.UTF_8))
+            );
+        } else {
+            credentials = GoogleCredentials.getApplicationDefault();
+        }
+
+        var rScopes = runContext.render(scopes).asList(String.class);
+        credentials = credentials.createScoped(rScopes);
 
         return new Drive.Builder(
             GoogleNetHttpTransport.newTrustedTransport(),

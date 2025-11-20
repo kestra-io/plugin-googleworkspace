@@ -10,7 +10,6 @@ import io.kestra.core.models.triggers.AbstractTrigger;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.googleworkspace.GcpInterface;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 @Getter
 @NoArgsConstructor
 public abstract class AbstractCalendarTrigger extends AbstractTrigger implements GcpInterface {
+
     private static final String APPLICATION_NAME = "Kestra";
 
     @Schema(
@@ -34,16 +34,25 @@ public abstract class AbstractCalendarTrigger extends AbstractTrigger implements
             "The service account must have read access to the calendars you want to monitor. " +
             "Share calendars with the service account's email address (found in the JSON key)."
     )
-    @NotNull
     protected Property<String> serviceAccount;
 
     protected Calendar connection(RunContext runContext) throws Exception {
-        String rServiceAccount = runContext.render(this.serviceAccount).as(String.class).orElseThrow();
-        var rScopes = runContext.render(this.getScopes()).asList(String.class);
+        GoogleCredentials credentials;
 
-        GoogleCredentials credentials = GoogleCredentials
-            .fromStream(new ByteArrayInputStream(rServiceAccount.getBytes(StandardCharsets.UTF_8)))
-            .createScoped(rScopes);
+        if (this.serviceAccount != null) {
+            String rServiceAccount = runContext.render(this.serviceAccount)
+                .as(String.class)
+                .orElseThrow();
+
+            credentials = GoogleCredentials.fromStream(
+                new ByteArrayInputStream(rServiceAccount.getBytes(StandardCharsets.UTF_8))
+            );
+        } else {
+            credentials = GoogleCredentials.getApplicationDefault();
+        }
+
+        var rScopes = runContext.render(this.getScopes()).asList(String.class);
+        credentials = credentials.createScoped(rScopes);
 
         return new Calendar.Builder(
             GoogleNetHttpTransport.newTrustedTransport(),
