@@ -61,7 +61,13 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
                 tasks:
                   - id: log_changes
                     type: io.kestra.plugin.core.log.Log
-                    message: "Spreadsheet '{{ trigger.modifications[0].spreadsheetTitle }}' was modified"
+                    message: |
+                      {% if trigger.count > 0 %}
+                      Spreadsheet '{{ trigger.modifications[0].spreadsheetTitle }}' was modified by {{ trigger.modifications[0].lastModifyingUser }}.
+                      Detected {{ trigger.count }} modification(s).
+                      {% else %}
+                      No modifications detected in spreadsheet.
+                      {% endif %}
 
                 triggers:
                   - id: watch_sheet
@@ -82,10 +88,14 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
                   - id: process_changes
                     type: io.kestra.plugin.core.debug.Return
                     format: |
-                      Changes detected:
-                      - Sheet name: {{ trigger.modifications[0].sheetName }}
+                      {% if trigger.count > 0 %}
+                      Changes detected in sheet:
                       - Modified at: {{ trigger.modifications[0].modifiedTime }}
-                      - Revision: {{ trigger.modifications[0].revisionId }}
+                      - Modified by: {{ trigger.modifications[0].lastModifyingUser }}
+                      - Revision ID: {{ trigger.modifications[0].revisionId }}
+                      {% else %}
+                      No modifications detected in Orders sheet.
+                      {% endif %}
 
                 triggers:
                   - id: watch_orders
@@ -110,7 +120,7 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
                     url: "{{ secret('SLACK_WEBHOOK') }}"
                     payload: |
                       {
-                        "text": "Spreadsheet '{{ trigger.modifications[0].spreadsheetTitle }}' was modified by {{ trigger.modifications[0].lastModifyingUser }}"
+                        "text": "{% if trigger.count > 0 %}Spreadsheet '{{ trigger.modifications[0].spreadsheetTitle }}' was modified by {{ trigger.modifications[0].lastModifyingUser }}{% else %}No changes detected{% endif %}"
                       }
 
                 triggers:
