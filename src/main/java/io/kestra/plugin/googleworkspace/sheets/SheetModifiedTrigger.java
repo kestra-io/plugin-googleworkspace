@@ -129,6 +129,7 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
                     interval: PT1M
                     spreadsheetId: "{{ vars.spreadsheet_id }}"
                     serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
+                    on: CREATE
                     includeDetails: true
                 """
         )
