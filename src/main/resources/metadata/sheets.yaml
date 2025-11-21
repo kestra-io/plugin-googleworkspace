@@ -1,0 +1,8 @@
+group: io.kestra.plugin.googleworkspace.sheets
+name: "sheets"
+title: "Sheets"
+description: "This sub-group of plugins contains tasks for using Google Sheet."
+body: ""
+videos: []
+createdBy: "Kestra Core Team"
+managedBy: "Kestra Core Team"

@@ -1,0 +1,8 @@
+group: io.kestra.plugin.googleworkspace.calendar
+name: "calendar"
+title: "Calendar"
+description: "This sub-group of plugins contains tasks for using Google Calendar."
+body: ""
+videos: []
+createdBy: "Kestra Core Team"
+managedBy: "Kestra Core Team"

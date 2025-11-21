@@ -1,0 +1,8 @@
+group: io.kestra.plugin.googleworkspace.drive
+name: "drive"
+title: "Drive"
+description: "This sub-group of plugins contains tasks for using Google Drive."
+body: ""
+videos: []
+createdBy: "Kestra Core Team"
+managedBy: "Kestra Core Team"

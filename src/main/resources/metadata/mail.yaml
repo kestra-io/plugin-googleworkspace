@@ -1,0 +1,8 @@
+group: io.kestra.plugin.googleworkspace.mail
+name: "mail"
+title: "Mail"
+description: "This sub-group of plugins contains tasks for using Gmail."
+body: ""
+videos: []
+createdBy: "Kestra Core Team"
+managedBy: "Kestra Core Team"
