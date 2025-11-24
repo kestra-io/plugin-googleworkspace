@@ -102,12 +102,12 @@ public class ReadRange extends AbstractRead implements RunnableTask<ReadRange.Ou
         private List<Object> rows;
 
         @Schema(
-            title = "The size of the rows fetch"
+            title = "The number of rows fetched"
         )
         private int size;
 
         @Schema(
-            title = "The URI of store result",
+            title = "The URI of the stored result",
             description = "Only populated if 'store' is set to true."
         )
         private URI uri;
