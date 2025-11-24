@@ -51,7 +51,7 @@ import jakarta.validation.constraints.NotNull;
 )
 @Schema(
     title = "Export a Google Workspace document into a downloadable file format, then download the file.",
-    description = "Possible Google Workspace documents to export include Google Docs, Sheets, and Slides, and they can be exported as Word, Excel, Powerpoint files, and more."
+    description = "Possible Google Workspace documents to export include Google Docs, Sheets, and Slides, and they can be exported as Word, Excel, PowerPoint files, and more."
 )
 public class Export extends AbstractDrive implements RunnableTask<Export.Output> {
     @Schema(
@@ -107,7 +107,7 @@ public class Export extends AbstractDrive implements RunnableTask<Export.Output>
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
         @Schema(
-            title = "The url of the downloaded file on kestra storage "
+            title = "The URL of the downloaded file on Kestra storage"
         )
         private final URI uri;
 
