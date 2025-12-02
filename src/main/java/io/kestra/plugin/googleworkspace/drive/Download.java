@@ -90,7 +90,7 @@ public class Download extends AbstractDrive implements RunnableTask<Download.Out
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
         @Schema(
-            title = "The url of the downloaded file on kestra storage "
+            title = "The URL of the downloaded file on Kestra storage"
         )
         private final URI uri;
 

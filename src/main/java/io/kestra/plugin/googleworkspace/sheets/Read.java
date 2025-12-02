@@ -163,8 +163,8 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
         private int size;
 
         @Schema(
-            title = "The URI of store result",
-            description = "The keyOnly populated if 'store' is set to true.\n" +
+            title = "The URI of the stored result",
+            description = "Only populated if 'store' is set to true.\n" +
                 "The key is the name of the sheet."
         )
         @PluginProperty(additionalProperties = URI.class)
