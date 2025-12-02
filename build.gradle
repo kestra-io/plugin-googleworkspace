@@ -57,7 +57,7 @@ dependencies {
     api 'com.google.apis:google-api-services-drive:v3-rev20251019-2.0.0'
     api 'com.google.apis:google-api-services-sheets:v4-rev20251110-2.0.0'
     api 'com.google.apis:google-api-services-calendar:v3-rev20251028-2.0.0'
-    api 'com.google.apis:google-api-services-gmail:v1-rev20250630-2.0.0'
+    api 'com.google.apis:google-api-services-gmail:v1-rev20251110-2.0.0'
     api 'javax.mail:javax.mail-api:1.6.2'
     api 'com.sun.mail:javax.mail:1.6.2'
     api 'javax.activation:activation:1.1.1'
