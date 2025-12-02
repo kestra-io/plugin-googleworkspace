@@ -22,7 +22,7 @@ import reactor.core.publisher.Flux;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Read from a sheets"
+    title = "Read data from a Google Sheets spreadsheet"
 )
 public abstract class AbstractRead extends AbstractSheet {
     @Schema(
@@ -41,7 +41,7 @@ public abstract class AbstractRead extends AbstractSheet {
 
     @Schema(
         title = "How dates, times, and durations should be represented in the output",
-        description = "his is ignored if valueRender is `FORMATTED_VALUE`.\n" +
+        description = "This is ignored if valueRender is `FORMATTED_VALUE`.\n" +
             "For more details, refer to the [DateTimeRenderOption API](https://developers.google.com/sheets/api/reference/rest/v4/DateTimeRenderOption)"
     )
     @NotNull
@@ -55,7 +55,7 @@ public abstract class AbstractRead extends AbstractSheet {
     protected final Property<Boolean> header = Property.ofValue(true);
 
     @Schema(
-        title = "Whether to Fetch the data from the query result to the task output"
+        title = "Whether to fetch the data from the query result to the task output"
     )
     @Builder.Default
     protected final Property<Boolean> fetch = Property.ofValue(false);
