@@ -1,8 +1,8 @@
 group: io.kestra.plugin.googleworkspace.drive
 name: "drive"
 title: "Drive"
-description: "This sub-group of plugins contains tasks for using Google Drive."
-body: ""
+description: "Tasks that upload, download, export, list, and watch files in Google Drive."
+body: "Use OAuth or service-account credentials with Drive scopes and a parent folder or file ID to upload or create files, export Google Docs formats, download content, list files, delete items, and trigger flows when new files appear."
 videos: []
 createdBy: "Kestra Core Team"
 managedBy: "Kestra Core Team"

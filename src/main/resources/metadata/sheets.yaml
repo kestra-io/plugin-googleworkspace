@@ -1,8 +1,8 @@
 group: io.kestra.plugin.googleworkspace.sheets
 name: "sheets"
 title: "Sheets"
-description: "This sub-group of plugins contains tasks for using Google Sheet."
-body: ""
+description: "Tasks that read, write, create, delete, and watch Google Sheets."
+body: "Provide Sheets/Drive scopes, spreadsheet IDs, ranges, and optional value/input options to read or load data, create or delete spreadsheets, and use the sheet modification trigger to launch flows on updates."
 videos: []
 createdBy: "Kestra Core Team"
 managedBy: "Kestra Core Team"

@@ -1,8 +1,8 @@
 group: io.kestra.plugin.googleworkspace.mail
 name: "mail"
 title: "Mail"
-description: "This sub-group of plugins contains tasks for using Gmail."
-body: ""
+description: "Tasks that send, read, and trigger on Gmail messages."
+body: "Authenticate with Gmail scopes, specify the user email, and provide message content or search queries to send mail, list or fetch messages (with attachments), and enable a trigger to start flows when new messages arrive."
 videos: []
 createdBy: "Kestra Core Team"
 managedBy: "Kestra Core Team"
