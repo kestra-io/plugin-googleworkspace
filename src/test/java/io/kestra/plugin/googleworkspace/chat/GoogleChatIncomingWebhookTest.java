@@ -32,7 +32,7 @@ public class GoogleChatIncomingWebhookTest {
     void run() throws Exception {
         RunContext runContext = runContextFactory.of(Map.of(
             "text", "Google test webhook notification"
-                                                           ));
+        ));
 
         EmbeddedServer embeddedServer = applicationContext.getBean(EmbeddedServer.class);
         embeddedServer.start();
