@@ -1,0 +1,23 @@
+id: google-successful
+namespace: io.kestra.tests
+
+inputs:
+  - id: url
+    type: STRING
+    defaults: "http://localhost:59443"
+
+tasks:
+  - id: google-successful
+    type: io.kestra.plugin.googleworkspace.chat.GoogleChatExecution
+    url: "{{ inputs.url }}/webhook-unit-test"
+    executionId: "{{trigger.executionId}}"
+
+triggers:
+  - id: on_success
+    type: io.kestra.plugin.core.trigger.Flow
+    preconditions:
+      id: flow_trigger
+      flows:
+        - namespace: io.kestra.tests
+          flowId: main-flow-that-succeeds
+          states: [ SUCCESS ]
