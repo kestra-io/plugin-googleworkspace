@@ -1,7 +1,7 @@
 group: io.kestra.plugin.googleworkspace
 name: "googleworkspace"
 title: "Google Workspace"
-description: "Tasks that work with Google Workspace services (Drive, Calendar, Mail, Sheets)."
+description: "Tasks that work with Google Workspace services (Chat, Drive, Calendar, Mail, Sheets)."
 body: "Configure OAuth or service-account credentials with required scopes to send and receive Gmail, manage Drive files and exports, create or list Calendar events, and read/write Sheets data with triggers for new mail, files, or sheet changes."
 videos: []
 createdBy: "Kestra Core Team"
