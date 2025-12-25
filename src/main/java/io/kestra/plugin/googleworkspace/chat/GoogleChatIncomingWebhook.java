@@ -71,9 +71,10 @@ import java.net.URI;
                       }
                 """
         ),
-    }
+    },
+    aliases = "io.kestra.plugin.notifications.google.GoogleChatIncomingWebhook"
 )
-public class GoogleChatIncomingWebhook extends AbstractHttpOptionsTask {
+public class GoogleChatIncomingWebhook extends AbstractChatConnection {
 
     @Schema(
         title = "Google Chat incoming webhook URL",
