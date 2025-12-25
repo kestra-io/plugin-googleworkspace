@@ -1,0 +1,6 @@
+id: main-flow-that-succeeds
+namespace: io.kestra.tests
+tasks:
+    - id: success
+      type: io.kestra.plugin.core.debug.Return
+      format: "{{ task.id }} > {{ taskrun.startDate }}"

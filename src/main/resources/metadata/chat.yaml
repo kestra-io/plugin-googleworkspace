@@ -1,0 +1,8 @@
+group: io.kestra.plugin.googleworkspace.chat
+name: "chat"
+title: "Google Chat"
+description: "Tasks that send notifications to Google Chat."
+body: "Provide the Google Chat webhook URL and message text (or cards) to post notifications from Kestra into Chat rooms."
+videos: []
+createdBy: "Kestra Core Team"
+managedBy: "Kestra Core Team"

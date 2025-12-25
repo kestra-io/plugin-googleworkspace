@@ -1,0 +1,3 @@
+{
+    "text": "Kestra Google notification: Namespace {{execution.namespace}}, Flow ID {{execution.flowId}}, Execution ID {{execution.id}}, Execution Status {{execution.state.current}}, Final task ID {{lastTask.taskId}}. *<{{link}}|[{{execution.namespace}}] {{execution.flowId}} ➛ {{execution.state.current}}>*\n> {% if firstFailed == false %}Succeeded{% else %}Failed on task `{{firstFailed.taskId}}`{% endif %} after {{duration}}"
+}
