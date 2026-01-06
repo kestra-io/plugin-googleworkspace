@@ -37,13 +37,13 @@ import java.util.*;
     description = "Monitors one or multiple Google Calendars for newly created events and emits a Kestra execution when new events are detected. " +
         "The trigger polls calendars at regular intervals and detects events based on their creation time. " +
         "\n\n" +
-        "**Authentication:** Requires a Google Cloud service account with Calendar API access (scope: `https://www.googleapis.com/auth/calendar`). " +
+        "Authentication: Requires a Google Cloud service account with Calendar API access (scope: `https://www.googleapis.com/auth/calendar`). " +
         "Share the target calendars with the service account email address. " +
         "\n\n" +
-        "**Configuration:** Specify one or more calendar IDs in `calendarIds` (defaults to 'primary' if not specified). " +
+        "Configuration: Specify one or more calendar IDs in `calendarIds` (defaults to 'primary' if not specified). If not primary, the calendarId must be an email address like `team@company.com` or `your-name@company.com` depending on your organization." +
         "Set a polling `interval` (minimum PT1M). Optionally filter events by keywords (`searchQuery`), organizer email, or status. " +
         "\n\n" +
-        "**Performance:** Each calendar requires a separate API call. Use filters to reduce processing load and set `maxEventsPerPoll` to avoid overwhelming the system. " +
+        "Performance: Each calendar requires a separate API call. Use filters to reduce processing load and set `maxEventsPerPoll` to avoid overwhelming the system. " +
         "The trigger automatically handles errors and continues monitoring if one calendar fails."
 )
 @Plugin(
