@@ -35,7 +35,7 @@ import java.util.Map;
               - id: list_events
                 type: io.kestra.plugin.googleworkspace.calendar.ListEvents
                 serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
-                calendarId: primary
+                calendarId: team@company.com
                 timeMin: "2025-08-10T00:00:00Z"
                 timeMax: "2025-08-12T00:00:00Z"
                 q: "standup"
@@ -50,7 +50,7 @@ import java.util.Map;
     title = "List Google Calendar events using filters (range, keyword, etc.)."
 )
 public class ListEvents extends AbstractCalendar implements RunnableTask<ListEvents.Output> {
-    @Schema(title = "Calendar ID (e.g., 'primary' or a calendar email)")
+    @Schema(title = "Calendar ID (e.g., a calendar email)")
     @NotNull
     protected Property<String> calendarId;
 

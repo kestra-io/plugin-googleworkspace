@@ -30,7 +30,7 @@ import org.slf4j.Logger;
                   - id: insert_event
                     type: io.kestra.plugin.googleworkspace.calendar.InsertEvent
                     serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
-                    calendarId: primary
+                    calendarId: team@company.com
                     summary: Sample Event
                     description: This is a sample event from Kestra
                     location: Thane, Mumbai

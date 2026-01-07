@@ -33,7 +33,7 @@ import java.util.Map;
               - id: get_event
                 type: io.kestra.plugin.googleworkspace.calendar.GetEvent
                 serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
-                calendarId: primary
+                calendarId: team@company.com
                 eventId: "abcdef123456"
                 maxAttendees: 50
                 alwaysIncludeEmail: true
@@ -42,7 +42,7 @@ import java.util.Map;
 )
 @Schema(title = "Fetch a Google Calendar event by ID.")
 public class GetEvent extends AbstractCalendar implements RunnableTask<GetEvent.Output> {
-    @Schema(title = "Calendar ID (e.g., 'primary' or a calendar email)")
+    @Schema(title = "Calendar ID (e.g., a calendar email)")
     @NotNull
     protected Property<String> calendarId;
 

@@ -35,7 +35,7 @@ import java.util.List;
             - id: update_event
               type: io.kestra.plugin.googleworkspace.calendar.UpdateEvent
               serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
-              calendarId: primary
+              calendarId: team@company.com
               eventId: "abcdef123456"
               patch: true
               sendUpdates: externalOnly

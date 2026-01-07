@@ -15,6 +15,7 @@ import io.kestra.core.models.triggers.TriggerOutput;
 import io.kestra.core.models.triggers.TriggerService;
 import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.slf4j.Logger;
@@ -147,9 +148,10 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
 
     @Schema(
         title = "Calendar IDs to monitor",
-        description = "List of calendar IDs to monitor (for example, team@company.com)." 
+        description = "List of calendar IDs to monitor (for example, team@company.com)."
 
     )
+    @NotNull
     protected Property<List<String>> calendarIds;
 
     @Schema(
@@ -218,12 +220,12 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
 
         logger.debug("Checking for events created after: {}", lastCreatedTime);
 
-        List<String> calendarsToMonitor = getCalendarsToMonitor(runContext);
-        
+        List<String> rCalendarIds = runContext.render(calendarIds).asList(String.class);
+
         List<EventMetadata> allNewEvents = new ArrayList<>();
 
         //Check every calendar for new events
-        for (String calId : calendarsToMonitor) {
+        for (String calId : rCalendarIds) {
             try {
                 List<EventMetadata> newEvents = checkCalendarForNewEvents(
                     calendarService, runContext, calId, lastCreatedTime, logger
@@ -246,7 +248,7 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
             .build();
 
         Execution execution = TriggerService.generateExecution(this, conditionContext, context, output);
-            
+
         return Optional.of(execution);
     }
 
@@ -267,29 +269,16 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
         }
     }
 
-    protected List<String> getCalendarsToMonitor(RunContext runContext) throws Exception {
-        if (this.calendarIds != null) {
-            List<String> rCalendars = runContext.render(this.calendarIds).asList(String.class);
-            if (!rCalendars.isEmpty()) {
-                return rCalendars;
-            }
-        }
-        
-        // Default to "primary" - a special Google Calendar API keyword for the user's main calendar
-        // See: https://developers.google.com/calendar/api/v3/reference/events/list
-        return List.of("primary");
-    }
-
     private List<EventMetadata> checkCalendarForNewEvents(
-        Calendar calendarService, 
-        RunContext runContext, 
-        String calendarId, 
+        Calendar calendarService,
+        RunContext runContext,
+        String calendarId,
         Instant lastCreatedTime,
         Logger logger
     ) throws Exception {
-        
+
         DateTime timeMin = new DateTime(lastCreatedTime.toEpochMilli());
-        
+
         // Build the Calendar API request
         Calendar.Events.List request = calendarService.events().list(calendarId)
             .setTimeMin(timeMin)
