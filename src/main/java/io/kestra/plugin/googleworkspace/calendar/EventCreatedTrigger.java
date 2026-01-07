@@ -37,19 +37,19 @@ import java.util.*;
     description = "Monitors one or multiple Google Calendars for newly created events and emits a Kestra execution when new events are detected. " +
         "The trigger polls calendars at regular intervals and detects events based on their creation time. " +
         "\n\n" +
-        "**Authentication:** Requires a Google Cloud service account with Calendar API access (scope: `https://www.googleapis.com/auth/calendar`). " +
+        "Authentication: Requires a Google Cloud service account with Calendar API access (scope: `https://www.googleapis.com/auth/calendar`). " +
         "Share the target calendars with the service account email address. " +
         "\n\n" +
-        "**Configuration:** Specify one or more calendar IDs in `calendarIds` (defaults to 'primary' if not specified). " +
+        "Configuration: Specify one or more calendar IDs in `calendarIds`. The calendarId must be an email address like `team@company.com` or `your-name@company.com` depending on your organization." +
         "Set a polling `interval` (minimum PT1M). Optionally filter events by keywords (`searchQuery`), organizer email, or status. " +
         "\n\n" +
-        "**Performance:** Each calendar requires a separate API call. Use filters to reduce processing load and set `maxEventsPerPoll` to avoid overwhelming the system. " +
+        "Performance: Each calendar requires a separate API call. Use filters to reduce processing load and set `maxEventsPerPoll` to avoid overwhelming the system. " +
         "The trigger automatically handles errors and continues monitoring if one calendar fails."
 )
 @Plugin(
     examples = {
         @Example(
-            title = "Monitor primary calendar for any new event",
+            title = "Monitor calendar for any new event",
             full = true,
             code = """
                 id: google_calendar_event_trigger
@@ -72,7 +72,7 @@ import java.util.*;
                     type: io.kestra.plugin.googleworkspace.calendar.EventCreatedTrigger
                     serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
                     calendarIds:
-                      - primary
+                      - "team@company.com"
                     interval: PT5M
                 """
         ),
@@ -127,7 +127,6 @@ import java.util.*;
                     type: io.kestra.plugin.googleworkspace.calendar.EventCreatedTrigger
                     serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
                     calendarIds:
-                      - primary
                       - "team-calendar@company.com"
                       - "project-calendar@company.com"
                     organizerEmail: "manager@company.com"
@@ -148,8 +147,8 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
 
     @Schema(
         title = "Calendar IDs to monitor",
-        description = "List of calendar IDs to monitor (e.g., 'primary' for your main calendar, or calendar emails like 'team@company.com'). " +
-            "If not specified, defaults to ['primary']."
+        description = "List of calendar IDs to monitor (for example, team@company.com)." 
+
     )
     protected Property<List<String>> calendarIds;
 
