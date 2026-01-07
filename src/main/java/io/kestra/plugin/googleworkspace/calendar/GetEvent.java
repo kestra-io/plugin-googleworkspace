@@ -42,7 +42,7 @@ import java.util.Map;
 )
 @Schema(title = "Fetch a Google Calendar event by ID.")
 public class GetEvent extends AbstractCalendar implements RunnableTask<GetEvent.Output> {
-    @Schema(title = "Calendar ID (e.g., a calendar email)")
+    @Schema(title = "Calendar ID (e.g., team@company.com).")
     @NotNull
     protected Property<String> calendarId;
 

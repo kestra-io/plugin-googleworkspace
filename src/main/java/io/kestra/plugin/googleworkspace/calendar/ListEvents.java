@@ -50,7 +50,7 @@ import java.util.Map;
     title = "List Google Calendar events using filters (range, keyword, etc.)."
 )
 public class ListEvents extends AbstractCalendar implements RunnableTask<ListEvents.Output> {
-    @Schema(title = "Calendar ID (e.g., a calendar email)")
+    @Schema(title = "Calendar ID (e.g., team@company.com).")
     @NotNull
     protected Property<String> calendarId;
 
