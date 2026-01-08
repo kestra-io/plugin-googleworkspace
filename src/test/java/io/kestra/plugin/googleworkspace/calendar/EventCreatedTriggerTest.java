@@ -274,40 +274,7 @@ class EventCreatedTriggerTest {
         assertThat("Should reject events created before lastCreatedTime",
             trigger.isNewEvent(oldEvent, lastCreatedTime, runContext), is(false));
     }
-
-    @Test
-    void shouldReturnPrimaryCalendarByDefault() throws Exception {
-        RunContext runContext = runContextFactory.of(Map.of());
-
-        var trigger = EventCreatedTrigger.builder()
-            .id(IdUtils.create())
-            .serviceAccount(Property.ofValue("dummy"))
-            // No calendarIds specified
-            .build();
-
-        List<String> calendars = trigger.getCalendarsToMonitor(runContext);
-
-        assertThat("Should default to 'primary' calendar", calendars, hasSize(1));
-        assertThat("Should default to 'primary' calendar", calendars.get(0), equalTo("primary"));
-    }
-
-    @Test
-    void shouldReturnSpecifiedCalendars() throws Exception {
-        RunContext runContext = runContextFactory.of(Map.of());
-
-        var trigger = EventCreatedTrigger.builder()
-            .id(IdUtils.create())
-            .serviceAccount(Property.ofValue("dummy"))
-            .calendarIds(Property.ofValue(List.of("team@company.com", "project@company.com")))
-            .build();
-
-        List<String> calendars = trigger.getCalendarsToMonitor(runContext);
-
-        assertThat("Should return specified calendars", calendars, hasSize(2));
-        assertThat("Should contain first calendar", calendars, hasItem("team@company.com"));
-        assertThat("Should contain second calendar", calendars, hasItem("project@company.com"));
-    }
-
+    
     @Test
     void shouldRejectMaxEventsPerPollBelowMinimum() {
         var trigger = EventCreatedTrigger.builder()

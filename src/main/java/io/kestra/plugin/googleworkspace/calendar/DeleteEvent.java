@@ -33,7 +33,7 @@ import org.slf4j.Logger;
                   - id: cancel_event
                     type: io.kestra.plugin.googleworkspace.calendar.DeleteEvent
                     serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
-                    calendarId: primary
+                    calendarId: team@company.com
                     eventId: "abcdef123456"
                     sendUpdates: all
                 """
