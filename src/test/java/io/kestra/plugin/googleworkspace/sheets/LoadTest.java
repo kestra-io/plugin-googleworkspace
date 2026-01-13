@@ -38,6 +38,8 @@ import static org.hamcrest.Matchers.*;
 class LoadTest {
     private static final Object GOOGLE_API_LOCK = new Object();
 
+    private static final String TEST_SHEET = "Sheet1";
+
     @Inject
     private RunContextFactory runContextFactory;
 
@@ -78,7 +80,7 @@ class LoadTest {
     void loadCSV() throws Exception {
 
         RunContext runContext = runContextFactory.of();
-        String sheet = newSheet();
+        String sheet = TEST_SHEET;
 
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
@@ -108,7 +110,7 @@ class LoadTest {
 
 
         RunContext runContext = runContextFactory.of();
-        String sheet = newSheet();
+        String sheet = TEST_SHEET;
 
         URI source = getSource(".json");
         Load task = Load.builder()
@@ -137,7 +139,7 @@ class LoadTest {
     @Test
     void loadJSONWithHeader() throws Exception {
         RunContext runContext = runContextFactory.of();
-        String sheet = newSheet();
+        String sheet = TEST_SHEET;
 
 
         URI source = getSource(".json");
@@ -171,7 +173,7 @@ class LoadTest {
     @Test
     void loadAVRO() throws Exception {
         RunContext runContext = runContextFactory.of();
-        String sheet = newSheet();
+        String sheet = TEST_SHEET;
 
 
         URI source = getSource(".avro");
@@ -201,7 +203,7 @@ class LoadTest {
     @Test
     void loadAVROWithHeader() throws Exception {
         RunContext runContext = runContextFactory.of();
-        String sheet = newSheet();
+        String sheet = TEST_SHEET;
 
 
         URI source = getSource(".avro");
@@ -235,7 +237,7 @@ class LoadTest {
     @Test
     void loadORC() throws Exception {
         RunContext runContext = runContextFactory.of();
-        String sheet = newSheet();
+        String sheet = TEST_SHEET;
 
 
         URI source = getSource(".orc");
@@ -267,7 +269,7 @@ class LoadTest {
     @Test
     void loadORCWithHeader() throws Exception {
         RunContext runContext = runContextFactory.of();
-        String sheet = newSheet();
+        String sheet = TEST_SHEET;
 
 
         URI source = getSource(".orc");
@@ -301,7 +303,7 @@ class LoadTest {
     @Test
     void loadPARQUET() throws Exception {
         RunContext runContext = runContextFactory.of();
-        String sheet = newSheet();
+        String sheet = TEST_SHEET;
 
 
         URI source = getSource(".parquet");
@@ -333,7 +335,7 @@ class LoadTest {
     @Test
     void loadPARQUETWithHeader() throws Exception {
         RunContext runContext = runContextFactory.of();
-        String sheet = newSheet();
+        String sheet = TEST_SHEET;
 
 
         URI source = getSource(".parquet");
@@ -367,7 +369,7 @@ class LoadTest {
     @Test
     void loadWithOverwriteMode() throws Exception {
         RunContext runContext = runContextFactory.of();
-        String sheet = newSheet();
+        String sheet = TEST_SHEET;
 
 
         URI source = storageInterface.put(
@@ -428,8 +430,7 @@ class LoadTest {
     @Test
     void loadWithAppendMode() throws Exception {
         RunContext runContext = runContextFactory.of();
-        String sheet = newSheet();
-
+        String sheet = TEST_SHEET;
 
         URI source = storageInterface.put(
             TenantService.MAIN_TENANT,
