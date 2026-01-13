@@ -110,7 +110,6 @@ class LoadTest {
     @Test
     void loadJSONWithHeader() throws Exception {
         RunContext runContext = runContextFactory.of();
-
         URI source = getSource(".json");
 
         Load task = Load.builder()
