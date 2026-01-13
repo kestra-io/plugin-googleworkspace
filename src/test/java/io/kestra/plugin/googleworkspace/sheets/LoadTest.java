@@ -175,7 +175,6 @@ class LoadTest {
     @Test
     void loadORC() throws Exception {
         RunContext runContext = runContextFactory.of();
-
         URI source = getSource(".orc");
 
         Load task = Load.builder()
