@@ -218,8 +218,8 @@ class LoadTest {
     @Test
     void loadPARQUET() throws Exception {
         RunContext runContext = runContextFactory.of();
-
         URI source = getSource(".parquet");
+        
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
