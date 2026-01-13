@@ -129,7 +129,6 @@ class LoadTest {
 
         assertThat(run.getRows(), is(6));
         assertThat(run.getColumns(), is(6));
-
     }
 
     @Test
