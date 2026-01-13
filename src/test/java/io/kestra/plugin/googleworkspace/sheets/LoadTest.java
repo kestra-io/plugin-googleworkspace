@@ -555,7 +555,5 @@ class LoadTest {
         return false;
     };
 
-    private String newSheet() {
-        return "sheet_" + IdUtils.create();
-    }
+    
 }
