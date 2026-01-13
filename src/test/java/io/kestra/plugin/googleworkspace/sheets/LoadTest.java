@@ -56,7 +56,7 @@ class LoadTest {
     }
 
     @BeforeAll
-    static void setup(RunContextFactory runContextFactory) throws Exception {
+    static void setup(RunContextFactory runContextFactory) {
         runContext = runContextFactory.of();
 
         CreateSpreadsheet createTask = CreateSpreadsheet.builder()
@@ -78,11 +78,12 @@ class LoadTest {
     void loadCSV() throws Exception {
 
         RunContext runContext = runContextFactory.of();
+        String sheet = newSheet();
 
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
-            .range(Property.ofValue("Sheet1!A1"))
+            .range(Property.ofValue(sheet + "!A1"))
             .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(getSource(".csv").toString()))
@@ -107,12 +108,13 @@ class LoadTest {
 
 
         RunContext runContext = runContextFactory.of();
+        String sheet = newSheet();
 
         URI source = getSource(".json");
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
-            .range(Property.ofValue("Sheet1!A1"))
+            .range(Property.ofValue(sheet + "!A1"))
             .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source.toString()))
@@ -135,6 +137,7 @@ class LoadTest {
     @Test
     void loadJSONWithHeader() throws Exception {
         RunContext runContext = runContextFactory.of();
+        String sheet = newSheet();
 
 
         URI source = getSource(".json");
@@ -142,7 +145,7 @@ class LoadTest {
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
-            .range(Property.ofValue("Sheet1!A1"))
+            .range(Property.ofValue(sheet + "!A1"))
             .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source.toString()))
@@ -168,13 +171,14 @@ class LoadTest {
     @Test
     void loadAVRO() throws Exception {
         RunContext runContext = runContextFactory.of();
+        String sheet = newSheet();
 
 
         URI source = getSource(".avro");
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
-            .range(Property.ofValue("Sheet1!A1"))
+            .range(Property.ofValue(sheet + "!A1"))
             .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source.toString()))
@@ -197,6 +201,7 @@ class LoadTest {
     @Test
     void loadAVROWithHeader() throws Exception {
         RunContext runContext = runContextFactory.of();
+        String sheet = newSheet();
 
 
         URI source = getSource(".avro");
@@ -204,7 +209,7 @@ class LoadTest {
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
-            .range(Property.ofValue("Sheet1!A1"))
+            .range(Property.ofValue(sheet + "!A1"))
             .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source.toString()))
@@ -230,13 +235,14 @@ class LoadTest {
     @Test
     void loadORC() throws Exception {
         RunContext runContext = runContextFactory.of();
+        String sheet = newSheet();
 
 
         URI source = getSource(".orc");
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
-            .range(Property.ofValue("Sheet1!A1"))
+            .range(Property.ofValue(sheet + "!A1"))
             .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source.toString()))
@@ -261,6 +267,7 @@ class LoadTest {
     @Test
     void loadORCWithHeader() throws Exception {
         RunContext runContext = runContextFactory.of();
+        String sheet = newSheet();
 
 
         URI source = getSource(".orc");
@@ -268,7 +275,7 @@ class LoadTest {
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
-            .range(Property.ofValue("Sheet1!A1"))
+            .range(Property.ofValue(sheet + "!A1"))
             .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source.toString()))
@@ -294,13 +301,14 @@ class LoadTest {
     @Test
     void loadPARQUET() throws Exception {
         RunContext runContext = runContextFactory.of();
+        String sheet = newSheet();
 
 
         URI source = getSource(".parquet");
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
-            .range(Property.ofValue("Sheet1!A1"))
+            .range(Property.ofValue(sheet + "!A1"))
             .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source.toString()))
@@ -325,6 +333,7 @@ class LoadTest {
     @Test
     void loadPARQUETWithHeader() throws Exception {
         RunContext runContext = runContextFactory.of();
+        String sheet = newSheet();
 
 
         URI source = getSource(".parquet");
@@ -332,7 +341,7 @@ class LoadTest {
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
-            .range(Property.ofValue("Sheet1!A1"))
+            .range(Property.ofValue(sheet + "!A1"))
             .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source.toString()))
@@ -358,6 +367,7 @@ class LoadTest {
     @Test
     void loadWithOverwriteMode() throws Exception {
         RunContext runContext = runContextFactory.of();
+        String sheet = newSheet();
 
 
         URI source = storageInterface.put(
@@ -381,7 +391,7 @@ class LoadTest {
         Load load1 = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
-            .range(Property.ofValue("Sheet1!A1"))
+            .range(Property.ofValue(sheet + "!A1"))
             .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source.toString()))
@@ -399,7 +409,7 @@ class LoadTest {
         Load load2 = Load.builder()
             .id("overwrite_small")
             .serviceAccount(Property.ofValue(serviceAccount))
-            .range(Property.ofValue("Sheet1!A1"))
+            .range(Property.ofValue(sheet + "!A1"))
             .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source2.toString()))
@@ -418,6 +428,7 @@ class LoadTest {
     @Test
     void loadWithAppendMode() throws Exception {
         RunContext runContext = runContextFactory.of();
+        String sheet = newSheet();
 
 
         URI source = storageInterface.put(
@@ -441,11 +452,10 @@ class LoadTest {
         Load load1 = Load.builder()
             .id("load_append_ " + IdUtils.create())
             .serviceAccount(Property.ofValue(serviceAccount))
-            .range(Property.ofValue("Sheet1!A1"))
+            .range(Property.ofValue(sheet + "!A1"))
             .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source.toString()))
-            .insertType(Property.ofValue(Load.InsertType.APPEND))
             .build();
 
         var out1 = load1.run(runContext);
@@ -456,8 +466,7 @@ class LoadTest {
         Load load2 = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
-            .range(Property.ofValue("Sheet1!A1"))
-            .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
+            .range(Property.ofValue(sheet))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source2.toString()))
             .insertType(Property.ofValue(Load.InsertType.APPEND))
@@ -472,7 +481,7 @@ class LoadTest {
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
             .spreadsheetId(Property.ofValue(spreadsheetId))
-            .selectedSheetsTitle(Property.ofValue(List.of("Sheet1")))
+            .selectedSheetsTitle(Property.ofValue(List.of(sheet)))
             .fetch(Property.ofValue(true))
             .build();
         Read.Output out = read.run(runContext);
@@ -547,4 +556,8 @@ class LoadTest {
         }
         return false;
     };
+
+    private String newSheet() {
+        return "sheet_" + IdUtils.create();
+    }
 }
