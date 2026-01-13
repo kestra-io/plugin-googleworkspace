@@ -39,9 +39,7 @@ class ReadTest {
         var run = RetryUtils.<Read.Output, Exception>of()
             .runRetryIf(isRetryableExternalFailure, () -> {
                     synchronized (GOOGLE_API_LOCK) {
-                        return task.run(
-                            TestsUtils.mockRunContext(runContextFactory, task, Map.of())
-                        );
+                        return task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));
                     }
                 }
             );
