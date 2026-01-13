@@ -34,22 +34,14 @@ public abstract class AbstractSheet extends AbstractTask {
         HttpRequestInitializer initializer = request -> {
             credentials.initialize(request);
 
-            request.setUnsuccessfulResponseHandler(new HttpBackOffUnsuccessfulResponseHandler(
-                new ExponentialBackOff.Builder()
-                    .setInitialIntervalMillis(500)
-                    .setMaxIntervalMillis(10_000)
-                    .setMaxElapsedTimeMillis(60_000)
-                    .build()
-                )
-            );
+            ExponentialBackOff backOff = new ExponentialBackOff.Builder()
+                .setInitialIntervalMillis(1000)
+                .setMaxIntervalMillis(10_000)
+                .setMaxElapsedTimeMillis(120_000)
+                .build();
 
-            request.setIOExceptionHandler(new HttpBackOffIOExceptionHandler(
-                new ExponentialBackOff.Builder()
-                    .setInitialIntervalMillis(500)
-                    .setMaxIntervalMillis(10_000)
-                    .setMaxElapsedTimeMillis(60_000)
-                    .build()
-                )
+            request.setUnsuccessfulResponseHandler(new HttpBackOffUnsuccessfulResponseHandler(backOff)
+                .setBackOffRequired(response -> response.getStatusCode() == 429 || response.getStatusCode() / 100 == 5)
             );
         };
 
