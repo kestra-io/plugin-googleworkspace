@@ -448,6 +448,14 @@ class LoadTest {
                 .toURI()))
         );
 
+        int before = Read.builder()
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .selectedSheetsTitle(Property.ofValue(List.of("Sheet1")))
+            .fetch(Property.ofValue(true))
+            .build()
+            .run(runContext)
+            .getSize();
+
         Load load1 = Load.builder()
             .id("load_append_ " + IdUtils.create())
             .serviceAccount(Property.ofValue(serviceAccount))
@@ -456,7 +464,7 @@ class LoadTest {
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source.toString()))
             .build();
-
+        
         var out1 = load1.run(runContext);
 
         assertThat(out1.getRows(), is(notNullValue()));
@@ -476,17 +484,15 @@ class LoadTest {
         assertThat(out2.getRows(), is(notNullValue()));
         assertThat(out2.getColumns(), is(notNullValue()));
 
-        ReadRange read = ReadRange.builder()
-            .id(LoadTest.class.getSimpleName())
-            .serviceAccount(Property.ofValue(serviceAccount))
+        int after = Read.builder()
             .spreadsheetId(Property.ofValue(spreadsheetId))
-            .range(Property.ofValue(sheet))
+            .selectedSheetsTitle(Property.ofValue(List.of("Sheet1")))
             .fetch(Property.ofValue(true))
-            .build();
+            .build()
+            .run(runContext)
+            .getSize();
 
-        ReadRange.Output out = read.run(runContext);
-
-        assertThat(out.getSize(), is(9));
+        assertThat(after - before, is(9));
     }
 
     private URI getSource(String extension) throws IOException, URISyntaxException {
