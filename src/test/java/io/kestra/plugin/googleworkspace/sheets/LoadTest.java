@@ -359,7 +359,7 @@ class LoadTest {
 
         var out1 = RetryUtils.<Load.Output, Exception>of()
             .runRetryIf(isRetryableExternalFailure, () ->
-                load1.run(TestsUtils.mockRunContext(runContextFactory, load1, Map.of()))
+                load1.run(runContext)
             );
 
         assertThat(out1.getRows(), is(notNullValue()));
@@ -376,7 +376,7 @@ class LoadTest {
 
         var out2 = RetryUtils.<Load.Output, Exception>of()
             .runRetryIf(isRetryableExternalFailure, () ->
-                load2.run(TestsUtils.mockRunContext(runContextFactory, load2, Map.of()))
+                load2.run(runContext)
             );
 
         assertThat(out2.getRows(), is(notNullValue()));
