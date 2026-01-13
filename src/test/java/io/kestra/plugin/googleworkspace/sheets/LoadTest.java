@@ -301,7 +301,6 @@ class LoadTest {
 
         var run = task.run(runContext);
 
-
         assertThat(run.getRows(), is(greaterThan(6)));
         assertThat(run.getColumns(), is(6));
 
