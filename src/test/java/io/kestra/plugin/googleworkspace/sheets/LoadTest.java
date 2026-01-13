@@ -490,8 +490,7 @@ class LoadTest {
         assertThat(out.getSize(), is(9));
         assertThat(out.getRows().containsKey("Sheet1"), is(true));
     }
-
-
+    
     private URI getSource(String extension) throws IOException, URISyntaxException {
         URL resource = LoadTest.class.getClassLoader().getResource("examples/addresses" + extension);
 
