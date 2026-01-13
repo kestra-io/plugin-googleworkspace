@@ -365,7 +365,6 @@ class LoadTest {
         assertThat(out2.getColumns(), is(notNullValue()));
 
         deleteSpreadsheet(runContext, spreadsheetId);
-
     }
 
     @Test
@@ -460,7 +459,7 @@ class LoadTest {
 
         return createOutput.getSpreadsheetId();
     }
-    
+
     private void deleteSpreadsheet(RunContext runContext, String spreadsheetId) throws Exception {
         DeleteSpreadsheet deleteTask = DeleteSpreadsheet.builder()
             .id(LoadTest.class.getSimpleName())
