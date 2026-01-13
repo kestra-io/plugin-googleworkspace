@@ -196,7 +196,6 @@ class LoadTest {
     @Test
     void loadORCWithHeader() throws Exception {
         RunContext runContext = runContextFactory.of();
-
         URI source = getSource(".orc");
 
         Load task = Load.builder()
@@ -219,7 +218,7 @@ class LoadTest {
     void loadPARQUET() throws Exception {
         RunContext runContext = runContextFactory.of();
         URI source = getSource(".parquet");
-        
+
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
