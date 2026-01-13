@@ -1,5 +1,9 @@
 package io.kestra.plugin.googleworkspace.sheets;
 
+import com.google.api.client.http.HttpBackOffIOExceptionHandler;
+import com.google.api.client.http.HttpBackOffUnsuccessfulResponseHandler;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.auth.http.HttpCredentialsAdapter;
@@ -27,7 +31,29 @@ public abstract class AbstractSheet extends AbstractTask {
     protected Sheets connection(RunContext runContext) throws IllegalVariableEvaluationException, IOException, GeneralSecurityException {
         HttpCredentialsAdapter credentials = this.credentials(runContext);
 
-        return new Sheets.Builder(this.netHttpTransport(), JSON_FACTORY, credentials)
+        HttpRequestInitializer initializer = request -> {
+            credentials.initialize(request);
+
+            request.setUnsuccessfulResponseHandler(new HttpBackOffUnsuccessfulResponseHandler(
+                new ExponentialBackOff.Builder()
+                    .setInitialIntervalMillis(500)
+                    .setMaxIntervalMillis(10_000)
+                    .setMaxElapsedTimeMillis(60_000)
+                    .build()
+                )
+            );
+
+            request.setIOExceptionHandler(new HttpBackOffIOExceptionHandler(
+                new ExponentialBackOff.Builder()
+                    .setInitialIntervalMillis(500)
+                    .setMaxIntervalMillis(10_000)
+                    .setMaxElapsedTimeMillis(60_000)
+                    .build()
+                )
+            );
+        };
+
+        return new Sheets.Builder(this.netHttpTransport(), JSON_FACTORY, initializer)
             .setApplicationName("Kestra")
             .build();
     }
