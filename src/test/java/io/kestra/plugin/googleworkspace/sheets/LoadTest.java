@@ -58,7 +58,6 @@ class LoadTest {
     @BeforeAll
     static void setup(RunContextFactory runContextFactory) throws Exception {
         runContext = runContextFactory.of();
-
         CreateSpreadsheet createTask = CreateSpreadsheet.builder()
             .id("shared-spreadsheet")
             .title(Property.ofValue("Kestra Integration Test"))
