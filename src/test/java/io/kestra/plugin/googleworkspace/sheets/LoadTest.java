@@ -7,6 +7,8 @@ import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.storages.StorageInterface;
 import io.kestra.core.tenant.TenantService;
 import io.kestra.core.utils.IdUtils;
+import io.kestra.core.utils.RetryUtils;
+import io.kestra.core.utils.TestsUtils;
 import io.kestra.plugin.googleworkspace.UtilsTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeAll;
@@ -20,7 +22,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -31,6 +35,8 @@ import static org.hamcrest.Matchers.*;
     disabledReason = "Disabled for CI/CD"
 )
 class LoadTest {
+    private static final Object GOOGLE_API_LOCK = new Object();
+
     @Inject
     private RunContextFactory runContextFactory;
 
@@ -57,7 +63,15 @@ class LoadTest {
             .from(Property.ofValue(getSource(".csv").toString()))
             .build();
 
-        Load.Output run = task.run(runContext);
+         var run = RetryUtils.<Load.Output, Exception>of()
+            .runRetryIf(isRetryableExternalFailure, () -> {
+                synchronized (GOOGLE_API_LOCK) {
+                    return task.run(
+                        TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                    );
+                }
+                }
+            );
 
         assertThat(run.getRows(), is(6));
         assertThat(run.getColumns(), is(6));
@@ -79,7 +93,15 @@ class LoadTest {
             .from(Property.ofValue(source.toString()))
             .build();
 
-        Load.Output run = task.run(runContext);
+         var run = RetryUtils.<Load.Output, Exception>of().
+            runRetryIf(isRetryableExternalFailure, () -> {
+                synchronized (GOOGLE_API_LOCK) {
+                    return task.run(
+                        TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                    );
+                }
+                }
+            );
 
         assertThat(run.getRows(), is(6));
         assertThat(run.getColumns(), is(6));
@@ -103,7 +125,15 @@ class LoadTest {
             .header(Property.ofValue(true))
             .build();
 
-        Load.Output run = task.run(runContext);
+         var run = RetryUtils.<Load.Output, Exception>of().
+            runRetryIf(isRetryableExternalFailure, () -> {
+                synchronized (GOOGLE_API_LOCK) {
+                    return task.run(
+                        TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                    );
+                }
+                }
+            );
 
         assertThat(run.getRows(), is(greaterThan(6)));
         assertThat(run.getColumns(), is(6));
@@ -125,7 +155,15 @@ class LoadTest {
             .from(Property.ofValue(source.toString()))
             .build();
 
-        Load.Output run = task.run(runContext);
+         var run = RetryUtils.<Load.Output, Exception>of().
+            runRetryIf(isRetryableExternalFailure, () -> {
+                synchronized (GOOGLE_API_LOCK) {
+                    return task.run(
+                        TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                    );
+                }
+                }
+            );
 
         assertThat(run.getRows(), is(6));
         assertThat(run.getColumns(), is(6));
@@ -149,7 +187,15 @@ class LoadTest {
             .header(Property.ofValue(true))
             .build();
 
-        Load.Output run = task.run(runContext);
+         var run = RetryUtils.<Load.Output, Exception>of().
+            runRetryIf(isRetryableExternalFailure, () -> {
+                synchronized (GOOGLE_API_LOCK) {
+                    return task.run(
+                        TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                    );
+                }
+                }
+            );
 
         assertThat(run.getRows(), is(greaterThan(6)));
         assertThat(run.getColumns(), is(6));
@@ -171,7 +217,15 @@ class LoadTest {
             .from(Property.ofValue(source.toString()))
             .build();
 
-        Load.Output run = task.run(runContext);
+         var run = RetryUtils.<Load.Output, Exception>of().
+            runRetryIf(isRetryableExternalFailure, () -> {
+                synchronized (GOOGLE_API_LOCK) {
+                    return task.run(
+                        TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                    );
+                }
+                }
+            );
 
         assertThat(run.getRows(), is(6));
         assertThat(run.getColumns(), is(6));
@@ -195,7 +249,15 @@ class LoadTest {
             .header(Property.ofValue(true))
             .build();
 
-        Load.Output run = task.run(runContext);
+         var run = RetryUtils.<Load.Output, Exception>of().
+            runRetryIf(isRetryableExternalFailure, () -> {
+                synchronized (GOOGLE_API_LOCK) {
+                    return task.run(
+                        TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                    );
+                }
+                }
+            );
 
         assertThat(run.getRows(), is(greaterThan(6)));
         assertThat(run.getColumns(), is(6));
@@ -217,7 +279,15 @@ class LoadTest {
             .from(Property.ofValue(source.toString()))
             .build();
 
-        Load.Output run = task.run(runContext);
+         var run = RetryUtils.<Load.Output, Exception>of().
+            runRetryIf(isRetryableExternalFailure, () -> {
+                synchronized (GOOGLE_API_LOCK) {
+                    return task.run(
+                        TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                    );
+                }
+                }
+            );
 
         assertThat(run.getRows(), is(6));
         assertThat(run.getColumns(), is(6));
@@ -241,7 +311,15 @@ class LoadTest {
             .header(Property.ofValue(true))
             .build();
 
-        Load.Output run = task.run(runContext);
+        var run = RetryUtils.<Load.Output, Exception>of().
+            runRetryIf(isRetryableExternalFailure, () -> {
+                synchronized (GOOGLE_API_LOCK) {
+                    return task.run(
+                        TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                    );
+                }
+                }
+            );
 
         assertThat(run.getRows(), is(greaterThan(6)));
         assertThat(run.getColumns(), is(6));
@@ -281,7 +359,11 @@ class LoadTest {
             .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
             .build();
 
-        var out1 = load1.run(runContext);;
+        var out1 = RetryUtils.<Load.Output, Exception>of()
+            .runRetryIf(isRetryableExternalFailure, () ->
+                load1.run(TestsUtils.mockRunContext(runContextFactory, load1, Map.of()))
+            );
+
         assertThat(out1.getRows(), is(notNullValue()));
         assertThat(out1.getColumns(), is(notNullValue()));
 
@@ -294,7 +376,11 @@ class LoadTest {
             .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
             .build();
 
-        var out2 = load2.run(runContext);;
+        var out2 = RetryUtils.<Load.Output, Exception>of()
+            .runRetryIf(isRetryableExternalFailure, () ->
+                load2.run(TestsUtils.mockRunContext(runContextFactory, load2, Map.of()))
+            );
+
         assertThat(out2.getRows(), is(notNullValue()));
         assertThat(out2.getColumns(), is(notNullValue()));
 
@@ -333,7 +419,8 @@ class LoadTest {
             .insertType(Property.ofValue(Load.InsertType.APPEND))
             .build();
 
-        var out1 = load1.run(runContext);;
+        var out1 = load1.run(runContext);
+
         assertThat(out1.getRows(), is(notNullValue()));
         assertThat(out1.getColumns(), is(notNullValue()));
 
@@ -409,4 +496,11 @@ class LoadTest {
             .getClassLoader()
             .getResource(".gcp-service-account.json") == null;
     }
+
+    static Predicate<Throwable> isRetryableExternalFailure = throwable -> {
+        if (throwable instanceof com.google.api.client.googleapis.json.GoogleJsonResponseException e) {
+            return e.getStatusCode() == 429 || e.getStatusCode() == 503;
+        }
+        return false;
+    };
 }
