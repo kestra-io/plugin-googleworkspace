@@ -131,7 +131,6 @@ class LoadTest {
     @Test
     void loadAVRO() throws Exception {
         RunContext runContext = runContextFactory.of();;
-
         URI source = getSource(".avro");
 
         Load task = Load.builder()
