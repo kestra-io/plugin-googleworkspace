@@ -518,7 +518,6 @@ class LoadTest {
                     }
                 });
 
-
         assertThat(createOutput.getSpreadsheetId(), is(notNullValue()));
 
         return createOutput.getSpreadsheetId();
