@@ -20,6 +20,8 @@ import static org.hamcrest.Matchers.nullValue;
 
 @KestraTest
 class ReadTest {
+    private static final Object GOOGLE_API_LOCK = new Object();
+
     @Inject
     private RunContextFactory runContextFactory;
 
@@ -34,9 +36,14 @@ class ReadTest {
             .fetch(Property.ofValue(true))
             .build();
 
-        Read.Output run = RetryUtils.<Read.Output, Exception>of()
-            .runRetryIf(isRetryableExternalFailure, () ->
-                task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()))
+        var run = RetryUtils.<Read.Output, Exception>of()
+            .runRetryIf(isRetryableExternalFailure, () -> {
+                    synchronized (GOOGLE_API_LOCK) {
+                        return task.run(
+                            TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                        );
+                    }
+                }
             );
 
         assertThat(run.getSize(), is(93));
@@ -61,9 +68,14 @@ class ReadTest {
             .fetch(Property.ofValue(true))
             .build();
 
-        Read.Output run = RetryUtils.<Read.Output, Exception>of()
-            .runRetryIf(isRetryableExternalFailure, () ->
-                task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()))
+        var run = RetryUtils.<Read.Output, Exception>of()
+            .runRetryIf(isRetryableExternalFailure, () -> {
+                    synchronized (GOOGLE_API_LOCK) {
+                        return task.run(
+                            TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                        );
+                    }
+                }
             );
 
         assertThat(run.getRows().size(), is(1));

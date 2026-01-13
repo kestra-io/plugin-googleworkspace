@@ -5,6 +5,7 @@ import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.serializers.FileSerde;
 import io.kestra.core.storages.StorageInterface;
 import io.kestra.core.tenant.TenantService;
+import io.kestra.core.utils.RetryUtils;
 import io.kestra.core.utils.TestsUtils;
 import io.kestra.plugin.googleworkspace.UtilsTest;
 import io.kestra.core.junit.annotations.KestraTest;
@@ -15,6 +16,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
+
 import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -22,6 +25,8 @@ import static org.hamcrest.Matchers.is;
 
 @KestraTest
 class ReadRangeTest {
+    private static final Object GOOGLE_API_LOCK = new Object();
+    
     @Inject
     private RunContextFactory runContextFactory;
 
@@ -40,7 +45,15 @@ class ReadRangeTest {
             .fetch(Property.ofValue(true))
             .build();
 
-        ReadRange.Output run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));
+        var run = RetryUtils.<ReadRange.Output, Exception>of()
+            .runRetryIf(isRetryableExternalFailure, () -> {
+                    synchronized (GOOGLE_API_LOCK) {
+                        return task.run(
+                            TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                        );
+                    }
+                }
+            );
 
         assertThat(run.getSize(), is(30));
         assertThat(((Map<String, Object>) run.getRows().get(0)).get("Date"), is("1/1/2012"));
@@ -57,7 +70,15 @@ class ReadRangeTest {
             .range(Property.ofValue("Second One!A1:I"))
             .build();
 
-        ReadRange.Output run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));
+        var run = RetryUtils.<ReadRange.Output, Exception>of()
+            .runRetryIf(isRetryableExternalFailure, () -> {
+                    synchronized (GOOGLE_API_LOCK) {
+                        return task.run(
+                            TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                        );
+                    }
+                }
+            );
 
         assertThat(run.getSize(), is(30));
 
@@ -67,4 +88,11 @@ class ReadRangeTest {
         assertThat(((Map<String, Object>) result.get(0)).get("Student Name"), is("Alexandra"));
         assertThat(((Map<String, Object>) result.get(0)).get("Formula"), is("Female"));
     }
+
+    static Predicate<Throwable> isRetryableExternalFailure = throwable -> {
+        if (throwable instanceof com.google.api.client.googleapis.json.GoogleJsonResponseException e) {
+            return e.getStatusCode() == 429 || e.getStatusCode() == 503;
+        }
+        return false;
+    };
 }
