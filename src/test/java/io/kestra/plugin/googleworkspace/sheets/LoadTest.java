@@ -267,13 +267,7 @@ class LoadTest {
             .from(Property.ofValue(source.toString()))
             .build();
 
-        var run =
-
-
-                        task.run(
-                            runContext
-                        );
-
+        var run = task.run(runContext);
 
         assertThat(run.getRows(), is(6));
         assertThat(run.getColumns(), is(6));
