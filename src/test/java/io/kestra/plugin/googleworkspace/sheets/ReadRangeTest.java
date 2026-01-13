@@ -26,7 +26,7 @@ import static org.hamcrest.Matchers.is;
 @KestraTest
 class ReadRangeTest {
     private static final Object GOOGLE_API_LOCK = new Object();
-    
+
     @Inject
     private RunContextFactory runContextFactory;
 

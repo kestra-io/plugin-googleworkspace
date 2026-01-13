@@ -65,11 +65,9 @@ class LoadTest {
 
          var run = RetryUtils.<Load.Output, Exception>of()
             .runRetryIf(isRetryableExternalFailure, () -> {
-                synchronized (GOOGLE_API_LOCK) {
-                    return task.run(
-                        TestsUtils.mockRunContext(runContextFactory, task, Map.of())
-                    );
-                }
+                    synchronized (GOOGLE_API_LOCK) {
+                        return task.run(runContext);
+                    }
                 }
             );
 
@@ -97,7 +95,7 @@ class LoadTest {
             runRetryIf(isRetryableExternalFailure, () -> {
                 synchronized (GOOGLE_API_LOCK) {
                     return task.run(
-                        TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                        runContext
                     );
                 }
                 }
@@ -129,7 +127,7 @@ class LoadTest {
             runRetryIf(isRetryableExternalFailure, () -> {
                 synchronized (GOOGLE_API_LOCK) {
                     return task.run(
-                        TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                        runContext
                     );
                 }
                 }
@@ -159,7 +157,7 @@ class LoadTest {
             runRetryIf(isRetryableExternalFailure, () -> {
                 synchronized (GOOGLE_API_LOCK) {
                     return task.run(
-                        TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                        runContext
                     );
                 }
                 }
@@ -191,7 +189,7 @@ class LoadTest {
             runRetryIf(isRetryableExternalFailure, () -> {
                 synchronized (GOOGLE_API_LOCK) {
                     return task.run(
-                        TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                        runContext
                     );
                 }
                 }
@@ -221,7 +219,7 @@ class LoadTest {
             runRetryIf(isRetryableExternalFailure, () -> {
                 synchronized (GOOGLE_API_LOCK) {
                     return task.run(
-                        TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                        runContext
                     );
                 }
                 }
@@ -253,7 +251,7 @@ class LoadTest {
             runRetryIf(isRetryableExternalFailure, () -> {
                 synchronized (GOOGLE_API_LOCK) {
                     return task.run(
-                        TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                        runContext
                     );
                 }
                 }
@@ -283,7 +281,7 @@ class LoadTest {
             runRetryIf(isRetryableExternalFailure, () -> {
                 synchronized (GOOGLE_API_LOCK) {
                     return task.run(
-                        TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                        runContext
                     );
                 }
                 }
@@ -315,7 +313,7 @@ class LoadTest {
             runRetryIf(isRetryableExternalFailure, () -> {
                 synchronized (GOOGLE_API_LOCK) {
                     return task.run(
-                        TestsUtils.mockRunContext(runContextFactory, task, Map.of())
+                        runContext
                     );
                 }
                 }
