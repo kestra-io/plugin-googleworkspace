@@ -499,8 +499,7 @@ class LoadTest {
         }
         return false;
     };
-
-
+    
     private String nextRange() {
         int start = ROW_CURSOR.getAndAdd(20);
         return "Sheet1!A" + start;
