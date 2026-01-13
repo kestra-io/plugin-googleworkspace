@@ -11,6 +11,7 @@ import io.kestra.core.utils.RetryUtils;
 import io.kestra.core.utils.TestsUtils;
 import io.kestra.plugin.googleworkspace.UtilsTest;
 import jakarta.inject.Inject;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIf;
@@ -40,9 +41,9 @@ class LoadTest {
     @Inject
     private RunContextFactory runContextFactory;
 
-    private static String spreadsheetId;
     private static RunContext runContext;
 
+    private static String spreadsheetId;
 
     @Inject
     private StorageInterface storageInterface;
@@ -56,7 +57,7 @@ class LoadTest {
 
     @BeforeAll
     static void setup(RunContextFactory runContextFactory) throws Exception {
-        RunContext runContext = runContextFactory.of();
+        runContext = runContextFactory.of();
 
         CreateSpreadsheet createTask = CreateSpreadsheet.builder()
             .id("shared-spreadsheet")
@@ -64,14 +65,13 @@ class LoadTest {
             .serviceAccount(Property.ofValue(serviceAccount))
             .build();
 
-        spreadsheetId =
-            RetryUtils.<CreateSpreadsheet.Output, Exception>of()
-                .runRetryIf(isRetryableExternalFailure, () -> {
-                    synchronized (GOOGLE_API_LOCK) {
-                        return createTask.run(runContext);
-                    }
-                })
-                .getSpreadsheetId();
+        spreadsheetId = RetryUtils.<CreateSpreadsheet.Output, Exception>of()
+            .runRetryIf(isRetryableExternalFailure, () -> {
+                synchronized (GOOGLE_API_LOCK) {
+                    return createTask.run(runContext);
+                }
+            })
+            .getSpreadsheetId();
     }
 
     @Test
@@ -79,16 +79,16 @@ class LoadTest {
         String sheet = IdUtils.create();
         RunContext runContext = runContextFactory.of();
 
-        String spreadsheetId = createSpreadsheet(runContext);
-
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
+            .range(Property.ofValue(sheet))
             .spreadsheetId(Property.ofValue(spreadsheetId))
+            .range(Property.ofValue(sheet))
             .from(Property.ofValue(getSource(".csv").toString()))
             .build();
 
-         var run = RetryUtils.<Load.Output, Exception>of()
+        var run = RetryUtils.<Load.Output, Exception>of()
             .runRetryIf(isRetryableExternalFailure, () -> {
                     synchronized (GOOGLE_API_LOCK) {
                         return task.run(runContext);
@@ -99,7 +99,7 @@ class LoadTest {
         assertThat(run.getRows(), is(6));
         assertThat(run.getColumns(), is(6));
 
-        deleteSpreadsheet(runContext, spreadsheetId);
+
     }
 
     @Test
@@ -108,229 +108,41 @@ class LoadTest {
 
         RunContext runContext = runContextFactory.of();
 
-        String spreadsheetId = createSpreadsheet(runContext);
-
         URI source = getSource(".json");
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
+            .range(Property.ofValue(sheet))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source.toString()))
             .build();
 
-         var run = RetryUtils.<Load.Output, Exception>of().
+        var run = RetryUtils.<Load.Output, Exception>of().
             runRetryIf(isRetryableExternalFailure, () -> {
-                synchronized (GOOGLE_API_LOCK) {
-                    return task.run(
-                        runContext
-                    );
-                }
+                    synchronized (GOOGLE_API_LOCK) {
+                        return task.run(
+                            runContext
+                        );
+                    }
                 }
             );
 
         assertThat(run.getRows(), is(6));
         assertThat(run.getColumns(), is(6));
 
-        deleteSpreadsheet(runContext, spreadsheetId);
     }
 
     @Test
     void loadJSONWithHeader() throws Exception {
         RunContext runContext = runContextFactory.of();
 
-        String spreadsheetId = createSpreadsheet(runContext);
-
+        String sheet = IdUtils.create();
         URI source = getSource(".json");
 
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
-            .spreadsheetId(Property.ofValue(spreadsheetId))
-            .from(Property.ofValue(source.toString()))
-            .header(Property.ofValue(true))
-            .build();
-
-         var run = RetryUtils.<Load.Output, Exception>of().
-            runRetryIf(isRetryableExternalFailure, () -> {
-                synchronized (GOOGLE_API_LOCK) {
-                    return task.run(
-                        runContext
-                    );
-                }
-                }
-            );
-
-        assertThat(run.getRows(), is(greaterThan(6)));
-        assertThat(run.getColumns(), is(6));
-
-        deleteSpreadsheet(runContext, spreadsheetId);
-    }
-
-    @Test
-    void loadAVRO() throws Exception {
-        RunContext runContext = runContextFactory.of();
-
-        String spreadsheetId = createSpreadsheet(runContext);
-
-        URI source = getSource(".avro");
-        Load task = Load.builder()
-            .id(LoadTest.class.getSimpleName())
-            .serviceAccount(Property.ofValue(serviceAccount))
-            .spreadsheetId(Property.ofValue(spreadsheetId))
-            .from(Property.ofValue(source.toString()))
-            .build();
-
-         var run = RetryUtils.<Load.Output, Exception>of().
-            runRetryIf(isRetryableExternalFailure, () -> {
-                    synchronized (GOOGLE_API_LOCK) {
-                        return task.run(
-                            runContext
-                        );
-                    }
-                }
-            );
-
-        assertThat(run.getRows(), is(6));
-        assertThat(run.getColumns(), is(6));
-
-        deleteSpreadsheet(runContext, spreadsheetId);
-    }
-
-    @Test
-    void loadAVROWithHeader() throws Exception {
-        RunContext runContext = runContextFactory.of();
-
-        String spreadsheetId = createSpreadsheet(runContext);
-
-        URI source = getSource(".avro");
-
-        Load task = Load.builder()
-            .id(LoadTest.class.getSimpleName())
-            .serviceAccount(Property.ofValue(serviceAccount))
-            .spreadsheetId(Property.ofValue(spreadsheetId))
-            .from(Property.ofValue(source.toString()))
-            .header(Property.ofValue(true))
-            .build();
-
-         var run = RetryUtils.<Load.Output, Exception>of().
-            runRetryIf(isRetryableExternalFailure, () -> {
-                    synchronized (GOOGLE_API_LOCK) {
-                        return task.run(
-                            runContext
-                        );
-                    }
-                }
-            );
-
-        assertThat(run.getRows(), is(greaterThan(6)));
-        assertThat(run.getColumns(), is(6));
-
-        deleteSpreadsheet(runContext, spreadsheetId);
-    }
-
-    @Test
-    void loadORC() throws Exception {
-        RunContext runContext = runContextFactory.of();
-
-        String spreadsheetId = createSpreadsheet(runContext);
-
-        URI source = getSource(".orc");
-        Load task = Load.builder()
-            .id(LoadTest.class.getSimpleName())
-            .serviceAccount(Property.ofValue(serviceAccount))
-            .spreadsheetId(Property.ofValue(spreadsheetId))
-            .from(Property.ofValue(source.toString()))
-            .build();
-
-         var run = RetryUtils.<Load.Output, Exception>of().
-            runRetryIf(isRetryableExternalFailure, () -> {
-                    synchronized (GOOGLE_API_LOCK) {
-                        return task.run(
-                            runContext
-                        );
-                    }
-                }
-            );
-
-        assertThat(run.getRows(), is(6));
-        assertThat(run.getColumns(), is(6));
-
-        deleteSpreadsheet(runContext, spreadsheetId);
-    }
-
-    @Test
-    void loadORCWithHeader() throws Exception {
-        RunContext runContext = runContextFactory.of();
-
-        String spreadsheetId = createSpreadsheet(runContext);
-
-        URI source = getSource(".orc");
-
-        Load task = Load.builder()
-            .id(LoadTest.class.getSimpleName())
-            .serviceAccount(Property.ofValue(serviceAccount))
-            .spreadsheetId(Property.ofValue(spreadsheetId))
-            .from(Property.ofValue(source.toString()))
-            .header(Property.ofValue(true))
-            .build();
-
-         var run = RetryUtils.<Load.Output, Exception>of().
-            runRetryIf(isRetryableExternalFailure, () -> {
-                    synchronized (GOOGLE_API_LOCK) {
-                        return task.run(
-                            runContext
-                        );
-                    }
-                }
-            );
-
-        assertThat(run.getRows(), is(greaterThan(6)));
-        assertThat(run.getColumns(), is(6));
-
-        deleteSpreadsheet(runContext, spreadsheetId);
-    }
-
-    @Test
-    void loadPARQUET() throws Exception {
-        RunContext runContext = runContextFactory.of();
-
-        String spreadsheetId = createSpreadsheet(runContext);
-
-        URI source = getSource(".parquet");
-        Load task = Load.builder()
-            .id(LoadTest.class.getSimpleName())
-            .serviceAccount(Property.ofValue(serviceAccount))
-            .spreadsheetId(Property.ofValue(spreadsheetId))
-            .from(Property.ofValue(source.toString()))
-            .build();
-
-         var run = RetryUtils.<Load.Output, Exception>of().
-            runRetryIf(isRetryableExternalFailure, () -> {
-                    synchronized (GOOGLE_API_LOCK) {
-                        return task.run(
-                            runContext
-                        );
-                    }
-                }
-            );
-
-        assertThat(run.getRows(), is(6));
-        assertThat(run.getColumns(), is(6));
-
-        deleteSpreadsheet(runContext, spreadsheetId);
-    }
-
-    @Test
-    void loadPARQUETWithHeader() throws Exception {
-        RunContext runContext = runContextFactory.of();
-
-        String spreadsheetId = createSpreadsheet(runContext);
-
-        URI source = getSource(".parquet");
-
-        Load task = Load.builder()
-            .id(LoadTest.class.getSimpleName())
-            .serviceAccount(Property.ofValue(serviceAccount))
+            .range(Property.ofValue(sheet))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source.toString()))
             .header(Property.ofValue(true))
@@ -349,13 +161,199 @@ class LoadTest {
         assertThat(run.getRows(), is(greaterThan(6)));
         assertThat(run.getColumns(), is(6));
 
-        deleteSpreadsheet(runContext, spreadsheetId);
+
+    }
+
+    @Test
+    void loadAVRO() throws Exception {
+        RunContext runContext = runContextFactory.of();
+        String sheet = IdUtils.create();
+
+        URI source = getSource(".avro");
+        Load task = Load.builder()
+            .id(LoadTest.class.getSimpleName())
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .range(Property.ofValue(sheet))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .from(Property.ofValue(source.toString()))
+            .build();
+
+        var run = RetryUtils.<Load.Output, Exception>of().
+            runRetryIf(isRetryableExternalFailure, () -> {
+                    synchronized (GOOGLE_API_LOCK) {
+                        return task.run(
+                            runContext
+                        );
+                    }
+                }
+            );
+
+        assertThat(run.getRows(), is(6));
+        assertThat(run.getColumns(), is(6));
+
+
+    }
+
+    @Test
+    void loadAVROWithHeader() throws Exception {
+        RunContext runContext = runContextFactory.of();
+        String sheet = IdUtils.create();
+
+        URI source = getSource(".avro");
+
+        Load task = Load.builder()
+            .id(LoadTest.class.getSimpleName())
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .range(Property.ofValue(sheet))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .from(Property.ofValue(source.toString()))
+            .header(Property.ofValue(true))
+            .build();
+
+        var run = RetryUtils.<Load.Output, Exception>of().
+            runRetryIf(isRetryableExternalFailure, () -> {
+                    synchronized (GOOGLE_API_LOCK) {
+                        return task.run(
+                            runContext
+                        );
+                    }
+                }
+            );
+
+        assertThat(run.getRows(), is(greaterThan(6)));
+        assertThat(run.getColumns(), is(6));
+
+
+    }
+
+    @Test
+    void loadORC() throws Exception {
+        RunContext runContext = runContextFactory.of();
+        String sheet = IdUtils.create();
+
+        URI source = getSource(".orc");
+        Load task = Load.builder()
+            .id(LoadTest.class.getSimpleName())
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .range(Property.ofValue(sheet))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .from(Property.ofValue(source.toString()))
+            .build();
+
+        var run = RetryUtils.<Load.Output, Exception>of().
+            runRetryIf(isRetryableExternalFailure, () -> {
+                    synchronized (GOOGLE_API_LOCK) {
+                        return task.run(
+                            runContext
+                        );
+                    }
+                }
+            );
+
+        assertThat(run.getRows(), is(6));
+        assertThat(run.getColumns(), is(6));
+
+
+    }
+
+    @Test
+    void loadORCWithHeader() throws Exception {
+        RunContext runContext = runContextFactory.of();
+        String sheet = IdUtils.create();
+
+        URI source = getSource(".orc");
+
+        Load task = Load.builder()
+            .id(LoadTest.class.getSimpleName())
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .range(Property.ofValue(sheet))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .from(Property.ofValue(source.toString()))
+            .header(Property.ofValue(true))
+            .build();
+
+        var run = RetryUtils.<Load.Output, Exception>of().
+            runRetryIf(isRetryableExternalFailure, () -> {
+                    synchronized (GOOGLE_API_LOCK) {
+                        return task.run(
+                            runContext
+                        );
+                    }
+                }
+            );
+
+        assertThat(run.getRows(), is(greaterThan(6)));
+        assertThat(run.getColumns(), is(6));
+
+
+    }
+
+    @Test
+    void loadPARQUET() throws Exception {
+        RunContext runContext = runContextFactory.of();
+        String sheet = IdUtils.create();
+
+        URI source = getSource(".parquet");
+        Load task = Load.builder()
+            .id(LoadTest.class.getSimpleName())
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .range(Property.ofValue(sheet))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .from(Property.ofValue(source.toString()))
+            .build();
+
+        var run = RetryUtils.<Load.Output, Exception>of().
+            runRetryIf(isRetryableExternalFailure, () -> {
+                    synchronized (GOOGLE_API_LOCK) {
+                        return task.run(
+                            runContext
+                        );
+                    }
+                }
+            );
+
+        assertThat(run.getRows(), is(6));
+        assertThat(run.getColumns(), is(6));
+
+
+    }
+
+    @Test
+    void loadPARQUETWithHeader() throws Exception {
+        RunContext runContext = runContextFactory.of();
+        String sheet = IdUtils.create();
+
+        URI source = getSource(".parquet");
+
+        Load task = Load.builder()
+            .id(LoadTest.class.getSimpleName())
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .range(Property.ofValue(sheet))
+            .spreadsheetId(Property.ofValue(spreadsheetId))
+            .from(Property.ofValue(source.toString()))
+            .header(Property.ofValue(true))
+            .build();
+
+        var run = RetryUtils.<Load.Output, Exception>of().
+            runRetryIf(isRetryableExternalFailure, () -> {
+                    synchronized (GOOGLE_API_LOCK) {
+                        return task.run(
+                            runContext
+                        );
+                    }
+                }
+            );
+
+        assertThat(run.getRows(), is(greaterThan(6)));
+        assertThat(run.getColumns(), is(6));
+
+
     }
 
     @Test
     void loadWithOverwriteMode() throws Exception {
         RunContext runContext = runContextFactory.of();
-        String spreadsheetId = createSpreadsheet(runContext);
+        String sheet = IdUtils.create();
 
         URI source = storageInterface.put(
             TenantService.MAIN_TENANT,
@@ -378,9 +376,9 @@ class LoadTest {
         Load load1 = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
+            .range(Property.ofValue(sheet))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source.toString()))
-            .range(Property.ofValue("Sheet1!A1:F6"))
             .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
             .build();
 
@@ -395,9 +393,9 @@ class LoadTest {
         Load load2 = Load.builder()
             .id("overwrite_small")
             .serviceAccount(Property.ofValue(serviceAccount))
+            .range(Property.ofValue(sheet))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source2.toString()))
-            .range(Property.ofValue("Sheet1!A1:F6"))
             .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
             .build();
 
@@ -407,13 +405,13 @@ class LoadTest {
         assertThat(out2.getRows(), is(notNullValue()));
         assertThat(out2.getColumns(), is(notNullValue()));
 
-        deleteSpreadsheet(runContext, spreadsheetId);
+
     }
 
     @Test
     void loadWithAppendMode() throws Exception {
         RunContext runContext = runContextFactory.of();
-        String spreadsheetId = createSpreadsheet(runContext);
+        String sheet = IdUtils.create();
 
         URI source = storageInterface.put(
             TenantService.MAIN_TENANT,
@@ -436,9 +434,9 @@ class LoadTest {
         Load load1 = Load.builder()
             .id("load_append_ " + IdUtils.create())
             .serviceAccount(Property.ofValue(serviceAccount))
+            .range(Property.ofValue(sheet))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source.toString()))
-            .range(Property.ofValue("Sheet1"))
             .insertType(Property.ofValue(Load.InsertType.APPEND))
             .build();
 
@@ -450,13 +448,14 @@ class LoadTest {
         Load load2 = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
+            .range(Property.ofValue(sheet))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source2.toString()))
-            .range(Property.ofValue("Sheet1"))
             .insertType(Property.ofValue(Load.InsertType.APPEND))
             .build();
 
-        var out2 = load2.run(runContext);;
+        var out2 = load2.run(runContext);
+
         assertThat(out2.getRows(), is(notNullValue()));
         assertThat(out2.getColumns(), is(notNullValue()));
 
@@ -472,7 +471,7 @@ class LoadTest {
         assertThat(out.getSize(), is(9));
         assertThat(out.getRows().containsKey("Sheet1"), is(true));
 
-        deleteSpreadsheet(runContext, spreadsheetId);
+
     }
 
 
@@ -506,10 +505,11 @@ class LoadTest {
 
         assertThat(createOutput.getSpreadsheetId(), is(notNullValue()));
 
-	    return createOutput.getSpreadsheetId();
+        return createOutput.getSpreadsheetId();
     }
 
-    private void deleteSpreadsheet(RunContext runContext, String spreadsheetId) throws Exception {
+    @AfterAll
+    static void cleanup() throws Exception {
         DeleteSpreadsheet deleteTask = DeleteSpreadsheet.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
