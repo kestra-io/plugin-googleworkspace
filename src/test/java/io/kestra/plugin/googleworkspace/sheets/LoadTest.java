@@ -428,7 +428,7 @@ class LoadTest {
     @Test
     void loadWithAppendMode() throws Exception {
         RunContext runContext = runContextFactory.of();
-        String sheet = nextRange();
+        String spreadsheetId = createSpreadsheet(runContext);
 
         URI source = storageInterface.put(
             TenantService.MAIN_TENANT,
@@ -448,20 +448,10 @@ class LoadTest {
                 .toURI()))
         );
 
-        int before = Read.builder()
-            .id(IdUtils.create())
-            .serviceAccount(Property.ofValue(serviceAccount))
-            .spreadsheetId(Property.ofValue(spreadsheetId))
-            .selectedSheetsTitle(Property.ofValue(List.of("Sheet1")))
-            .fetch(Property.ofValue(true))
-            .build()
-            .run(runContext)
-            .getSize();
-
         Load load1 = Load.builder()
             .id("load_append_ " + IdUtils.create())
             .serviceAccount(Property.ofValue(serviceAccount))
-            .range(Property.ofValue(sheet))
+            .range(Property.ofValue("Sheet1"))
             .insertType(Property.ofValue(Load.InsertType.APPEND))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source.toString()))
@@ -475,7 +465,7 @@ class LoadTest {
         Load load2 = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
-            .range(Property.ofValue(sheet))
+            .range(Property.ofValue("Sheet1"))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source2.toString()))
             .insertType(Property.ofValue(Load.InsertType.APPEND))
@@ -486,17 +476,18 @@ class LoadTest {
         assertThat(out2.getRows(), is(notNullValue()));
         assertThat(out2.getColumns(), is(notNullValue()));
 
-        int after = Read.builder()
-            .id(IdUtils.create())
+        Read read = Read.builder()
+            .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .selectedSheetsTitle(Property.ofValue(List.of("Sheet1")))
             .fetch(Property.ofValue(true))
-            .build()
-            .run(runContext)
-            .getSize();
+            .build();
 
-        assertThat(after - before, is(9));
+        Read.Output out = read.run(runContext);
+
+        assertThat(out.getSize(), is(9));
+        assertThat(out.getRows().containsKey("Sheet1"), is(true));
     }
 
     private URI getSource(String extension) throws IOException, URISyntaxException {
