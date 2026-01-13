@@ -187,11 +187,11 @@ class LoadTest {
 
          var run = RetryUtils.<Load.Output, Exception>of().
             runRetryIf(isRetryableExternalFailure, () -> {
-                synchronized (GOOGLE_API_LOCK) {
-                    return task.run(
-                        runContext
-                    );
-                }
+                    synchronized (GOOGLE_API_LOCK) {
+                        return task.run(
+                            runContext
+                        );
+                    }
                 }
             );
 
