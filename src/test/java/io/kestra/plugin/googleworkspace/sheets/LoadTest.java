@@ -249,11 +249,11 @@ class LoadTest {
 
          var run = RetryUtils.<Load.Output, Exception>of().
             runRetryIf(isRetryableExternalFailure, () -> {
-                synchronized (GOOGLE_API_LOCK) {
-                    return task.run(
-                        runContext
-                    );
-                }
+                    synchronized (GOOGLE_API_LOCK) {
+                        return task.run(
+                            runContext
+                        );
+                    }
                 }
             );
 
@@ -279,11 +279,11 @@ class LoadTest {
 
          var run = RetryUtils.<Load.Output, Exception>of().
             runRetryIf(isRetryableExternalFailure, () -> {
-                synchronized (GOOGLE_API_LOCK) {
-                    return task.run(
-                        runContext
-                    );
-                }
+                    synchronized (GOOGLE_API_LOCK) {
+                        return task.run(
+                            runContext
+                        );
+                    }
                 }
             );
 
@@ -311,11 +311,11 @@ class LoadTest {
 
         var run = RetryUtils.<Load.Output, Exception>of().
             runRetryIf(isRetryableExternalFailure, () -> {
-                synchronized (GOOGLE_API_LOCK) {
-                    return task.run(
-                        runContext
-                    );
-                }
+                    synchronized (GOOGLE_API_LOCK) {
+                        return task.run(
+                            runContext
+                        );
+                    }
                 }
             );
 
@@ -375,9 +375,7 @@ class LoadTest {
             .build();
 
         var out2 = RetryUtils.<Load.Output, Exception>of()
-            .runRetryIf(isRetryableExternalFailure, () ->
-                load2.run(runContext)
-            );
+            .runRetryIf(isRetryableExternalFailure, () -> load2.run(runContext));
 
         assertThat(out2.getRows(), is(notNullValue()));
         assertThat(out2.getColumns(), is(notNullValue()));
