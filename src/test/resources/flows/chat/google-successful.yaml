@@ -5,7 +5,7 @@ inputs:
   - id: url
     type: STRING
     defaults: "http://localhost:59443"
-w
+
 tasks:
   - id: google-successful
     type: io.kestra.plugin.googleworkspace.chat.GoogleChatExecution
