@@ -90,7 +90,6 @@ class LoadTest {
     @Test
     void loadJSON() throws Exception {
         RunContext runContext = runContextFactory.of();
-
         URI source = getSource(".json");
 
         Load task = Load.builder()
