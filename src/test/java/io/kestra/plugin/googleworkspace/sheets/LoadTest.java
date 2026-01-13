@@ -488,8 +488,6 @@ class LoadTest {
 
         assertThat(out.getSize(), is(9));
         assertThat(out.getRows().containsKey("Sheet1"), is(true));
-
-
     }
 
 
