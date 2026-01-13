@@ -468,7 +468,14 @@ class LoadTest {
             .serviceAccount(Property.ofValue(serviceAccount))
             .build();
 
-        CreateSpreadsheet.Output createOutput = createTask.run(runContext);
+        CreateSpreadsheet.Output createOutput =
+            RetryUtils.<CreateSpreadsheet.Output, Exception>of()
+                .runRetryIf(isRetryableExternalFailure, () -> {
+                    synchronized (GOOGLE_API_LOCK) {
+                        return createTask.run(runContext);
+                    }
+                });
+
 
         assertThat(createOutput.getSpreadsheetId(), is(notNullValue()));
 
@@ -482,7 +489,12 @@ class LoadTest {
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .build();
 
-        DeleteSpreadsheet.Output deleteOutput = deleteTask.run(runContext);
+        DeleteSpreadsheet.Output deleteOutput = RetryUtils.<DeleteSpreadsheet.Output, Exception>of()
+            .runRetryIf(isRetryableExternalFailure, () -> {
+                synchronized (GOOGLE_API_LOCK) {
+                    return deleteTask.run(runContext);
+                }
+            });
 
         assertThat(deleteOutput.getSpreadsheetId(), is(notNullValue()));
     }
