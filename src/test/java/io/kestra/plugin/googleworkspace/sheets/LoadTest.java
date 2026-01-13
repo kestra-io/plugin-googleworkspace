@@ -41,7 +41,6 @@ import static org.hamcrest.Matchers.*;
 )
 class LoadTest {
     private static final AtomicInteger ROW_CURSOR = new AtomicInteger(1);
-    private static final Object GOOGLE_API_LOCK = new Object();
 
     private static final String TEST_SHEET = "Sheet1";
 
@@ -89,13 +88,7 @@ class LoadTest {
             .from(Property.ofValue(getSource(".csv").toString()))
             .build();
 
-        var run = RetryUtils.<Load.Output, Exception>of()
-            .runRetryIf(isRetryableExternalFailure, () -> {
-                    synchronized (GOOGLE_API_LOCK) {
-                        return task.run(runContext);
-                    }
-                }
-            );
+        var run = task.run(runContext);
 
         assertThat(run.getRows(), is(6));
         assertThat(run.getColumns(), is(6));
@@ -120,15 +113,7 @@ class LoadTest {
             .from(Property.ofValue(source.toString()))
             .build();
 
-        var run = RetryUtils.<Load.Output, Exception>of().
-            runRetryIf(isRetryableExternalFailure, () -> {
-                    synchronized (GOOGLE_API_LOCK) {
-                        return task.run(
-                            runContext
-                        );
-                    }
-                }
-            );
+        var run = task.run(runContext);
 
         assertThat(run.getRows(), is(6));
         assertThat(run.getColumns(), is(6));
@@ -152,15 +137,7 @@ class LoadTest {
             .header(Property.ofValue(true))
             .build();
 
-        var run = RetryUtils.<Load.Output, Exception>of().
-            runRetryIf(isRetryableExternalFailure, () -> {
-                    synchronized (GOOGLE_API_LOCK) {
-                        return task.run(
-                            runContext
-                        );
-                    }
-                }
-            );
+        var run = task.run(runContext);
 
         assertThat(run.getRows(), is(greaterThan(6)));
         assertThat(run.getColumns(), is(6));
@@ -170,9 +147,7 @@ class LoadTest {
 
     @Test
     void loadAVRO() throws Exception {
-        RunContext runContext = runContextFactory.of();
-        String sheet = TEST_SHEET;
-
+        RunContext runContext = runContextFactory.of();;
 
         URI source = getSource(".avro");
         Load task = Load.builder()
@@ -184,15 +159,7 @@ class LoadTest {
             .from(Property.ofValue(source.toString()))
             .build();
 
-        var run = RetryUtils.<Load.Output, Exception>of().
-            runRetryIf(isRetryableExternalFailure, () -> {
-                    synchronized (GOOGLE_API_LOCK) {
-                        return task.run(
-                            runContext
-                        );
-                    }
-                }
-            );
+        var run = task.run(runContext);
 
         assertThat(run.getRows(), is(6));
         assertThat(run.getColumns(), is(6));
@@ -201,8 +168,6 @@ class LoadTest {
     @Test
     void loadAVROWithHeader() throws Exception {
         RunContext runContext = runContextFactory.of();
-        String sheet = TEST_SHEET;
-
 
         URI source = getSource(".avro");
 
@@ -216,15 +181,7 @@ class LoadTest {
             .header(Property.ofValue(true))
             .build();
 
-        var run = RetryUtils.<Load.Output, Exception>of().
-            runRetryIf(isRetryableExternalFailure, () -> {
-                    synchronized (GOOGLE_API_LOCK) {
-                        return task.run(
-                            runContext
-                        );
-                    }
-                }
-            );
+        var run = task.run(runContext);
 
         assertThat(run.getRows(), is(greaterThan(6)));
         assertThat(run.getColumns(), is(6));
@@ -235,7 +192,7 @@ class LoadTest {
     @Test
     void loadORC() throws Exception {
         RunContext runContext = runContextFactory.of();
-        String sheet = TEST_SHEET;
+
 
 
         URI source = getSource(".orc");
@@ -248,15 +205,13 @@ class LoadTest {
             .from(Property.ofValue(source.toString()))
             .build();
 
-        var run = RetryUtils.<Load.Output, Exception>of().
-            runRetryIf(isRetryableExternalFailure, () -> {
-                    synchronized (GOOGLE_API_LOCK) {
-                        return task.run(
+        var run =
+
+
+                        task.run(
                             runContext
                         );
-                    }
-                }
-            );
+
 
         assertThat(run.getRows(), is(6));
         assertThat(run.getColumns(), is(6));
@@ -282,15 +237,13 @@ class LoadTest {
             .header(Property.ofValue(true))
             .build();
 
-        var run = RetryUtils.<Load.Output, Exception>of().
-            runRetryIf(isRetryableExternalFailure, () -> {
-                    synchronized (GOOGLE_API_LOCK) {
-                        return task.run(
+        var run =
+
+
+                        task.run(
                             runContext
                         );
-                    }
-                }
-            );
+
 
         assertThat(run.getRows(), is(greaterThan(6)));
         assertThat(run.getColumns(), is(6));
@@ -314,15 +267,13 @@ class LoadTest {
             .from(Property.ofValue(source.toString()))
             .build();
 
-        var run = RetryUtils.<Load.Output, Exception>of().
-            runRetryIf(isRetryableExternalFailure, () -> {
-                    synchronized (GOOGLE_API_LOCK) {
-                        return task.run(
+        var run =
+
+
+                        task.run(
                             runContext
                         );
-                    }
-                }
-            );
+
 
         assertThat(run.getRows(), is(6));
         assertThat(run.getColumns(), is(6));
@@ -348,15 +299,13 @@ class LoadTest {
             .header(Property.ofValue(true))
             .build();
 
-        var run = RetryUtils.<Load.Output, Exception>of().
-            runRetryIf(isRetryableExternalFailure, () -> {
-                    synchronized (GOOGLE_API_LOCK) {
-                        return task.run(
+        var run =
+
+
+                        task.run(
                             runContext
                         );
-                    }
-                }
-            );
+
 
         assertThat(run.getRows(), is(greaterThan(6)));
         assertThat(run.getColumns(), is(6));
@@ -509,13 +458,7 @@ class LoadTest {
             .serviceAccount(Property.ofValue(serviceAccount))
             .build();
 
-        CreateSpreadsheet.Output createOutput =
-            RetryUtils.<CreateSpreadsheet.Output, Exception>of()
-                .runRetryIf(isRetryableExternalFailure, () -> {
-                    synchronized (GOOGLE_API_LOCK) {
-                        return createTask.run(runContext);
-                    }
-                });
+        CreateSpreadsheet.Output createOutput = createTask.run(runContext);
 
         assertThat(createOutput.getSpreadsheetId(), is(notNullValue()));
 
@@ -530,13 +473,8 @@ class LoadTest {
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .build();
 
-        DeleteSpreadsheet.Output deleteOutput = RetryUtils.<DeleteSpreadsheet.Output, Exception>of()
-            .runRetryIf(isRetryableExternalFailure, () -> {
-                synchronized (GOOGLE_API_LOCK) {
-                    return deleteTask.run(runContext);
-                }
-            });
-
+        DeleteSpreadsheet.Output deleteOutput = deleteTask.run(runContext);
+        
         assertThat(deleteOutput.getSpreadsheetId(), is(notNullValue()));
     }
 
