@@ -303,8 +303,6 @@ class LoadTest {
 
         assertThat(run.getRows(), is(greaterThan(6)));
         assertThat(run.getColumns(), is(6));
-
-
     }
 
     @Test
