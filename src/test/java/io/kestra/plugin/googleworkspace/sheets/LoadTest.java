@@ -449,6 +449,8 @@ class LoadTest {
         );
 
         int before = Read.builder()
+            .id(IdUtils.create())
+            .serviceAccount(Property.ofValue(serviceAccount))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .selectedSheetsTitle(Property.ofValue(List.of("Sheet1")))
             .fetch(Property.ofValue(true))
@@ -464,7 +466,7 @@ class LoadTest {
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source.toString()))
             .build();
-        
+
         var out1 = load1.run(runContext);
 
         assertThat(out1.getRows(), is(notNullValue()));
@@ -485,6 +487,8 @@ class LoadTest {
         assertThat(out2.getColumns(), is(notNullValue()));
 
         int after = Read.builder()
+            .id(IdUtils.create())
+            .serviceAccount(Property.ofValue(serviceAccount))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .selectedSheetsTitle(Property.ofValue(List.of("Sheet1")))
             .fetch(Property.ofValue(true))
