@@ -284,8 +284,6 @@ class LoadTest {
     @Test
     void loadPARQUETWithHeader() throws Exception {
         RunContext runContext = runContextFactory.of();
-        String sheet = TEST_SHEET;
-
 
         URI source = getSource(".parquet");
 
