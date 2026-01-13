@@ -40,6 +40,10 @@ class LoadTest {
     @Inject
     private RunContextFactory runContextFactory;
 
+    private static String spreadsheetId;
+    private static RunContext runContext;
+
+
     @Inject
     private StorageInterface storageInterface;
 
@@ -50,8 +54,29 @@ class LoadTest {
         serviceAccount = UtilsTest.serviceAccount();
     }
 
+    @BeforeAll
+    static void setup(RunContextFactory runContextFactory) throws Exception {
+        RunContext runContext = runContextFactory.of();
+
+        CreateSpreadsheet createTask = CreateSpreadsheet.builder()
+            .id("shared-spreadsheet")
+            .title(Property.ofValue("Kestra Integration Test"))
+            .serviceAccount(Property.ofValue(serviceAccount))
+            .build();
+
+        spreadsheetId =
+            RetryUtils.<CreateSpreadsheet.Output, Exception>of()
+                .runRetryIf(isRetryableExternalFailure, () -> {
+                    synchronized (GOOGLE_API_LOCK) {
+                        return createTask.run(runContext);
+                    }
+                })
+                .getSpreadsheetId();
+    }
+
     @Test
     void loadCSV() throws Exception {
+        String sheet = IdUtils.create();
         RunContext runContext = runContextFactory.of();
 
         String spreadsheetId = createSpreadsheet(runContext);
@@ -79,6 +104,8 @@ class LoadTest {
 
     @Test
     void loadJSON() throws Exception {
+        String sheet = IdUtils.create();
+
         RunContext runContext = runContextFactory.of();
 
         String spreadsheetId = createSpreadsheet(runContext);
