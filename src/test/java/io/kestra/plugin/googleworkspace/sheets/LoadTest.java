@@ -428,7 +428,7 @@ class LoadTest {
     @Test
     void loadWithAppendMode() throws Exception {
         RunContext runContext = runContextFactory.of();
-        String sheet = TEST_SHEET;
+        String sheet = nextRange();
 
         URI source = storageInterface.put(
             TenantService.MAIN_TENANT,
@@ -452,7 +452,7 @@ class LoadTest {
             .id("load_append_ " + IdUtils.create())
             .serviceAccount(Property.ofValue(serviceAccount))
             .range(Property.ofValue(sheet))
-            .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
+            .insertType(Property.ofValue(Load.InsertType.APPEND))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source.toString()))
             .build();
@@ -476,17 +476,17 @@ class LoadTest {
         assertThat(out2.getRows(), is(notNullValue()));
         assertThat(out2.getColumns(), is(notNullValue()));
 
-        Read read = Read.builder()
+        ReadRange read = ReadRange.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
             .spreadsheetId(Property.ofValue(spreadsheetId))
-            .selectedSheetsTitle(Property.ofValue(List.of(sheet)))
+            .range(Property.ofValue(sheet))
             .fetch(Property.ofValue(true))
             .build();
-        Read.Output out = read.run(runContext);
+
+        ReadRange.Output out = read.run(runContext);
 
         assertThat(out.getSize(), is(9));
-        assertThat(out.getRows().containsKey("Sheet1"), is(true));
     }
 
     private URI getSource(String extension) throws IOException, URISyntaxException {
