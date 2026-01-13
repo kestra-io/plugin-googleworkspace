@@ -25,8 +25,6 @@ import static org.hamcrest.Matchers.is;
 
 @KestraTest
 class ReadRangeTest {
-    private static final Object GOOGLE_API_LOCK = new Object();
-
     @Inject
     private RunContextFactory runContextFactory;
 
@@ -45,15 +43,7 @@ class ReadRangeTest {
             .fetch(Property.ofValue(true))
             .build();
 
-        var run = RetryUtils.<ReadRange.Output, Exception>of()
-            .runRetryIf(isRetryableExternalFailure, () -> {
-                    synchronized (GOOGLE_API_LOCK) {
-                        return task.run(
-                            TestsUtils.mockRunContext(runContextFactory, task, Map.of())
-                        );
-                    }
-                }
-            );
+        var run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));
 
         assertThat(run.getSize(), is(30));
         assertThat(((Map<String, Object>) run.getRows().get(0)).get("Date"), is("1/1/2012"));
@@ -70,15 +60,7 @@ class ReadRangeTest {
             .range(Property.ofValue("Second One!A1:I"))
             .build();
 
-        var run = RetryUtils.<ReadRange.Output, Exception>of()
-            .runRetryIf(isRetryableExternalFailure, () -> {
-                    synchronized (GOOGLE_API_LOCK) {
-                        return task.run(
-                            TestsUtils.mockRunContext(runContextFactory, task, Map.of())
-                        );
-                    }
-                }
-            );
+        var run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));
 
         assertThat(run.getSize(), is(30));
 
@@ -88,11 +70,4 @@ class ReadRangeTest {
         assertThat(((Map<String, Object>) result.get(0)).get("Student Name"), is("Alexandra"));
         assertThat(((Map<String, Object>) result.get(0)).get("Formula"), is("Female"));
     }
-
-    static Predicate<Throwable> isRetryableExternalFailure = throwable -> {
-        if (throwable instanceof com.google.api.client.googleapis.json.GoogleJsonResponseException e) {
-            return e.getStatusCode() == 429 || e.getStatusCode() == 503;
-        }
-        return false;
-    };
 }

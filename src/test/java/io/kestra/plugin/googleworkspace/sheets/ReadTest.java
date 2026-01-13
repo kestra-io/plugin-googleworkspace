@@ -20,8 +20,6 @@ import static org.hamcrest.Matchers.nullValue;
 
 @KestraTest
 class ReadTest {
-    private static final Object GOOGLE_API_LOCK = new Object();
-
     @Inject
     private RunContextFactory runContextFactory;
 
@@ -36,13 +34,7 @@ class ReadTest {
             .fetch(Property.ofValue(true))
             .build();
 
-        var run = RetryUtils.<Read.Output, Exception>of()
-            .runRetryIf(isRetryableExternalFailure, () -> {
-                    synchronized (GOOGLE_API_LOCK) {
-                        return task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));
-                    }
-                }
-            );
+        var run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));
 
         assertThat(run.getSize(), is(93));
         assertThat(((Map<String, Object>) run.getRows().get("Class Data").get(6)).get("Date"), is("7/11/2012"));
@@ -66,24 +58,11 @@ class ReadTest {
             .fetch(Property.ofValue(true))
             .build();
 
-        var run = RetryUtils.<Read.Output, Exception>of()
-            .runRetryIf(isRetryableExternalFailure, () -> {
-                    synchronized (GOOGLE_API_LOCK) {
-                        return task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));
-                    }
-                }
-            );
+        var run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));
 
         assertThat(run.getRows().size(), is(1));
         assertThat(run.getSize(), is(31));
         assertThat(((Map<String, Object>) run.getRows().get("Second One").get(0)).get("Formula"), is("Female"));
         assertThat(((Map<String, Object>) run.getRows().get("Second One").get(0)).size(), is(3));
     }
-
-    static Predicate<Throwable> isRetryableExternalFailure = throwable -> {
-        if (throwable instanceof com.google.api.client.googleapis.json.GoogleJsonResponseException e) {
-            return e.getStatusCode() == 429 || e.getStatusCode() == 503;
-        }
-        return false;
-    };
 }
