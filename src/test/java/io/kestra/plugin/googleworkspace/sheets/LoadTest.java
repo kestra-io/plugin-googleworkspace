@@ -299,12 +299,7 @@ class LoadTest {
             .header(Property.ofValue(true))
             .build();
 
-        var run =
-
-
-                        task.run(
-                            runContext
-                        );
+        var run = task.run(runContext);
 
 
         assertThat(run.getRows(), is(greaterThan(6)));
@@ -474,7 +469,7 @@ class LoadTest {
             .build();
 
         DeleteSpreadsheet.Output deleteOutput = deleteTask.run(runContext);
-        
+
         assertThat(deleteOutput.getSpreadsheetId(), is(notNullValue()));
     }
 
