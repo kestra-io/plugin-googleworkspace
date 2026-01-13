@@ -76,7 +76,6 @@ class LoadTest {
 
     @Test
     void loadCSV() throws Exception {
-
         RunContext runContext = runContextFactory.of();
 
         Load task = Load.builder()
@@ -92,16 +91,11 @@ class LoadTest {
 
         assertThat(run.getRows(), is(6));
         assertThat(run.getColumns(), is(6));
-
-
     }
 
     @Test
     void loadJSON() throws Exception {
-
-
         RunContext runContext = runContextFactory.of();
-        String sheet = TEST_SHEET;
 
         URI source = getSource(".json");
         Load task = Load.builder()
@@ -122,8 +116,6 @@ class LoadTest {
     @Test
     void loadJSONWithHeader() throws Exception {
         RunContext runContext = runContextFactory.of();
-        String sheet = TEST_SHEET;
-
 
         URI source = getSource(".json");
 
@@ -141,8 +133,6 @@ class LoadTest {
 
         assertThat(run.getRows(), is(greaterThan(6)));
         assertThat(run.getColumns(), is(6));
-
-
     }
 
     @Test
@@ -150,6 +140,7 @@ class LoadTest {
         RunContext runContext = runContextFactory.of();;
 
         URI source = getSource(".avro");
+
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
@@ -185,17 +176,14 @@ class LoadTest {
 
         assertThat(run.getRows(), is(greaterThan(6)));
         assertThat(run.getColumns(), is(6));
-
-
     }
 
     @Test
     void loadORC() throws Exception {
         RunContext runContext = runContextFactory.of();
 
-
-
         URI source = getSource(".orc");
+
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
@@ -205,25 +193,15 @@ class LoadTest {
             .from(Property.ofValue(source.toString()))
             .build();
 
-        var run =
-
-
-                        task.run(
-                            runContext
-                        );
-
+        var run = task.run(runContext);
 
         assertThat(run.getRows(), is(6));
         assertThat(run.getColumns(), is(6));
-
-
     }
 
     @Test
     void loadORCWithHeader() throws Exception {
         RunContext runContext = runContextFactory.of();
-        String sheet = TEST_SHEET;
-
 
         URI source = getSource(".orc");
 
@@ -237,25 +215,15 @@ class LoadTest {
             .header(Property.ofValue(true))
             .build();
 
-        var run =
-
-
-                        task.run(
-                            runContext
-                        );
-
+        var run = task.run(runContext);
 
         assertThat(run.getRows(), is(greaterThan(6)));
         assertThat(run.getColumns(), is(6));
-
-
     }
 
     @Test
     void loadPARQUET() throws Exception {
         RunContext runContext = runContextFactory.of();
-        String sheet = TEST_SHEET;
-
 
         URI source = getSource(".parquet");
         Load task = Load.builder()
@@ -271,8 +239,6 @@ class LoadTest {
 
         assertThat(run.getRows(), is(6));
         assertThat(run.getColumns(), is(6));
-
-
     }
 
     @Test
@@ -330,10 +296,7 @@ class LoadTest {
             .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
             .build();
 
-        var out1 = RetryUtils.<Load.Output, Exception>of()
-            .runRetryIf(isRetryableExternalFailure, () ->
-                load1.run(runContext)
-            );
+        var out1 = load1.run(runContext);
 
         assertThat(out1.getRows(), is(notNullValue()));
         assertThat(out1.getColumns(), is(notNullValue()));
@@ -348,8 +311,7 @@ class LoadTest {
             .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
             .build();
 
-        var out2 = RetryUtils.<Load.Output, Exception>of()
-            .runRetryIf(isRetryableExternalFailure, () -> load2.run(runContext));
+        var out2 = load2.run(runContext);
 
         assertThat(out2.getRows(), is(notNullValue()));
         assertThat(out2.getColumns(), is(notNullValue()));
@@ -480,14 +442,7 @@ class LoadTest {
             .getClassLoader()
             .getResource(".gcp-service-account.json") == null;
     }
-
-    static Predicate<Throwable> isRetryableExternalFailure = throwable -> {
-        if (throwable instanceof com.google.api.client.googleapis.json.GoogleJsonResponseException e) {
-            return e.getStatusCode() == 429 || e.getStatusCode() == 503;
-        }
-        return false;
-    };
-
+    
     private String nextRange() {
         int start = ROW_CURSOR.getAndAdd(20);
         return "Sheet1!A" + start;
