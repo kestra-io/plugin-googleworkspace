@@ -92,6 +92,7 @@ class LoadTest {
         RunContext runContext = runContextFactory.of();
 
         URI source = getSource(".json");
+        
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
