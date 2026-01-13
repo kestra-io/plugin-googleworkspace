@@ -423,6 +423,7 @@ class LoadTest {
 
         assertThat(deleteOutput.getSpreadsheetId(), is(notNullValue()));
     }
+    
 
     @AfterAll
     static void cleanup() throws Exception {
@@ -442,7 +443,7 @@ class LoadTest {
             .getClassLoader()
             .getResource(".gcp-service-account.json") == null;
     }
-    
+
     private String nextRange() {
         int start = ROW_CURSOR.getAndAdd(20);
         return "Sheet1!A" + start;
