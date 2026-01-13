@@ -423,7 +423,6 @@ class LoadTest {
 
         assertThat(deleteOutput.getSpreadsheetId(), is(notNullValue()));
     }
-    
 
     @AfterAll
     static void cleanup() throws Exception {
