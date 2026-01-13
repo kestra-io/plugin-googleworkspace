@@ -460,8 +460,7 @@ class LoadTest {
 
         return createOutput.getSpreadsheetId();
     }
-
-
+    
     private void deleteSpreadsheet(RunContext runContext, String spreadsheetId) throws Exception {
         DeleteSpreadsheet deleteTask = DeleteSpreadsheet.builder()
             .id(LoadTest.class.getSimpleName())
@@ -499,7 +498,7 @@ class LoadTest {
         }
         return false;
     };
-    
+
     private String nextRange() {
         int start = ROW_CURSOR.getAndAdd(20);
         return "Sheet1!A" + start;
