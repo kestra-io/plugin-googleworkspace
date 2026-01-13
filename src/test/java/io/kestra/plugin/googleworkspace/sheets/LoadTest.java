@@ -92,7 +92,7 @@ class LoadTest {
         RunContext runContext = runContextFactory.of();
 
         URI source = getSource(".json");
-        
+
         Load task = Load.builder()
             .id(LoadTest.class.getSimpleName())
             .serviceAccount(Property.ofValue(serviceAccount))
@@ -238,7 +238,6 @@ class LoadTest {
     @Test
     void loadPARQUETWithHeader() throws Exception {
         RunContext runContext = runContextFactory.of();
-
         URI source = getSource(".parquet");
 
         Load task = Load.builder()
