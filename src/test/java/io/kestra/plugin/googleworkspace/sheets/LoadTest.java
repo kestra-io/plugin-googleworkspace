@@ -453,7 +453,7 @@ class LoadTest {
         Load load1 = Load.builder()
             .id("load_append_ " + IdUtils.create())
             .serviceAccount(Property.ofValue(serviceAccount))
-            .range(Property.ofValue(sheet + "!A1"))
+            .range(Property.ofValue(sheet))
             .insertType(Property.ofValue(Load.InsertType.OVERWRITE))
             .spreadsheetId(Property.ofValue(spreadsheetId))
             .from(Property.ofValue(source.toString()))
