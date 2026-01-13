@@ -554,6 +554,4 @@ class LoadTest {
         }
         return false;
     };
-
-    
 }
