@@ -41,12 +41,17 @@ public abstract class AbstractSheet extends AbstractTask {
                 .build();
 
             request.setUnsuccessfulResponseHandler(new HttpBackOffUnsuccessfulResponseHandler(backOff)
-                .setBackOffRequired(response -> response.getStatusCode() == 429 || response.getStatusCode() / 100 == 5)
+                .setBackOffRequired(this::shouldRetry)
             );
         };
 
         return new Sheets.Builder(this.netHttpTransport(), JSON_FACTORY, initializer)
             .setApplicationName("Kestra")
             .build();
+    }
+
+    private boolean shouldRetry(HttpResponse response) {
+    int status = response.getStatusCode();
+    return status == 429 || status >= 500;
     }
 }
