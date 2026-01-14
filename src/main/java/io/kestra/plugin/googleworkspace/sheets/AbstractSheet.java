@@ -51,7 +51,7 @@ public abstract class AbstractSheet extends AbstractTask {
     }
 
     private boolean shouldRetry(HttpResponse response) {
-    int status = response.getStatusCode();
-    return status == 429 || status >= 500;
+        int status = response.getStatusCode();
+        return status == 429 || status >= 500;
     }
 }
