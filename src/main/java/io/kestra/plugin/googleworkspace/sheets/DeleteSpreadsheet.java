@@ -20,7 +20,8 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @NoArgsConstructor
 @Schema(
-	title = "Delete a Google Sheet."
+	title = "Delete a Google Spreadsheet",
+    description = "Deletes a spreadsheet by ID using a service account; calls Drive delete under the hood"
 )
 @Plugin(
     examples = {
@@ -47,7 +48,8 @@ import lombok.experimental.SuperBuilder;
 public class DeleteSpreadsheet extends AbstractSheet implements RunnableTask<DeleteSpreadsheet.Output> {
 
 	@Schema(
-		title = "Spreadsheet ID"
+		title = "Spreadsheet ID",
+        description = "ID of the spreadsheet to delete"
 	)
 	@NotNull
 	private Property<String> spreadsheetId;
@@ -83,7 +85,7 @@ public class DeleteSpreadsheet extends AbstractSheet implements RunnableTask<Del
 	public static class Output implements io.kestra.core.models.tasks.Output {
 
 		@Schema(
-			title = "The spreadsheet ID"
+			title = "Deleted spreadsheet ID"
 		)
 		private String spreadsheetId;
 

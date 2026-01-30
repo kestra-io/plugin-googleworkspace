@@ -22,27 +22,27 @@ import reactor.core.publisher.Flux;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Read data from a Google Sheets spreadsheet"
+    title = "Read data from a Google Sheet",
+    description = "Base class for reading values with configurable render options, header handling, and optional fetch/store output"
 )
 public abstract class AbstractRead extends AbstractSheet {
     @Schema(
-        title = "The spreadsheet unique id"
+        title = "Spreadsheet ID"
     )
     @NotNull
     protected Property<String> spreadsheetId;
 
     @Schema(
-        title = "Determines how values should be rendered in the output",
-        description = "For more details, refer to the [ValueRenderOption API](https://developers.google.com/sheets/api/reference/rest/v4/ValueRenderOption)."
+        title = "Value render option",
+        description = "FORMATTED_VALUE, UNFORMATTED_VALUE (default), or FORMULA"
     )
     @NotNull
     @Builder.Default
     protected Property<ValueRender> valueRender = Property.ofValue(ValueRender.UNFORMATTED_VALUE);
 
     @Schema(
-        title = "How dates, times, and durations should be represented in the output",
-        description = "This is ignored if valueRender is `FORMATTED_VALUE`.\n" +
-            "For more details, refer to the [DateTimeRenderOption API](https://developers.google.com/sheets/api/reference/rest/v4/DateTimeRenderOption)"
+        title = "Date/time render option",
+        description = "SERIAL_NUMBER or FORMATTED_STRING (default); ignored if valueRender=FORMATTED_VALUE"
     )
     @NotNull
     @Builder.Default
@@ -50,18 +50,21 @@ public abstract class AbstractRead extends AbstractSheet {
 
     @Builder.Default
     @Schema(
-        title = "Specifies if the first line should be the header (default: false)"
+        title = "Treat first row as header",
+        description = "When true, maps rows to objects using first row keys; default true"
     )
     protected final Property<Boolean> header = Property.ofValue(true);
 
     @Schema(
-        title = "Whether to fetch the data from the query result to the task output"
+        title = "Fetch results",
+        description = "If true, data is returned in output; otherwise written to storage"
     )
     @Builder.Default
     protected final Property<Boolean> fetch = Property.ofValue(false);
 
     @Schema(
-        title = "Whether to store the data from the query result into an ION-serialized data file"
+        title = "Store results",
+        description = "If true, writes ION file to storage; default true"
     )
     @Builder.Default
     protected final Property<Boolean> store = Property.ofValue(true);

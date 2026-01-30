@@ -40,9 +40,8 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Trigger that listens for new emails in Gmail",
-    description = "Monitors Gmail inbox or specific labels for new messages and emits an event for each new email detected. " +
-        "The trigger uses polling to check for new emails and filters by message timestamp to avoid duplicates."
+    title = "Poll Gmail for newly received emails",
+    description = "Polls Gmail for messages newer than the previous interval (default PT5M, min PT1M) and triggers an execution with the matches. Supports search query and label filters, optionally includes spam/trash. Limits processing to maxMessagesPerPoll (default 50)."
 )
 @Plugin(
     examples = {
@@ -139,42 +138,40 @@ public class MailReceivedTrigger extends AbstractTrigger implements PollingTrigg
 
     @Schema(
         title = "Gmail search query",
-        description = "Search query using Gmail search syntax (e.g., 'is:unread', 'from:sender@example.com', 'subject:important'). " +
-            "If not specified, monitors all messages."
+        description = "Gmail search string (e.g., is:unread, from:sender@example.com, subject:important); empty monitors all"
     )
     private Property<String> query;
 
     @Schema(
-        title = "Label IDs to filter messages",
-        description = "List of label IDs to restrict the search (e.g., INBOX, SENT, DRAFT, UNREAD). " +
-            "If not specified, searches all accessible messages."
+        title = "Label filters",
+        description = "Label IDs to restrict search (INBOX, SENT, UNREAD, etc.); empty searches all"
     )
     private Property<List<String>> labelIds;
 
     @Schema(
         title = "Include spam and trash",
-        description = "Whether to include messages from SPAM and TRASH in the results"
+        description = "Whether to include SPAM and TRASH messages"
     )
     @Builder.Default
     private Property<Boolean> includeSpamTrash = Property.ofValue(false);
 
     @Schema(
-        title = "The polling interval",
-        description = "How frequently to check for new emails. Must be at least PT1M (1 minute)."
+        title = "Polling interval",
+        description = "How often to check for new emails; minimum PT1M, default PT5M"
     )
     @Builder.Default
     protected Duration interval = Duration.ofMinutes(5);
 
     @Schema(
-        title = "Maximum number of messages to process per poll",
-        description = "Limits the number of new messages processed in a single poll to avoid overwhelming the system"
+        title = "Messages processed per poll",
+        description = "Upper bound on messages processed each poll; default 50"
     )
     @Builder.Default
     protected Property<Integer> maxMessagesPerPoll = Property.ofValue(50);
 
     @Schema(
-        title = "Lookback window for first run",
-        description = "On first execution, how far back to look for messages. Defaults to the polling interval."
+        title = "Initial lookback window",
+        description = "How far back to look on first run; defaults to polling interval"
     )
     private Property<Duration> initialLookback;
 
@@ -469,9 +466,8 @@ public class MailReceivedTrigger extends AbstractTrigger implements PollingTrigg
     @Jacksonized
     public static class Output implements io.kestra.core.models.tasks.Output {
         @Schema(
-            title = "List of new messages found during the poll",
-            description = "Each message can be accessed via trigger.messages[0], trigger.messages[1], etc. " +
-                "For convenience, if only one message is found, its fields are also available directly as trigger.subject, trigger.from, etc."
+            title = "New messages detected",
+            description = "Messages created since last interval; trigger.subject/from/etc. mirror the first when only one exists"
         )
         private List<EmailMetadata> messages;
     }

@@ -30,8 +30,8 @@ public abstract class AbstractDriveTrigger extends AbstractTrigger {
     private static final String DRIVE_SCOPE = "https://www.googleapis.com/auth/drive";
 
     @Schema(
-        title = "The Google Cloud service account key",
-        description = "Service account JSON key with access to Google Drive API"
+        title = "Service account key",
+        description = "Google service account JSON with Drive scope; if omitted, Application Default Credentials are used"
     )
     protected Property<String> serviceAccount;
 

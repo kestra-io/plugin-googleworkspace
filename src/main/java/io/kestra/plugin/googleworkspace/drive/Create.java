@@ -34,7 +34,8 @@ import org.slf4j.Logger;
     }
 )
 @Schema(
-    title = "Create a file or a folder in Google Drive."
+    title = "Create a file or folder in Drive",
+    description = "Creates metadata only (or empty folder) using a service account. Set `mimeType` to `application/vnd.google-apps.folder` for folders; parents can target Shared Drive."
 )
 public class Create extends AbstractCreate implements RunnableTask<Create.Output> {
     @Override
@@ -63,7 +64,8 @@ public class Create extends AbstractCreate implements RunnableTask<Create.Output
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
         @Schema(
-            title = "The file metadata created"
+            title = "Created file metadata",
+            description = "Drive file resource returned by create call"
         )
         private final io.kestra.plugin.googleworkspace.drive.models.File file;
     }

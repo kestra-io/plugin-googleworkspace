@@ -50,19 +50,20 @@ import jakarta.validation.constraints.NotNull;
     }
 )
 @Schema(
-    title = "Export a Google Workspace document into a downloadable file format, then download the file.",
-    description = "Possible Google Workspace documents to export include Google Docs, Sheets, and Slides, and they can be exported as Word, Excel, PowerPoint files, and more."
+    title = "Export a Google Doc and download it",
+    description = "Exports a Google Docs/Sheets/Slides file to another MIME type (e.g., DOCX, CSV, PPTX) and downloads it to Kestra storage. Uses supportsAllDrives; exported size is taken from the downloaded file because Google apps sizes are often null."
 )
 public class Export extends AbstractDrive implements RunnableTask<Export.Output> {
     @Schema(
-        title = "The file id to copy"
+        title = "File ID to export",
+        description = "Google Workspace file ID to export; supports Shared Drives"
     )
     @NotNull
     private Property<String> fileId;
 
     @Schema(
-        title = "The content-type of the file",
-        description = "a valid [RFC2045](https://datatracker.ietf.org/doc/html/rfc2045) like `text/csv`, `application/msword`, etc. "
+        title = "Export MIME type",
+        description = "Target MIME type, e.g. text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
     @NotNull
     private Property<String> contentType;
@@ -107,12 +108,13 @@ public class Export extends AbstractDrive implements RunnableTask<Export.Output>
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
         @Schema(
-            title = "The URL of the downloaded file on Kestra storage"
+            title = "Kestra storage URI",
+            description = "kestra:// URI of the exported file"
         )
         private final URI uri;
 
         @Schema(
-            title = "The file metadata uploaded"
+            title = "Exported file metadata"
         )
         private final io.kestra.plugin.googleworkspace.drive.models.File file;
     }

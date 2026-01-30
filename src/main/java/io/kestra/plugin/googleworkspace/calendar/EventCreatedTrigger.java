@@ -34,18 +34,10 @@ import java.util.*;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Trigger that listens for new events created in a Google Calendar",
-    description = "Monitors one or multiple Google Calendars for newly created events and emits a Kestra execution when new events are detected. " +
-        "The trigger polls calendars at regular intervals and detects events based on their creation time. " +
-        "\n\n" +
-        "Authentication: Requires a Google Cloud service account with Calendar API access (scope: `https://www.googleapis.com/auth/calendar`). " +
-        "Share the target calendars with the service account email address. " +
-        "\n\n" +
-        "Configuration: Specify one or more calendar IDs in `calendarIds`. The calendarId must be an email address like `team@company.com` or `your-name@company.com` depending on your organization." +
-        "Set a polling `interval` (minimum PT1M). Optionally filter events by keywords (`searchQuery`), organizer email, or status. " +
-        "\n\n" +
-        "Performance: Each calendar requires a separate API call. Use filters to reduce processing load and set `maxEventsPerPoll` to avoid overwhelming the system. " +
-        "The trigger automatically handles errors and continues monitoring if one calendar fails."
+    title = "Poll Google Calendar for new events",
+    description = "Polls one or more shared calendars for events created since the previous interval and starts an Execution when any are found. " +
+        "Uses a service account with Calendar scope (`https://www.googleapis.com/auth/calendar`); each calendar ID must be shared with that account. " +
+        "Minimum interval is PT1M (default PT5M); `maxEventsPerPoll` defaults to 100 and must be 1-2500. Errors on one calendar are logged and polling continues."
 )
 @Plugin(
     examples = {
@@ -147,9 +139,8 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
     }
 
     @Schema(
-        title = "Calendar IDs to monitor",
-        description = "List of calendar IDs to monitor (for example, team@company.com)."
-
+        title = "Calendar IDs",
+        description = "Email-style calendar IDs shared with the service account; each calendar is polled separately."
     )
     @NotNull
     protected Property<List<String>> calendarIds;
@@ -163,27 +154,26 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
 
     @Schema(
         title = "Organizer email filter",
-        description = "Only events organized by this email address will trigger events"
+        description = "Only events organized by this email address trigger an execution"
     )
     protected Property<String> organizerEmail;
 
     @Schema(
         title = "Event status filter",
-        description = "Only events with this status will trigger executions."
+        description = "Only events with this status trigger executions (CONFIRMED, TENTATIVE, CANCELLED)"
     )
     protected Property<EventStatus> eventStatus;
 
     @Schema(
-        title = "The polling interval",
-        description = "How frequently to check for new events. Must be at least PT1M (1 minute)."
+        title = "Polling interval",
+        description = "How frequently to check for new events; minimum PT1M, default PT5M"
     )
     @Builder.Default
     protected Duration interval = Duration.ofMinutes(5);
 
     @Schema(
-        title = "Maximum number of events to process per poll",
-        description = "Limits the number of new events processed in a single poll to avoid overwhelming the system. " +
-            "Valid range: 1-" + MAX_EVENTS_PER_POLL + " (Google Calendar API maximum). Default is 100."
+        title = "Events processed per poll",
+        description = "Upper bound on new events processed per calendar per poll; default 100, valid range 1-" + MAX_EVENTS_PER_POLL + " (API limit)"
     )
     @Builder.Default
     protected Property<Integer> maxEventsPerPoll = Property.ofValue(100);

@@ -27,8 +27,8 @@ import java.util.stream.Collectors;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Get a Gmail message",
-    description = "Retrieve a specific Gmail message by ID with full content and metadata"
+    title = "Fetch a Gmail message by ID",
+    description = "Retrieves one message with chosen format (minimal, full, raw, metadata). Defaults to full; requires OAuth Gmail scopes."
 )
 @Plugin(
     examples = {
@@ -77,14 +77,14 @@ import java.util.stream.Collectors;
 public class Get extends AbstractMail implements RunnableTask<Get.Output> {
     @Schema(
         title = "Message ID",
-        description = "The ID of the message to retrieve"
+        description = "Gmail message ID to fetch"
     )
     @NotNull
     private Property<String> messageId;
 
     @Schema(
         title = "Message format",
-        description = "The format to return the message payload in (options: minimal, full, raw, metadata)"
+        description = "minimal, full, raw, or metadata; defaults to full"
     )
     @Builder.Default
     private Property<String> format = Property.ofValue("full");
@@ -259,7 +259,7 @@ public class Get extends AbstractMail implements RunnableTask<Get.Output> {
     @Builder
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
-        @Schema(title = "The retrieved message")
+        @Schema(title = "Retrieved message")
         private io.kestra.plugin.googleworkspace.mail.models.Message message;
     }
 }

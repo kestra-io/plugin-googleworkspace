@@ -34,29 +34,29 @@ public abstract class AbstractMail extends Task implements OAuthInterface {
     protected static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 
     @Schema(
-        title = "OAuth 2.0 Client ID",
-        description = "The OAuth 2.0 client ID from Google Cloud Console"
+        title = "OAuth client ID",
+        description = "Google OAuth 2.0 client ID for the Gmail project"
     )
     @NotNull
     protected Property<String> clientId;
 
     @Schema(
-        title = "OAuth 2.0 Client Secret",
-        description = "The OAuth 2.0 client secret from Google Cloud Console"
+        title = "OAuth client secret",
+        description = "Google OAuth 2.0 client secret"
     )
     @NotNull
     protected Property<String> clientSecret;
 
     @Schema(
-        title = "OAuth 2.0 Refresh Token",
-        description = "The OAuth 2.0 refresh token obtained through the authorization flow"
+        title = "OAuth refresh token",
+        description = "Refresh token obtained via OAuth consent; used to mint access tokens"
     )
     @NotNull
     protected Property<String> refreshToken;
 
     @Schema(
-        title = "OAuth 2.0 Access Token",
-        description = "The OAuth 2.0 access token (optional, will be generated from refresh token if not provided)"
+        title = "OAuth access token",
+        description = "Optional access token; if absent, one is fetched from the refresh token"
     )
     protected Property<String> accessToken;
 

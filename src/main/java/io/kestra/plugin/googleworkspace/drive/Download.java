@@ -48,11 +48,13 @@ import jakarta.validation.constraints.NotNull;
     }
 )
 @Schema(
-    title = "Download a file from a Google Drive folder."
+    title = "Download a Drive file to Kestra storage",
+    description = "Downloads file content by ID using a service account and stores it in internal storage. Uses supportsAllDrives; metrics include file size."
 )
 public class Download extends AbstractDrive implements RunnableTask<Download.Output> {
     @Schema(
-        title = "The file id to copy"
+        title = "File ID to download",
+        description = "Drive file ID; supports Shared Drives"
     )
     @NotNull
     private Property<String> fileId;
@@ -90,12 +92,13 @@ public class Download extends AbstractDrive implements RunnableTask<Download.Out
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
         @Schema(
-            title = "The URL of the downloaded file on Kestra storage"
+            title = "Kestra storage URI",
+            description = "kestra:// URI where the content was written"
         )
         private final URI uri;
 
         @Schema(
-            title = "The file metadata uploaded"
+            title = "Downloaded file metadata"
         )
         private final io.kestra.plugin.googleworkspace.drive.models.File file;
     }

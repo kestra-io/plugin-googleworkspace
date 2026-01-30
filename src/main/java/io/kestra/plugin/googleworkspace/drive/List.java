@@ -53,21 +53,19 @@ import java.util.stream.Collectors;
     }
 )
 @Schema(
-    title = "List files in a Google Drive folder."
+    title = "List Drive files with a query",
+    description = "Runs Drive files.list with an optional search query and corpora scope using a service account. Fetches all pages and reports count via metrics."
 )
 public class List extends AbstractDrive implements RunnableTask<List.Output> {
     @Schema(
-        title = "Query operators to filter results",
-        description = "For more details refer to [Search Files API](https://developers.google.com/drive/api/v3/search-files).\n" +
-            "If not defined, the task will list all files that the service account have access."
+        title = "Drive search query",
+        description = "Drive v3 search string; if empty, lists all files accessible to the service account. See Search Files API."
     )
     private Property<String> query;
 
     @Schema(
-        title = "List of bodies of items (files/documents) applicable to the query",
-        description = "'allTeamDrives' must" +
-            " be combined with 'user'; all other values must be used in isolation. Prefer 'user' or 'teamDrive' " +
-            "to 'allTeamDrives' for efficiency."
+        title = "Corpora scope",
+        description = "'allTeamDrives' must be combined with 'user'; prefer 'user' or 'teamDrive' for performance"
     )
     private Property<java.util.List<Corpora>> corpora;
 
@@ -136,7 +134,7 @@ public class List extends AbstractDrive implements RunnableTask<List.Output> {
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
         @Schema(
-            title = "The list of files"
+            title = "Files returned"
         )
         private final java.util.List<File> files;
     }
