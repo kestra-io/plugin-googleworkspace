@@ -32,8 +32,8 @@ import java.util.Properties;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Send an email via Gmail",
-    description = "Send an email message using Gmail API with support for text/HTML content and attachments"
+    title = "Send an email with Gmail API",
+    description = "Sends a message using OAuth Gmail access. Supports text/HTML bodies, CC/BCC, and attachments from kestra:// URIs."
 )
 @Plugin(
     examples = {
@@ -85,51 +85,51 @@ import java.util.Properties;
 )
 public class Send extends AbstractMail implements RunnableTask<Send.Output> {
     @Schema(
-        title = "Recipient email addresses (To field)",
-        description = "List of primary recipient email addresses"
+        title = "To recipients",
+        description = "Primary recipient email addresses"
     )
     @NotNull
     private Property<List<String>> to;
 
     @Schema(
-        title = "CC recipient email addresses",
-        description = "List of CC recipient email addresses"
+        title = "CC recipients",
+        description = "Carbon copy addresses"
     )
     private Property<List<String>> cc;
 
     @Schema(
-        title = "BCC recipient email addresses",
-        description = "List of BCC recipient email addresses"
+        title = "BCC recipients",
+        description = "Blind carbon copy addresses"
     )
     private Property<List<String>> bcc;
 
     @Schema(
-        title = "Email subject",
-        description = "Subject line for the email"
+        title = "Subject",
+        description = "Subject line"
     )
     private Property<String> subject;
 
     @Schema(
         title = "Plain text body",
-        description = "Plain text content of the email"
+        description = "Plain text content"
     )
     private Property<String> textBody;
 
     @Schema(
         title = "HTML body",
-        description = "HTML content of the email"
+        description = "HTML content"
     )
     private Property<String> htmlBody;
 
     @Schema(
-        title = "From email address",
-        description = "Sender email address (defaults to authenticated user)"
+        title = "From address",
+        description = "Sender email; defaults to authenticated Gmail user"
     )
     private Property<String> from;
 
     @Schema(
-        title = "File attachments",
-        description = "List of file URIs to attach to the email"
+        title = "Attachments",
+        description = "List of kestra:// file URIs to attach"
     )
     private Property<List<String>> attachments;
 
@@ -296,10 +296,10 @@ public class Send extends AbstractMail implements RunnableTask<Send.Output> {
     @Builder
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
-        @Schema(title = "The ID of the sent message")
+        @Schema(title = "Sent message ID")
         private String messageId;
 
-        @Schema(title = "The thread ID of the sent message")
+        @Schema(title = "Thread ID of sent message")
         private String threadId;
     }
 }

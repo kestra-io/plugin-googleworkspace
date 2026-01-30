@@ -29,15 +29,14 @@ public abstract class AbstractSheetTrigger extends AbstractTrigger {
     private static final String APPLICATION_NAME = "Kestra";
 
     @Schema(
-        title = "The Google Cloud service account key",
-        description = "Service account JSON key with access to Google Sheets API and Drive API. " +
-            "The service account must have spreadsheets.readonly and drive.metadata.readonly scopes."
+        title = "Service account key",
+        description = "Service account JSON with Sheets and Drive access; must cover spreadsheets.readonly and drive.metadata.readonly scopes"
     )
     protected Property<String> serviceAccount;
 
     @Schema(
-        title = "Google API OAuth scopes",
-        description = "List of OAuth scopes required for the API calls"
+        title = "OAuth scopes",
+        description = "Scopes applied to the service account credentials; defaults to Sheets readonly and Drive metadata readonly"
     )
     @Builder.Default
     protected Property<List<String>> scopes = Property.ofValue(Arrays.asList(

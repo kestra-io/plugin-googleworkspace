@@ -24,7 +24,8 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Load data from a local file to a Google Sheet."
+    title = "Load data from file into Google Sheets",
+    description = "Reads data from Kestra storage (CSV/JSON/ION/AVRO/PARQUET/ORC) and writes it to a sheet range. Supports append, overwrite, or update modes; header parsing optional."
 )
 @Plugin(
 	examples = {
@@ -58,12 +59,14 @@ public class Load extends AbstractLoad implements RunnableTask<Load.Output> {
     private static final String VALUE_INPUT_OPTION = "RAW";
 
 	@Schema(
-		title = "The URI of the Kestra's internal storage file"
+		title = "Source file URI",
+        description = "kestra:// URI of the file to load"
 	)
 	private Property<String> from;
 
 	@Schema(
-		title = "The sheet name or range to select"
+		title = "Target sheet or range",
+        description = "Sheet name or A1 range to write into; default Sheet1"
 	)
 	@Builder.Default
 	private Property<String> range = Property.ofValue("Sheet1");
@@ -160,16 +163,16 @@ public class Load extends AbstractLoad implements RunnableTask<Load.Output> {
     @Getter
     @Builder
     public static class Output implements io.kestra.core.models.tasks.Output {
-        @Schema(title = "The spreadsheet ID or range")
+        @Schema(title = "Spreadsheet range written")
         private String range;
 
 		@Schema(
-			title = "The number of rows loaded"
+			title = "Rows written"
 		)
 		private int rows;
 
 		@Schema(
-			title = "The number of columns loaded"
+			title = "Columns written"
 		)
 		private int columns;
 

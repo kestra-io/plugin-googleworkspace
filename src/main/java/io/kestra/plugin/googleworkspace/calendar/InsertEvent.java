@@ -47,7 +47,8 @@ import org.slf4j.Logger;
     }
 )
 @Schema(
-    title = "Insert an event into Google Calendar."
+    title = "Create a Google Calendar event",
+    description = "Inserts a new event in the target calendar using a service account. Requires summary, start, and end times; optional location, description, creator, and attendees."
 )
 public class InsertEvent extends AbstractInsertEvent implements RunnableTask<InsertEvent.Output> {
     @Override
@@ -76,7 +77,8 @@ public class InsertEvent extends AbstractInsertEvent implements RunnableTask<Ins
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
         @Schema(
-            title = "Event ID of the inserted event"
+            title = "Inserted event",
+            description = "Event resource containing the new event ID"
         )
         private final io.kestra.plugin.googleworkspace.calendar.models.Event event;
     }

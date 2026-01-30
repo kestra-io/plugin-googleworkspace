@@ -27,32 +27,34 @@ public abstract class AbstractLoad extends AbstractSheet {
     private final static ObjectMapper ION_MAPPER = JacksonMapper.ofIon();
 
     @Schema(
-        title = "The spreadsheet unique id"
+        title = "Spreadsheet ID",
+        description = "Target spreadsheet to load data into"
     )
     @NotNull
     protected Property<String> spreadsheetId;
 
     @Builder.Default
     @Schema(
-        title = "Specifies if the first line should be the header (default: false)"
+        title = "Treat first row as header",
+        description = "When true, first row becomes column names; default false"
     )
     protected final Property<Boolean> header = Property.ofValue(false);
 
     @Schema(
-        title = "CSV parsing options (Optional)"
+        title = "CSV parsing options"
     )
     @Builder.Default
     private CsvOptions csvOptions = CsvOptions.builder().build();
 
     @Schema(
-        title = "Schema for avro objects (Optional)",
-        description = "If provided, the task will read avro objects using this schema."
+        title = "Avro schema",
+        description = "Optional schema string to read Avro payloads"
     )
     private Property<String> avroSchema;
 
     @Schema(
-        title = "Format of the input file",
-        description = "If not provided, the task will programmatically try to find the correct format based on the extension."
+        title = "Input file format",
+        description = "Optional override; otherwise inferred from file extension"
     )
     private Property<Format> format;
 
@@ -112,26 +114,27 @@ public abstract class AbstractLoad extends AbstractSheet {
     public static class CsvOptions {
 
         @Schema(
-            title = "The separator for fields in a CSV file"
+            title = "CSV field delimiter",
+            description = "Single-character separator; default comma"
         )
         @Builder.Default
         private Property<String> fieldDelimiter = Property.ofValue(",");
 
         @Schema(
-            title = "The number of rows at the top of a CSV file that will be skipped when reading the data",
-            description = "The default value is 0. This property is useful if you have header rows in the file" +
-                " that should be skipped."
+            title = "Skip leading rows",
+            description = "Number of initial rows to skip; default 0"
         )
         @PluginProperty
         private Property<Long> skipLeadingRows;
 
         @Schema(
-            title = "The quote character in a CSV file"
+            title = "CSV quote character"
         )
         private Property<String> quote;
 
         @Schema(
-            title = "The file encoding of CSV file"
+            title = "CSV file encoding",
+            description = "Character set used; default UTF-8"
         )
         @Builder.Default
         private Property<String> encoding = Property.ofValue("UTF-8");

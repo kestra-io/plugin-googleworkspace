@@ -31,7 +31,8 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Read all sheets from a Google Sheet."
+    title = "Read all sheets from a spreadsheet",
+    description = "Reads every sheet (or selected sheets) with render options. Can return data directly or store to kestra://; metrics report rows and sheet count."
 )
 @Plugin(
     examples = {
@@ -67,8 +68,8 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
 )
 public class Read extends AbstractRead implements RunnableTask<Read.Output> {
     @Schema(
-        title = "The sheet title to be included",
-        description = "If not provided all the sheets will be included."
+        title = "Sheet titles to include",
+        description = "Optional list of sheet names; empty reads all sheets"
     )
     private Property<List<String>> selectedSheetsTitle;
 
@@ -150,22 +151,20 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
         @Schema(
-            title = "List containing the fetched data",
-            description = "Only populated if 'fetch' parameter is set to true.\n" +
-                "The key is the name of the sheet."
+            title = "Fetched rows by sheet",
+            description = "Only when fetch=true; keyed by sheet title"
         )
         @PluginProperty(additionalProperties = List.class)
         private Map<String, List<Object>> rows;
 
         @Schema(
-            title = "The size of the rows fetched"
+            title = "Total rows fetched"
         )
         private int size;
 
         @Schema(
-            title = "The URI of the stored result",
-            description = "Only populated if 'store' is set to true.\n" +
-                "The key is the name of the sheet."
+            title = "Stored result URIs",
+            description = "Only when store=true; keyed by sheet title"
         )
         @PluginProperty(additionalProperties = URI.class)
         private Map<String, URI> uris;

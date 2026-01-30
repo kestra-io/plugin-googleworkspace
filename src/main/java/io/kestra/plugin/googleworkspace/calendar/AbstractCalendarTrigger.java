@@ -29,10 +29,8 @@ public abstract class AbstractCalendarTrigger extends AbstractTrigger implements
     private static final String APPLICATION_NAME = "Kestra";
 
     @Schema(
-        title = "The Google Cloud service account key",
-        description = "Service account JSON key with access to Google Calendar API. " +
-            "The service account must have read access to the calendars you want to monitor. " +
-            "Share calendars with the service account's email address (found in the JSON key)."
+        title = "Service account key",
+        description = "Google service account JSON with Calendar API scope. Share each target calendar with this account email; if omitted, Application Default Credentials are used."
     )
     protected Property<String> serviceAccount;
 

@@ -35,9 +35,8 @@ import java.util.stream.Collectors;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Trigger that listens for new files created in a Google Drive folder",
-    description = "Monitors a specified folder for newly created files and emits an event for each new file detected. " +
-        "The trigger uses polling to check for new files based on their creation time."
+    title = "Poll Drive for newly created files",
+    description = "Polls a folder (or entire Drive) for files created since the prior interval and triggers an execution with the new files. Uses service-account access; interval default PT1H, min PT1M. Max files per poll defaults to 100. Files are stored to internal storage when download succeeds; failures are logged and skipped."
 )
 @Plugin(
     examples = {
@@ -114,51 +113,47 @@ import java.util.stream.Collectors;
 public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingTriggerInterface, TriggerOutput<FileCreatedTrigger.Output> {
 
     @Schema(
-        title = "The OAuth scopes to request",
-        description = "List of OAuth scopes for Drive API access"
+        title = "OAuth scopes",
+        description = "Drive scopes to request; default metadata read-only"
     )
     @Builder.Default
     protected Property<List<String>> scopes = Property.ofValue(List.of("https://www.googleapis.com/auth/drive.metadata.readonly"));
 
     @Schema(
-        title = "The folder ID to monitor for new files",
-        description = "If not provided, monitors the entire Drive accessible by the service account. " +
-            "You can find the folder ID in the Google Drive URL."
+        title = "Folder ID to monitor",
+        description = "Google Drive folder ID; monitors entire Drive if omitted"
     )
-    @NotNull
     protected Property<String> folderId;
 
     @Schema(
-        title = "List of MIME types to filter",
-        description = "Only files matching these MIME types will trigger events. " +
-            "Examples: 'application/pdf', 'image/jpeg'" +
-            "If not specified, all file types are monitored."
+        title = "MIME type filters",
+        description = "Restrict to listed MIME types (e.g., application/pdf). Empty means all types."
     )
     protected Property<List<String>> mimeTypes;
 
     @Schema(
-        title = "Filter by file owner email address",
-        description = "Only files owned by this email address will trigger events"
+        title = "Owner email filter",
+        description = "Only files owned by this email trigger executions; must be a valid email"
     )
     protected Property<String> ownerEmail;
 
     @Schema(
-        title = "Whether to include files in subfolders",
-        description = "If true, recursively monitors all subfolders. Default is false."
+        title = "Include subfolders",
+        description = "When true, query is recursive through subfolders; default false"
     )
     @Builder.Default
     protected Property<Boolean> includeSubfolders = Property.ofValue(false);
 
     @Schema(
-        title = "The polling interval",
-        description = "How frequently to check for new files. Must be at least PT1M (1 minute)."
+        title = "Polling interval",
+        description = "How often to poll for new files; minimum PT1M, default PT1H"
     )
     @Builder.Default
     protected Duration interval = Duration.ofHours(1);
 
     @Schema(
-        title = "Maximum number of files to process per poll",
-        description = "Limits the number of new files processed in a single poll to avoid overwhelming the system"
+        title = "Files processed per poll",
+        description = "Upper bound on files returned each poll; default 100"
     )
     @Builder.Default
     protected Property<Integer> maxFilesPerPoll = Property.ofValue(100);
@@ -302,8 +297,8 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
         @Schema(
-            title = "List of new files found during the poll",
-            description = "All new files created since the last polling interval."
+            title = "New files detected",
+            description = "Files created since the last interval that matched filters"
         )
         private List<FileMetadata> files;
 
@@ -311,64 +306,63 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
         @Getter
         public static class FileMetadata {
             @Schema(
-                title = "The file ID"
+                title = "File ID"
             )
             private String id;
 
             @Schema(
-                title = "The name of the file"
+                title = "File name"
             )
             private String name;
 
             @Schema(
-                title = "The MIME type of the file"
+                title = "MIME type"
             )
             private String mimeType;
 
             @Schema(
-                title = "The time the file was created"
+                title = "Created time"
             )
             private ZonedDateTime createdTime;
 
             @Schema(
-                title = "The time the file was last modified"
+                title = "Last modified time"
             )
             private ZonedDateTime modifiedTime;
 
             @Schema(
-                title = "The owners of the file"
+                title = "Owners"
             )
             private List<User> owners;
 
             @Schema(
-                title = "The parent folder IDs"
+                title = "Parent folder IDs"
             )
             private List<String> parents;
 
             @Schema(
-                title = "The size of the file in bytes"
+                title = "File size (bytes)"
             )
             private Long size;
 
             @Schema(
-                title = "A link for opening the file in a browser"
+                title = "Web link"
             )
             private String webViewLink;
 
             @Schema(
-                title = "A link to the file's icon"
+                title = "Icon link"
             )
             private String iconLink;
 
             @Schema(
-                title = "A link to the file's thumbnail"
+                title = "Thumbnail link"
             )
             private String thumbnailLink;
 
             @Schema(
-                title = "Kestra file URI",
-                description = "The URI where the file content is stored in Kestra's internal storage." +
-                    "This URI can be used to access the file content in subsequent tasks"
+                title = "Kestra storage URI",
+                description = "Location in internal storage when download succeeded; null if download failed"
             )
             private String kestraFileUri;
         }

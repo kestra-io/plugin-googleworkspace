@@ -21,33 +21,33 @@ import java.util.List;
 @NoArgsConstructor
 public abstract class AbstractCreate extends AbstractDrive {
     @Schema(
-        title = "The destination path"
+        title = "Destination folders",
+        description = "Parent folder IDs; leave empty for My Drive root"
     )
     protected Property<List<String>> parents;
 
     @Schema(
-        title = "The name of the file",
-        description = "This is not necessarily unique within a folder"
+        title = "File name",
+        description = "Display name; not necessarily unique inside a folder"
     )
     protected Property<String> name;
 
     @Schema(
-        title = "A short description of the file"
+        title = "File description",
+        description = "Optional short description; supports templating"
     )
     @PluginProperty(dynamic = true)
     protected String description;
 
     @Schema(
-        title = "The MIME type of the file",
-        description = "Drive will attempt to automatically detect an appropriate value from uploaded content if no " +
-            "value is provided. The value cannot be changed unless a new revision is uploaded. If a file is created " +
-            "with a Google Doc MIME type, the uploaded content will be imported if possible. " +
-            "The supported import formats are published [here](https://developers.google.com/drive/api/v3/mime-types)."
+        title = "MIME type",
+        description = "Explicit MIME type; Drive auto-detects if omitted. Google MIME types import content when possible. Supported import formats: https://developers.google.com/drive/api/v3/mime-types"
     )
     protected Property<String> mimeType;
 
     @Schema(
-        title = "ID of the Team Drive the file resides in"
+        title = "Shared Drive ID",
+        description = "Target Shared Drive (teamDriveId) when writing outside My Drive"
     )
     protected Property<String> teamDriveId;
 

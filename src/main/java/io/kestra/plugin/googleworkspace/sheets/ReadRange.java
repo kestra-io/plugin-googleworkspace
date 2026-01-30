@@ -23,7 +23,8 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Read a range from a Google Sheet."
+    title = "Read a range from a spreadsheet",
+    description = "Reads a specific A1 range with render options. Can return data or store to kestra://; metrics report row count."
 )
 @Plugin(
     examples = {
@@ -54,7 +55,8 @@ import java.util.List;
 )
 public class ReadRange extends AbstractRead implements RunnableTask<ReadRange.Output> {
     @Schema(
-        title = "The range to select"
+        title = "Range",
+        description = "A1 notation range (e.g., Sheet1!A1:D10); required"
     )
     private Property<String> range;
 
@@ -96,19 +98,19 @@ public class ReadRange extends AbstractRead implements RunnableTask<ReadRange.Ou
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
         @Schema(
-            title = "List containing the fetched data",
-            description = "Only populated if 'fetch' parameter is set to true."
+            title = "Fetched rows",
+            description = "Only when fetch=true"
         )
         private List<Object> rows;
 
         @Schema(
-            title = "The number of rows fetched"
+            title = "Rows fetched"
         )
         private int size;
 
         @Schema(
-            title = "The URI of the stored result",
-            description = "Only populated if 'store' is set to true."
+            title = "Stored result URI",
+            description = "Only when store=true"
         )
         private URI uri;
     }

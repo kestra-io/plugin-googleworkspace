@@ -33,11 +33,13 @@ import org.slf4j.Logger;
     }
 )
 @Schema(
-    title = "Delete a file from a Google Drive folder."
+    title = "Delete a Drive file by ID",
+    description = "Permanently removes a file (or folder) using a service account; supports Shared Drives"
 )
 public class Delete extends AbstractDrive implements RunnableTask<Delete.Output> {
     @Schema(
-        title = "The file id to delete"
+        title = "File ID",
+        description = "ID of the file to delete; enable supportsAllDrives is handled automatically"
     )
     private Property<String> fileId;
 
@@ -64,7 +66,7 @@ public class Delete extends AbstractDrive implements RunnableTask<Delete.Output>
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
         @Schema(
-            title = "The file id deleted"
+            title = "Deleted file ID"
         )
         private final String fileId;
     }

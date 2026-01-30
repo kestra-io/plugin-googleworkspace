@@ -84,24 +84,26 @@ import jakarta.validation.constraints.NotNull;
     }
 )
 @Schema(
-    title = "Upload a file to a Google Drive folder."
+    title = "Upload a file to Drive",
+    description = "Uploads from Kestra storage to Drive using a service account. Creates or updates depending on `fileId`. Supports converting content by setting `mimeType` to a Google type. File size for Google apps is taken from the uploaded content."
 )
 public class Upload extends AbstractCreate implements RunnableTask<Upload.Output> {
     @Schema(
-        title = "The file URI to copy"
+        title = "Source file URI",
+        description = "kestra:// URI of the file to upload"
     )
     @NotNull
     private Property<String> from;
 
     @Schema(
-        title = "The file id to update",
-        description = "If not provided, the task will create a new file."
+        title = "Existing file ID",
+        description = "When set, updates that file; otherwise a new file is created"
     )
     private Property<String> fileId;
 
     @Schema(
-        title = "The content-type of the file",
-        description = "a valid [RFC2045](https://datatracker.ietf.org/doc/html/rfc2045) like `text/csv`, `application/msword`, etc. "
+        title = "Content type",
+        description = "RFC2045 content type of the uploaded data (e.g., text/csv, application/pdf)"
     )
     @NotNull
     private Property<String> contentType;
@@ -155,7 +157,7 @@ public class Upload extends AbstractCreate implements RunnableTask<Upload.Output
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
         @Schema(
-            title = "The file metadata uploaded"
+            title = "Uploaded file metadata"
         )
         private final io.kestra.plugin.googleworkspace.drive.models.File file;
     }
