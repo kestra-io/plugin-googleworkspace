@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+
 import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -31,7 +32,7 @@ class ReadTest {
             .fetch(Property.ofValue(true))
             .build();
 
-        Read.Output run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));
+        var run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));
 
         assertThat(run.getSize(), is(93));
         assertThat(((Map<String, Object>) run.getRows().get("Class Data").get(6)).get("Date"), is("7/11/2012"));
@@ -55,7 +56,7 @@ class ReadTest {
             .fetch(Property.ofValue(true))
             .build();
 
-        Read.Output run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));
+        var run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));
 
         assertThat(run.getRows().size(), is(1));
         assertThat(run.getSize(), is(31));

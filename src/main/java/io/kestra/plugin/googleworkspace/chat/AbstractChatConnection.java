@@ -27,8 +27,8 @@ import java.util.Map;
 @NoArgsConstructor
 public abstract class AbstractChatConnection extends Task implements RunnableTask<VoidOutput> {
     @Schema(
-        title = "Options",
-        description = "The options to set to customize the HTTP client"
+        title = "Configure HTTP client options",
+        description = "Optional HTTP settings (timeouts, charset, headers) applied to webhook calls"
     )
     @PluginProperty(dynamic = true)
     protected RequestOptions options;
@@ -68,32 +68,50 @@ public abstract class AbstractChatConnection extends Task implements RunnableTas
     @Getter
     @Builder
     public static class RequestOptions {
-        @Schema(title = "The time allowed to establish a connection to the server before failing.")
+        @Schema(
+            title = "Connect timeout for webhook calls",
+            description = "Max time to open the connection before failing"
+        )
         private final Property<Duration> connectTimeout;
 
-        @Schema(title = "The maximum time allowed for reading data from the server before failing.")
+        @Schema(
+            title = "Read timeout for responses",
+            description = "Max time to read data before failing; default PT10S"
+        )
         @Builder.Default
         private final Property<Duration> readTimeout = Property.ofValue(Duration.ofSeconds(10));
 
-        @Schema(title = "The time allowed for a read connection to remain idle before closing it.")
+        @Schema(
+            title = "Idle timeout during read",
+            description = "Idle time on an open connection before closing; default PT5M"
+        )
         @Builder.Default
         private final Property<Duration> readIdleTimeout = Property.ofValue(Duration.of(5, ChronoUnit.MINUTES));
 
-        @Schema(title = "The time an idle connection can remain in the client's connection pool before being closed.")
+        @Schema(
+            title = "Connection pool idle timeout",
+            description = "How long an idle connection stays in the pool; default PT0S"
+        )
         @Builder.Default
         private final Property<Duration> connectionPoolIdleTimeout = Property.ofValue(Duration.ofSeconds(0));
 
-        @Schema(title = "The maximum content length of the response.")
+        @Schema(
+            title = "Maximum response body size",
+            description = "Maximum response body length; default 10MB"
+        )
         @Builder.Default
         private final Property<Integer> maxContentLength = Property.ofValue(1024 * 1024 * 10);
 
-        @Schema(title = "The default charset for the request.")
+        @Schema(
+            title = "Default charset for requests",
+            description = "Request charset; default UTF-8"
+        )
         @Builder.Default
         private final Property<Charset> defaultCharset = Property.ofValue(StandardCharsets.UTF_8);
 
         @Schema(
-            title = "HTTP headers",
-            description = "HTTP headers to include in the request"
+            title = "Custom HTTP request headers",
+            description = "Optional headers to add to every request"
         )
         public Property<Map<String,String>> headers;
     }

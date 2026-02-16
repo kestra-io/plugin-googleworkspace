@@ -25,8 +25,8 @@ import java.net.URI;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Send a Google Chat message using an Incoming Webhook.",
-    description = "Add this task to a list of `errors` tasks to implement custom flow-level failure notifications. Check the <a href=\"https://developers.google.com/chat/how-tos/webhooks\">Google documentation</a> for more details.."
+    title = "Send Google Chat message via webhook",
+    description = "Posts JSON to a Google Chat incoming webhook. Commonly used in `errors` handlers for flow-level alerts. Configure the webhook in Chat first; no OAuth needed."
 )
 @Plugin(
     examples = {
@@ -77,16 +77,16 @@ import java.net.URI;
 public class GoogleChatIncomingWebhook extends AbstractChatConnection {
 
     @Schema(
-        title = "Google Chat incoming webhook URL",
-        description = "Check the <a href=\"https://developers.google.com/chat/how-tos/webhooks#step_1_register_the_incoming_webhook\">" +
-            "Create an Incoming Webhook</a> documentation for more details.."
+        title = "Incoming Google Chat webhook URL",
+        description = "Full Chat webhook endpoint (e.g. https://chat.googleapis.com/v1/spaces/.../messages); threadKey may be included"
     )
     @PluginProperty(dynamic = true)
     @NotBlank
     protected String url;
 
     @Schema(
-        title = "Google Chat message payload"
+        title = "JSON payload sent to Chat",
+        description = "Raw JSON body sent to Chat"
     )
     protected Property<String> payload;
 

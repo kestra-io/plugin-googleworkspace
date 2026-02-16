@@ -34,20 +34,8 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
 @ToString
 @Getter
 @Schema(
-    title = "Trigger on Google Sheet modifications",
-    description = """
-        Polls a Google Sheet at regular intervals and fires when content changes are detected.
-
-        Changes are tracked using Google Drive's revision system. The trigger detects:
-        - Cell value modifications
-        - Row/column additions or deletions
-        - Sheet tab additions or removals
-
-        Optionally filter by specific sheet names or cell ranges.
-
-        **Authentication**: Requires a GCP service account with both
-        Sheets API (spreadsheets.readonly) and Drive API (drive.metadata.readonly) access.
-        """
+    title = "Poll for Google Sheet modifications",
+    description = "Polls a spreadsheet for new Drive revisions and triggers when changes occur (cells, rows/columns, sheet tabs). Requires service account with spreadsheets.readonly and drive.metadata.readonly. Optional filters for sheet name/range. Interval default PT5M."
 )
 @Plugin(
     examples = {
@@ -141,57 +129,51 @@ public class SheetModifiedTrigger extends AbstractSheetTrigger implements Pollin
     @Builder.Default
     @Schema(
         title = "Polling interval",
-        description = "How often to check for sheet modifications"
+        description = "How often to check for sheet modifications; default PT5M"
     )
     private final Duration interval = Duration.ofMinutes(5);
 
     @Schema(
         title = "Spreadsheet ID",
-        description = "The unique identifier of the Google Spreadsheet. " +
-            "Found in the URL: https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/edit"
+        description = "Spreadsheet identifier from the URL (docs.google.com/spreadsheets/d/{ID}/...)"
     )
     @NotNull
     private Property<String> spreadsheetId;
 
     @Schema(
         title = "Sheet name filter",
-        description = "Optional sheet (tab) name to monitor. If not specified, monitors all sheets."
+        description = "Optional tab name to monitor; monitors all tabs when empty"
     )
     private Property<String> sheetName;
 
     @Schema(
         title = "Range filter",
-        description = "Optional A1 notation range (e.g., 'A1:D10'). Only monitors changes within this range."
+        description = "Optional A1 range (e.g., A1:D10) to scope change checks"
     )
     private Property<String> range;
 
     @Schema(
         title = "Include change details",
-        description = "If true, fetches full sheet content to compute detailed diff."
+        description = "If true, fetches sheet data for a lightweight diff summary; increases API calls"
     )
     @Builder.Default
     private Property<Boolean> includeDetails = Property.ofValue(false);
 
     @Schema(
         title = "State key",
-        description = "Custom key for state storage. Defaults to trigger ID."
+        description = "Custom key for state storage; defaults to trigger ID"
     )
     private Property<String> stateKey;
 
     @Schema(
         title = "State TTL",
-        description = "How long to remember processed revisions (e.g., P7D for 7 days)"
+        description = "Optional TTL for stored revisions, e.g., P7D"
     )
     private Property<Duration> stateTtl;
 
     @Schema(
-        title = "Trigger on",
-        description = """
-            When to fire the trigger:
-            - CREATE: Only for newly detected revisions
-            - UPDATE: Only when revision changes (not typical for sheets)
-            - CREATE_OR_UPDATE: On any new or changed revision (recommended)
-            """
+        title = "Trigger mode",
+        description = "CREATE (new revisions only), UPDATE, or CREATE_OR_UPDATE (default)"
     )
     @Builder.Default
     private Property<On> on = Property.ofValue(On.CREATE_OR_UPDATE);
@@ -343,14 +325,14 @@ public class SheetModifiedTrigger extends AbstractSheetTrigger implements Pollin
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
         @Schema(
-            title = "List of sheet modifications",
-            description = "New revisions detected in this polling cycle"
+            title = "Sheet modifications",
+            description = "New revisions detected in this poll"
         )
         private final List<ModificationOutput> modifications;
 
         @Schema(
-            title = "Number of modifications",
-            description = "Count of new revisions detected"
+            title = "Modification count",
+            description = "Number of revisions that fired this cycle"
         )
         private final Integer count;
     }
@@ -360,43 +342,41 @@ public class SheetModifiedTrigger extends AbstractSheetTrigger implements Pollin
     public static class ModificationOutput {
         @Schema(
             title = "Revision ID",
-            description = "Google Drive revision identifier"
+            description = "Drive revision identifier"
         )
         private final String revisionId;
 
         @Schema(
             title = "Modified time",
-            description = "When this revision was created"
+            description = "When the revision was created"
         )
         private final Instant modifiedTime;
 
         @Schema(
-            title = "Spreadsheet title",
-            description = "Name of the spreadsheet"
+            title = "Spreadsheet title"
         )
         private final String spreadsheetTitle;
 
         @Schema(
-            title = "Spreadsheet ID",
-            description = "Unique spreadsheet identifier"
+            title = "Spreadsheet ID"
         )
         private final String spreadsheetId;
 
         @Schema(
             title = "Last modifying user",
-            description = "Display name of the user who made the change"
+            description = "Display name of the editor if available"
         )
         private final String lastModifyingUser;
 
         @Schema(
             title = "Sheet name",
-            description = "Name of the modified sheet (tab), if filter was applied"
+            description = "Tab name when filter applied"
         )
         private final String sheetName;
 
         @Schema(
             title = "Change details",
-            description = "Detailed change information (if includeDetails=true)"
+            description = "Basic range/size info when includeDetails=true"
         )
         private final ChangeDetails changeDetails;
     }
@@ -406,25 +386,25 @@ public class SheetModifiedTrigger extends AbstractSheetTrigger implements Pollin
     public static class ChangeDetails {
         @Schema(
             title = "Affected range",
-            description = "A1 notation of the range that was checked"
+            description = "A1 range evaluated for change details"
         )
         private final String affectedRange;
 
         @Schema(
             title = "Row count",
-            description = "Current number of rows in the range"
+            description = "Rows present in the range"
         )
         private final Integer rowCount;
 
         @Schema(
             title = "Column count",
-            description = "Current number of columns in the range"
+            description = "Columns present in the range"
         )
         private final Integer columnCount;
 
         @Schema(
             title = "Has data",
-            description = "Whether the range contains any data"
+            description = "True if any cell in the range contains data"
         )
         private final Boolean hasData;
     }

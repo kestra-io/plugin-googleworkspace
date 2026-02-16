@@ -6,7 +6,7 @@ plugins {
     id 'jacoco'
     id "com.adarshr.test-logger" version "4.0.0"
     id "org.sonarqube" version "7.1.0.6387"
-    id "com.gradleup.shadow" version "9.2.2"
+    id "com.gradleup.shadow" version "9.3.1"
     id 'signing'
     id "com.github.ben-manes.versions" version "0.53.0"
     id 'net.researchgate.release' version '3.1.0'
@@ -53,11 +53,11 @@ dependencies {
     // Google libraries are managed by the the Kestra Platform so they are aligned on all plugins
     api platform('com.google.cloud:libraries-bom')
     api 'com.google.api-client:google-api-client:2.8.1'
-    api 'com.google.auth:google-auth-library-oauth2-http:1.40.0'
-    api 'com.google.apis:google-api-services-drive:v3-rev20251114-2.0.0'
+    api 'com.google.auth:google-auth-library-oauth2-http:1.41.0'
+    api 'com.google.apis:google-api-services-drive:v3-rev20251210-2.0.0'
     api 'com.google.apis:google-api-services-sheets:v4-rev20251110-2.0.0'
-    api 'com.google.apis:google-api-services-calendar:v3-rev20251028-2.0.0'
-    api 'com.google.apis:google-api-services-gmail:v1-rev20251110-2.0.0'
+    api 'com.google.apis:google-api-services-calendar:v3-rev20251207-2.0.0'
+    api 'com.google.apis:google-api-services-gmail:v1-rev20251201-2.0.0'
     api 'javax.mail:javax.mail-api:1.6.2'
     api 'com.sun.mail:javax.mail:1.6.2'
     api 'javax.activation:activation:1.1.1'
@@ -71,24 +71,11 @@ dependencies {
 
     // For ORC parsing
     api('org.apache.orc:orc-core:2.2.0')
-    api('org.apache.orc:orc-mapreduce:2.2.1')
-
-    // Additional libraries for Parquet, Avro, ORC parsers
-    api('org.apache.hadoop:hadoop-hdfs-client:3.4.2') {
-        exclude group: 'com.fasterxml.jackson.core'
-    }
-    api('org.apache.hadoop:hadoop-common:3.4.2') {
-        exclude group: 'com.fasterxml.jackson.core'
-        exclude group: 'org.apache.zookeeper'
-    }
-    api('org.apache.hadoop:hadoop-mapreduce-client-core:3.4.2') {
-        exclude group: 'com.fasterxml.jackson.core'
-    }
 
     // for org.apache.hadoop.hive.ql.exec.vector following bump for orc-core and orc-mapreduce to 2.1.2
     // those 2 deps should maybe be removed after upgrading again orc deps in the future
     api('org.apache.hive:hive-storage-api:4.2.0') // for Parquet parsing
-    api('com.google.protobuf:protobuf-java:4.33.1') // for ORC parsing
+    api('com.google.protobuf:protobuf-java:4.33.3') // for ORC parsing
 
     compileOnly 'com.fasterxml.jackson.core:jackson-databind'
 
@@ -166,7 +153,7 @@ configurations {
 }
 
 dependencies {
-    agent "org.aspectj:aspectjweaver:1.9.25"
+    agent "org.aspectj:aspectjweaver:1.9.25.1"
 }
 
 test {

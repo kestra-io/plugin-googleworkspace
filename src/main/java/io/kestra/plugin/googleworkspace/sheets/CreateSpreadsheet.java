@@ -27,7 +27,8 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Create a Google Sheet."
+    title = "Create a Google Spreadsheet",
+    description = "Creates a new spreadsheet using a service account; returns its ID and URL"
 )
 @Plugin(
     examples = {
@@ -53,7 +54,8 @@ import java.util.List;
 public class CreateSpreadsheet extends AbstractSheet implements RunnableTask<CreateSpreadsheet.Output> {
 
 	@Schema(
-		title = "Spreadsheet title"
+		title = "Spreadsheet title",
+        description = "Title to assign to the new spreadsheet"
 	)
 	@NotNull
 	private Property<String> title;
@@ -87,12 +89,12 @@ public class CreateSpreadsheet extends AbstractSheet implements RunnableTask<Cre
 	public static class Output implements io.kestra.core.models.tasks.Output {
 
 		@Schema(
-			title = "The spreadsheet ID"
+			title = "Spreadsheet ID"
 		)
 		private String spreadsheetId;
 
 		@Schema(
-			title = "The spreadsheet URL"
+			title = "Spreadsheet URL"
 		)
 		private String spreadsheetUrl;
 

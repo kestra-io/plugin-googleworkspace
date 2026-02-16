@@ -30,7 +30,7 @@ import java.util.ArrayList;
 @NoArgsConstructor
 @Schema(
     title = "List Gmail messages",
-    description = "Retrieve a list of messages from Gmail inbox or specific labels using Gmail API"
+    description = "Lists message IDs with optional Gmail search, label filters, and spam/trash inclusion. Fetch type controls output: FETCH (default) returns all, FETCH_ONE first only, STORE writes to kestra:// file, NONE outputs nothing."
 )
 @Plugin(
     examples = {
@@ -92,37 +92,33 @@ import java.util.ArrayList;
 public class List extends AbstractMail implements RunnableTask<List.Output> {
     @Schema(
         title = "Gmail search query",
-        description = "Search query using Gmail search syntax (e.g., 'is:unread', 'from:sender@example.com', 'subject:important')"
+        description = "Gmail search syntax (e.g., is:unread, from:sender@example.com, subject:important)"
     )
     private Property<String> query;
 
     @Schema(
-        title = "Label IDs to filter messages",
-        description = "List of label IDs to restrict the search (e.g., INBOX, SENT, DRAFT, UNREAD)"
+        title = "Label filters",
+        description = "Label IDs to restrict search (INBOX, SENT, UNREAD, etc.)"
     )
     private Property<java.util.List<String>> labelIds;
 
     @Schema(
-        title = "Maximum number of results",
-        description = "Maximum number of messages to return (default: 100, max: 500)"
+        title = "Maximum results",
+        description = "Max messages to return (default 100, capped at 500)"
     )
     @Builder.Default
     private Property<Integer> maxResults = Property.ofValue(100);
 
     @Schema(
         title = "Include spam and trash",
-        description = "Whether to include messages from SPAM and TRASH in the results"
+        description = "Whether to include SPAM and TRASH messages"
     )
     @Builder.Default
     private Property<Boolean> includeSpamTrash = Property.ofValue(false);
 
     @Schema(
-        title = "The way you want to store the data",
-        description = """
-            FETCH - outputs the messages as an output
-            FETCH_ONE - outputs the first message only as an output
-            STORE - stores all messages to a file
-            NONE - no output"""
+        title = "Fetch strategy",
+        description = "FETCH (all), FETCH_ONE (first only), STORE (write all to file), NONE (no output). Default FETCH."
     )
     @NotNull
     @Builder.Default

@@ -33,25 +33,35 @@ import org.slf4j.Logger;
                   - id: cancel_event
                     type: io.kestra.plugin.googleworkspace.calendar.DeleteEvent
                     serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
-                    calendarId: primary
+                    calendarId: team@company.com
                     eventId: "abcdef123456"
                     sendUpdates: all
                 """
         )
     }
 )
-@Schema(title = "Delete a Google Calendar event.")
+@Schema(
+    title = "Delete a Google Calendar event",
+    description = "Removes an event from the given calendar using a service account. `sendUpdates` controls cancellation emails (`none` default; `all` or `externalOnly` to notify attendees)."
+)
 public class DeleteEvent extends AbstractCalendar implements RunnableTask<VoidOutput> {
-    @Schema(title = "Calendar ID")
+    @Schema(
+        title = "Calendar ID",
+        description = "Email-style calendar shared with the service account"
+    )
     @NotNull
     protected Property<String> calendarId;
 
-    @Schema(title = "Event ID")
+    @Schema(
+        title = "Event ID",
+        description = "Identifier of the event to delete"
+    )
     @NotNull
     protected Property<String> eventId;
 
     @Schema(
-        title = "Send update emails (default: none)",
+        title = "Send update emails",
+        description = "Whether Google should email attendees about the deletion; default none",
         allowableValues = {"all", "none", "externalOnly"}
     )
     @Builder.Default

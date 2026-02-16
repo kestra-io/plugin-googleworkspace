@@ -33,27 +33,42 @@ import java.util.Map;
               - id: get_event
                 type: io.kestra.plugin.googleworkspace.calendar.GetEvent
                 serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
-                calendarId: primary
+                calendarId: team@company.com
                 eventId: "abcdef123456"
                 maxAttendees: 50
                 alwaysIncludeEmail: true
             """
     )
 )
-@Schema(title = "Fetch a Google Calendar event by ID.")
+@Schema(
+    title = "Fetch a Google Calendar event by ID",
+    description = "Retrieves a single event from a shared calendar using a service account. Supports attendee truncation via `maxAttendees` and toggling email fields with `alwaysIncludeEmail` (default false)."
+)
 public class GetEvent extends AbstractCalendar implements RunnableTask<GetEvent.Output> {
-    @Schema(title = "Calendar ID (e.g., 'primary' or a calendar email)")
+    @Schema(
+        title = "Calendar ID",
+        description = "Email-style calendar shared with the service account, e.g. team@company.com"
+    )
     @NotNull
     protected Property<String> calendarId;
 
-    @Schema(title = "Event ID")
+    @Schema(
+        title = "Event ID",
+        description = "Identifier of the event to fetch"
+    )
     @NotNull
     protected Property<String> eventId;
 
-    @Schema(title = "Upper bound on the number of attendees to include")
+    @Schema(
+        title = "Maximum attendees",
+        description = "Upper bound of attendees returned; omit to use API default"
+    )
     protected Property<Integer> maxAttendees;
 
-    @Schema(title = "Whether to include the email of the organizer/attendees in the response")
+    @Schema(
+        title = "Include attendee emails",
+        description = "Whether organizer/attendee emails are returned; default false"
+    )
     @Builder.Default
     protected Property<Boolean> alwaysIncludeEmail = Property.ofValue(false);
 
@@ -88,10 +103,10 @@ public class GetEvent extends AbstractCalendar implements RunnableTask<GetEvent.
     @Builder
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
-        @Schema(title = "Full Google Calendar event resource (wrapped)")
+        @Schema(title = "Event")
         private final io.kestra.plugin.googleworkspace.calendar.models.Event event;
 
-        @Schema(title = "Complete metadata of Google Calendar event resource")
+        @Schema(title = "Raw event metadata")
         private final Map<String, Object> metadata;
     }
 }

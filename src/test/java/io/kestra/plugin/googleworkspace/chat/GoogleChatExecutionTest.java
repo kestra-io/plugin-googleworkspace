@@ -26,6 +26,8 @@ public class GoogleChatExecutionTest extends AbstractChatTest {
 
     @BeforeEach
     protected void init() throws IOException, URISyntaxException {
+        FakeWebhookController.data = null;
+
         repositoryLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("flows/common")));
         repositoryLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("flows/chat")));
         this.runner.run();

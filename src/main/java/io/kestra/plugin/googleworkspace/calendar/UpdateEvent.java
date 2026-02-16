@@ -35,7 +35,7 @@ import java.util.List;
             - id: update_event
               type: io.kestra.plugin.googleworkspace.calendar.UpdateEvent
               serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
-              calendarId: primary
+              calendarId: team@company.com
               eventId: "abcdef123456"
               patch: true
               sendUpdates: externalOnly
@@ -53,48 +53,82 @@ import java.util.List;
     )
 )
 @Schema(
-    title = "Update a Google Calendar event."
+    title = "Update a Google Calendar event",
+    description = "Updates an existing event using a service account. Uses PATCH by default to change only provided fields; set `patch` to false for full replace. `sendUpdates` controls attendee emails (none by default)."
 )
 public class UpdateEvent extends AbstractCalendar implements RunnableTask<UpdateEvent.Output> {
-    @Schema(title = "Calendar ID")
+    @Schema(
+        title = "Calendar ID",
+        description = "Email-style calendar shared with the service account"
+    )
     @NotNull
     protected Property<String> calendarId;
 
-    @Schema(title = "Event ID")
+    @Schema(
+        title = "Event ID",
+        description = "Identifier of the event to update"
+    )
     @NotNull
     protected Property<String> eventId;
 
-    @Schema(title = "Use PATCH (partial) when true, or UPDATE (replace) when false.")
+    @Schema(
+        title = "Patch update",
+        description = "When true (default) sends PATCH; false sends full UPDATE"
+    )
     @Builder.Default
     protected Property<Boolean> patch = Property.ofValue(true);
 
-    @Schema(title = "Send update emails: all | externalOnly | none.")
+    @Schema(
+        title = "Send update emails",
+        description = "Controls attendee notification: all, externalOnly, or none (default)"
+    )
     @Builder.Default
     protected Property<String> sendUpdates = Property.ofValue("none");
 
-    @Schema(title = "Title")
+    @Schema(
+        title = "Title",
+        description = "New event title (optional)"
+    )
     protected Property<String> summary;
 
-    @Schema(title = "Description")
+    @Schema(
+        title = "Description",
+        description = "New description; supports templating"
+    )
     @io.kestra.core.models.annotations.PluginProperty(dynamic = true)
     protected String description;
 
-    @Schema(title = "Location (free-form)")
+    @Schema(
+        title = "Location",
+        description = "Free-form location to set"
+    )
     protected Property<String> location;
 
-    @Schema(title = "New start time")
+    @Schema(
+        title = "New start time",
+        description = "Replacement start datetime/timezone"
+    )
     @io.kestra.core.models.annotations.PluginProperty
     protected AbstractInsertEvent.CalendarTime startTime;
 
-    @Schema(title = "New end time")
+    @Schema(
+        title = "New end time",
+        description = "Replacement end datetime/timezone"
+    )
     @io.kestra.core.models.annotations.PluginProperty
     protected AbstractInsertEvent.CalendarTime endTime;
 
-    @Schema(title = "Replace attendees with this list.")
+    @Schema(
+        title = "Attendees",
+        description = "Replaces the attendee list with the provided entries"
+    )
     @io.kestra.core.models.annotations.PluginProperty
     protected List<AbstractInsertEvent.Attendee> attendees;
 
-    @Schema(title = "Event status: confirmed | tentative | cancelled")
+    @Schema(
+        title = "Event status",
+        description = "Status value: confirmed, tentative, or cancelled"
+    )
     protected Property<String> status;
 
     @Override
@@ -175,6 +209,7 @@ public class UpdateEvent extends AbstractCalendar implements RunnableTask<Update
     @Builder
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
+        @Schema(title = "Updated event")
         private final io.kestra.plugin.googleworkspace.calendar.models.Event event;
     }
 }

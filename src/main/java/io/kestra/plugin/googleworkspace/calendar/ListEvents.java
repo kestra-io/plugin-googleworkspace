@@ -35,7 +35,7 @@ import java.util.Map;
               - id: list_events
                 type: io.kestra.plugin.googleworkspace.calendar.ListEvents
                 serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
-                calendarId: primary
+                calendarId: team@company.com
                 timeMin: "2025-08-10T00:00:00Z"
                 timeMax: "2025-08-12T00:00:00Z"
                 q: "standup"
@@ -47,37 +47,65 @@ import java.util.Map;
     )
 )
 @Schema(
-    title = "List Google Calendar events using filters (range, keyword, etc.)."
+    title = "List Google Calendar events with filters",
+    description = "Retrieves events from a shared calendar using time range, keyword, and pagination filters. Defaults: `singleEvents` true (expands recurring), `showDeleted` false. `orderBy` supports startTime (requires singleEvents) or updated; `maxResults` up to 2500."
 )
 public class ListEvents extends AbstractCalendar implements RunnableTask<ListEvents.Output> {
-    @Schema(title = "Calendar ID (e.g., 'primary' or a calendar email)")
+    @Schema(
+        title = "Calendar ID",
+        description = "Email-style calendar shared with the service account, e.g. team@company.com"
+    )
     @NotNull
     protected Property<String> calendarId;
 
-    @Schema(title = "Lower bound for an event's start time (RFC3339)")
+    @Schema(
+        title = "Start time lower bound",
+        description = "RFC3339 timestamp for earliest event start (timeMin)"
+    )
     protected Property<String> timeMin;
 
-    @Schema(title = "Upper bound for an event's end time (RFC3339)")
+    @Schema(
+        title = "End time upper bound",
+        description = "RFC3339 timestamp for latest event end (timeMax)"
+    )
     protected Property<String> timeMax;
 
-    @Schema(title = "Free-text search across title/description/location")
+    @Schema(
+        title = "Keyword search",
+        description = "Free-text query across summary, description, and location"
+    )
     protected Property<String> q;
 
-    @Schema(title = "Return single instances of recurring events")
+    @Schema(
+        title = "Return single instances",
+        description = "When true (default), expands recurring events"
+    )
     @Builder.Default
     protected Property<Boolean> singleEvents = Property.ofValue(true);
 
-    @Schema(title = "Order by 'startTime' (requires singleEvents=true) or 'updated'")
+    @Schema(
+        title = "Order by",
+        description = "startTime (requires singleEvents=true) or updated"
+    )
     protected Property<String> orderBy;
 
-    @Schema(title = "Include cancelled events")
+    @Schema(
+        title = "Include cancelled",
+        description = "Whether to include cancelled events; default false"
+    )
     @Builder.Default
     protected Property<Boolean> showDeleted = Property.ofValue(false);
 
-    @Schema(title = "Max results (1–2500)")
+    @Schema(
+        title = "Max results",
+        description = "Number of events per page (1–2500)"
+    )
     protected Property<Integer> maxResults;
 
-    @Schema(title = "Page token for pagination")
+    @Schema(
+        title = "Page token",
+        description = "Pagination token from a previous response"
+    )
     protected Property<String> pageToken;
 
     @Override
@@ -149,13 +177,13 @@ public class ListEvents extends AbstractCalendar implements RunnableTask<ListEve
     @Builder
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
-        @Schema(title = "Matched events (typed, convenient)")
+        @Schema(title = "Matched events")
         private final List<io.kestra.plugin.googleworkspace.calendar.models.Event> events;
 
-        @Schema(title = "Full Google events (raw metadata, 1:1)")
+        @Schema(title = "Raw event metadata")
         private final List<Map<String, Object>> metadataList;
 
-        @Schema(title = "Pagination token for fetching the next page, if any")
+        @Schema(title = "Next page token")
         private final String nextPageToken;
     }
 }

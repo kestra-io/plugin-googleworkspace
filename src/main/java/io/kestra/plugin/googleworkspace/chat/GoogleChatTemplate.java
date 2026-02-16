@@ -25,18 +25,21 @@ import java.util.Objects;
 public abstract class GoogleChatTemplate extends GoogleChatIncomingWebhook {
 
     @Schema(
-        title = "Template to use",
+        title = "Template path for payload",
+        description = "Classpath PEB template rendered into the Chat payload",
         hidden = true
     )
     protected Property<String> templateUri;
 
     @Schema(
-        title = "Map of variables to use for the message template"
+        title = "Variables used to render template",
+        description = "Map rendered into the template context"
     )
     protected Property<Map<String, Object>> templateRenderMap;
 
     @Schema(
-        title = "Message body"
+        title = "Text override for message",
+        description = "Plain text that overrides or supplements the template output"
     )
     protected Property<String> text;
 
