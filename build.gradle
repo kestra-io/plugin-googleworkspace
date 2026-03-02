@@ -75,7 +75,7 @@ dependencies {
     // for org.apache.hadoop.hive.ql.exec.vector following bump for orc-core and orc-mapreduce to 2.1.2
     // those 2 deps should maybe be removed after upgrading again orc deps in the future
     api('org.apache.hive:hive-storage-api:4.2.0') // for Parquet parsing
-    api('com.google.protobuf:protobuf-java:4.33.5') // for ORC parsing
+    api('com.google.protobuf:protobuf-java:4.34.0') // for ORC parsing
 
     compileOnly 'com.fasterxml.jackson.core:jackson-databind'
 
