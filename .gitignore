@@ -15,3 +15,5 @@ out/
 .attach*
 src/test/resources/application-test.yml
 src/test/resources/.gcp-service-account.json
+.factorypath
+bin/
