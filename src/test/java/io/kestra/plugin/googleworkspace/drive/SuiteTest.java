@@ -1,16 +1,5 @@
 package io.kestra.plugin.googleworkspace.drive;
 
-import com.google.common.io.CharStreams;
-import io.kestra.core.models.property.Property;
-import io.kestra.core.runners.RunContextFactory;
-import io.kestra.core.storages.StorageInterface;
-import io.kestra.core.tenant.TenantService;
-import io.kestra.core.utils.IdUtils;
-import io.kestra.core.utils.TestsUtils;
-import io.kestra.plugin.googleworkspace.UtilsTest;
-import io.kestra.core.junit.annotations.KestraTest;
-import org.junit.jupiter.api.Test;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -19,6 +8,20 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import org.junit.jupiter.api.Test;
+
+import com.google.common.io.CharStreams;
+
+import io.kestra.core.junit.annotations.KestraTest;
+import io.kestra.core.models.property.Property;
+import io.kestra.core.runners.RunContextFactory;
+import io.kestra.core.storages.StorageInterface;
+import io.kestra.core.tenant.TenantService;
+import io.kestra.core.utils.IdUtils;
+import io.kestra.core.utils.TestsUtils;
+import io.kestra.plugin.googleworkspace.UtilsTest;
+
 import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -39,18 +42,30 @@ class SuiteTest {
             TenantService.MAIN_TENANT,
             null,
             new URI("/" + IdUtils.create()),
-            new FileInputStream(new File(Objects.requireNonNull(SuiteTest.class.getClassLoader()
-                    .getResource("examples/addresses.csv"))
-                .toURI()))
+            new FileInputStream(
+                new File(
+                    Objects.requireNonNull(
+                        SuiteTest.class.getClassLoader()
+                            .getResource("examples/addresses.csv")
+                    )
+                        .toURI()
+                )
+            )
         );
 
         URI source2 = storageInterface.put(
             TenantService.MAIN_TENANT,
             null,
             new URI("/" + IdUtils.create()),
-            new FileInputStream(new File(Objects.requireNonNull(SuiteTest.class.getClassLoader()
-                    .getResource("examples/addresses2.csv"))
-                .toURI()))
+            new FileInputStream(
+                new File(
+                    Objects.requireNonNull(
+                        SuiteTest.class.getClassLoader()
+                            .getResource("examples/addresses2.csv")
+                    )
+                        .toURI()
+                )
+            )
         );
 
         Create create = Create.builder()
@@ -168,16 +183,21 @@ class SuiteTest {
 
         assertThat(deleteFolderRun.getFileId(), is(createRun.getFile().getId()));
 
-        assertThrows(Exception.class, () -> {
+        assertThrows(Exception.class, () ->
+        {
             export.run(TestsUtils.mockRunContext(runContextFactory, upload, Map.of()));
         });
     }
 
     @Test
     void binary() throws Exception {
-        File file = new File(Objects.requireNonNull(SuiteTest.class.getClassLoader()
-                .getResource("examples/addresses.zip"))
-            .toURI());
+        File file = new File(
+            Objects.requireNonNull(
+                SuiteTest.class.getClassLoader()
+                    .getResource("examples/addresses.zip")
+            )
+                .toURI()
+        );
 
         URI source = storageInterface.put(
             TenantService.MAIN_TENANT,

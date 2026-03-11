@@ -1,7 +1,17 @@
 package io.kestra.plugin.googleworkspace.sheets;
 
+import java.net.URI;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.*;
+
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Metric;
 import io.kestra.core.models.annotations.Plugin;
@@ -10,18 +20,10 @@ import io.kestra.core.models.executions.metrics.Counter;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
-import io.kestra.core.utils.ListUtils;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.slf4j.Logger;
-
-import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static io.kestra.core.utils.Rethrow.throwFunction;
 
@@ -98,9 +100,11 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
         // generate range
         List<String> ranges = selectedSheets
             .stream()
-            .map(s -> s.getProperties().getTitle() + "!R1C1:" +
-                "R" + s.getProperties().getGridProperties().getRowCount() +
-                "C" + s.getProperties().getGridProperties().getColumnCount())
+            .map(
+                s -> s.getProperties().getTitle() + "!R1C1:" +
+                    "R" + s.getProperties().getGridProperties().getRowCount() +
+                    "C" + s.getProperties().getGridProperties().getColumnCount()
+            )
             .collect(Collectors.toList());
 
         // batch get all ranges
@@ -116,7 +120,7 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
         Map<String, URI> uris = new HashMap<>();
         AtomicInteger rowsCount = new AtomicInteger();
 
-        for(int index = 0; index < selectedSheets.size(); index++) {
+        for (int index = 0; index < selectedSheets.size(); index++) {
             ValueRange valueRange = batchGet.getValueRanges().get(index);
             Sheet sheet = selectedSheets.get(index);
 

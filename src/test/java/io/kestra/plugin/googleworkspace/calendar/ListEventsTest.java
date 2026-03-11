@@ -1,7 +1,7 @@
 package io.kestra.plugin.googleworkspace.calendar;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIf;
 
 import io.kestra.core.junit.annotations.KestraTest;
 import io.kestra.core.models.property.Property;
@@ -9,9 +9,11 @@ import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.plugin.googleworkspace.UtilsTest;
 import io.kestra.plugin.googleworkspace.calendar.AbstractInsertEvent.CalendarTime;
+
 import jakarta.inject.Inject;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIf;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 @KestraTest
 @DisabledIf(
@@ -19,7 +21,8 @@ import org.junit.jupiter.api.condition.DisabledIf;
     disabledReason = "Disabled for CI/CD"
 )
 class ListEventsTest {
-    @Inject private RunContextFactory runContextFactory;
+    @Inject
+    private RunContextFactory runContextFactory;
 
     @Test
     void listWithRangeAndKeyword() throws Exception {

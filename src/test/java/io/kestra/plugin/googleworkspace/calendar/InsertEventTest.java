@@ -1,25 +1,20 @@
 package io.kestra.plugin.googleworkspace.calendar;
 
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-
-import io.kestra.core.models.property.Property;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIf;
 
-import com.google.api.client.util.DateTime;
-import com.google.api.services.calendar.model.EventDateTime;
-import com.google.api.services.calendar.model.Event.Creator;
-import com.google.common.base.Strings;
-
 import io.kestra.core.junit.annotations.KestraTest;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.plugin.googleworkspace.UtilsTest;
 import io.kestra.plugin.googleworkspace.calendar.AbstractInsertEvent.CalendarTime;
+
 import jakarta.inject.Inject;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 @KestraTest
 @DisabledIf(

@@ -1,8 +1,16 @@
 package io.kestra.plugin.googleworkspace.mail;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.ListMessagesResponse;
 import com.google.api.services.gmail.model.Message;
+
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.property.Property;
@@ -10,18 +18,12 @@ import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.models.tasks.common.FetchType;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.serializers.FileSerde;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import reactor.core.publisher.Flux;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
 
 @SuperBuilder
 @ToString
@@ -157,10 +159,12 @@ public class List extends AbstractMail implements RunnableTask<List.Output> {
 
         // Transform Gmail messages to our message model
         java.util.List<io.kestra.plugin.googleworkspace.mail.models.Message> transformedMessages = messages.stream()
-            .map(msg -> io.kestra.plugin.googleworkspace.mail.models.Message.builder()
-                .id(msg.getId())
-                .threadId(msg.getThreadId())
-                .build())
+            .map(
+                msg -> io.kestra.plugin.googleworkspace.mail.models.Message.builder()
+                    .id(msg.getId())
+                    .threadId(msg.getThreadId())
+                    .build()
+            )
             .toList();
 
         // Handle different fetch types

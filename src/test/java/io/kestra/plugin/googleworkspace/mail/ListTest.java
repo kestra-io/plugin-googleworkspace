@@ -1,18 +1,21 @@
 package io.kestra.plugin.googleworkspace.mail;
 
-import com.google.api.services.gmail.Gmail;
-import com.google.api.services.gmail.model.ListMessagesResponse;
-import com.google.api.services.gmail.model.Message;
-import io.kestra.core.junit.annotations.KestraTest;
-import io.kestra.core.models.property.Property;
-import io.kestra.core.runners.RunContext;
-import io.kestra.core.runners.RunContextFactory;
-import jakarta.inject.Inject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
+
+import com.google.api.services.gmail.Gmail;
+import com.google.api.services.gmail.model.ListMessagesResponse;
+import com.google.api.services.gmail.model.Message;
+
+import io.kestra.core.junit.annotations.KestraTest;
+import io.kestra.core.models.property.Property;
+import io.kestra.core.runners.RunContext;
+import io.kestra.core.runners.RunContextFactory;
+
+import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -35,7 +38,8 @@ class ListTest {
 
     @BeforeAll
     static void setupMocks() throws Exception {
-        gmailListMock = Mockito.mockConstruction(Gmail.Users.Messages.List.class, (mock, context) -> {
+        gmailListMock = Mockito.mockConstruction(Gmail.Users.Messages.List.class, (mock, context) ->
+        {
             // Prepare fake Gmail list response
             Message msg1 = new Message().setId("mock-message-1");
             Message msg2 = new Message().setId("mock-message-2");

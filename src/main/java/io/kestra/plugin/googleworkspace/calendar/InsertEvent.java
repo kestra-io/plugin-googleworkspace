@@ -1,5 +1,7 @@
 package io.kestra.plugin.googleworkspace.calendar;
 
+import org.slf4j.Logger;
+
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 
@@ -7,11 +9,10 @@ import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import org.slf4j.Logger;
 
 @SuperBuilder
 @ToString
@@ -58,7 +59,7 @@ public class InsertEvent extends AbstractInsertEvent implements RunnableTask<Ins
 
         Event eventMetadata = event(runContext);
 
-        var renderedCalendarId= runContext.render(calendarId).as(String.class).orElseThrow();
+        var renderedCalendarId = runContext.render(calendarId).as(String.class).orElseThrow();
         Event event = service
             .events()
             .insert(renderedCalendarId, eventMetadata)

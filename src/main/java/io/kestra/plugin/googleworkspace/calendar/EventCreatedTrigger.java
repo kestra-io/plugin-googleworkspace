@@ -1,9 +1,19 @@
 package io.kestra.plugin.googleworkspace.calendar;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.TemporalAmount;
+import java.util.*;
+
+import org.slf4j.Logger;
+
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
+
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.conditions.ConditionContext;
@@ -14,19 +24,11 @@ import io.kestra.core.models.triggers.TriggerContext;
 import io.kestra.core.models.triggers.TriggerOutput;
 import io.kestra.core.models.triggers.TriggerService;
 import io.kestra.core.runners.RunContext;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.slf4j.Logger;
-
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.temporal.TemporalAmount;
-import java.util.*;
-
 
 @SuperBuilder
 @ToString
@@ -264,8 +266,7 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
         RunContext runContext,
         String calendarId,
         Instant lastCreatedTime,
-        Logger logger
-    ) throws Exception {
+        Logger logger) throws Exception {
 
         DateTime timeMin = new DateTime(lastCreatedTime.toEpochMilli());
 

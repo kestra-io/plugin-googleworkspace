@@ -1,17 +1,10 @@
 package io.kestra.plugin.googleworkspace.mail;
 
-import com.google.api.client.util.Base64;
-import com.google.api.services.gmail.Gmail;
-import com.google.api.services.gmail.model.Message;
-import io.kestra.core.models.annotations.Example;
-import io.kestra.core.models.annotations.Plugin;
-import io.kestra.core.models.property.Property;
-import io.kestra.core.models.tasks.RunnableTask;
-import io.kestra.core.runners.RunContext;
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
-import jakarta.validation.constraints.NotNull;
-import lombok.experimental.SuperBuilder;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.util.List;
+import java.util.Properties;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -20,11 +13,21 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.internet.*;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
-import java.util.Properties;
+
+import com.google.api.client.util.Base64;
+import com.google.api.services.gmail.Gmail;
+import com.google.api.services.gmail.model.Message;
+
+import io.kestra.core.models.annotations.Example;
+import io.kestra.core.models.annotations.Plugin;
+import io.kestra.core.models.property.Property;
+import io.kestra.core.models.tasks.RunnableTask;
+import io.kestra.core.runners.RunContext;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @ToString
@@ -162,7 +165,8 @@ public class Send extends AbstractMail implements RunnableTask<Send.Output> {
         if (rToAddresses != null && !rToAddresses.isEmpty()) {
             runContext.logger().debug("Setting TO recipients: {}", rToAddresses.size());
             InternetAddress[] toArray = rToAddresses.stream()
-                .map(addr -> {
+                .map(addr ->
+                {
                     try {
                         return new InternetAddress(addr);
                     } catch (AddressException e) {
@@ -178,7 +182,8 @@ public class Send extends AbstractMail implements RunnableTask<Send.Output> {
         if (rCcAddresses != null && !rCcAddresses.isEmpty()) {
             runContext.logger().debug("Setting CC recipients: {}", rCcAddresses.size());
             InternetAddress[] ccArray = rCcAddresses.stream()
-                .map(addr -> {
+                .map(addr ->
+                {
                     try {
                         return new InternetAddress(addr);
                     } catch (AddressException e) {
@@ -194,7 +199,8 @@ public class Send extends AbstractMail implements RunnableTask<Send.Output> {
         if (rBccAddresses != null && !rBccAddresses.isEmpty()) {
             runContext.logger().debug("Setting BCC recipients: {}", rBccAddresses.size());
             InternetAddress[] bccArray = rBccAddresses.stream()
-                .map(addr -> {
+                .map(addr ->
+                {
                     try {
                         return new InternetAddress(addr);
                     } catch (AddressException e) {
@@ -259,15 +265,15 @@ public class Send extends AbstractMail implements RunnableTask<Send.Output> {
         if (rHtmlContent != null && rTextContent != null) {
             // Both text and HTML - create multipart alternative
             Multipart multipart = new MimeMultipart("alternative");
-            
+
             MimeBodyPart textPart = new MimeBodyPart();
             textPart.setText(rTextContent, "utf-8");
             multipart.addBodyPart(textPart);
-            
+
             MimeBodyPart htmlPart = new MimeBodyPart();
             htmlPart.setContent(rHtmlContent, "text/html; charset=utf-8");
             multipart.addBodyPart(htmlPart);
-            
+
             part.setContent(multipart);
         } else if (rHtmlContent != null) {
             // HTML only
@@ -291,7 +297,6 @@ public class Send extends AbstractMail implements RunnableTask<Send.Output> {
         message.setRaw(encodedEmail);
         return message;
     }
-
 
     @Builder
     @Getter

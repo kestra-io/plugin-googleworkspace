@@ -1,21 +1,5 @@
 package io.kestra.plugin.googleworkspace.sheets;
 
-import io.kestra.core.junit.annotations.KestraTest;
-import io.kestra.core.models.property.Property;
-import io.kestra.core.runners.RunContext;
-import io.kestra.core.runners.RunContextFactory;
-import io.kestra.core.storages.StorageInterface;
-import io.kestra.core.tenant.TenantService;
-import io.kestra.core.utils.IdUtils;
-import io.kestra.plugin.googleworkspace.UtilsTest;
-import jakarta.inject.Inject;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIf;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -25,6 +9,24 @@ import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIf;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+
+import io.kestra.core.junit.annotations.KestraTest;
+import io.kestra.core.models.property.Property;
+import io.kestra.core.runners.RunContext;
+import io.kestra.core.runners.RunContextFactory;
+import io.kestra.core.storages.StorageInterface;
+import io.kestra.core.tenant.TenantService;
+import io.kestra.core.utils.IdUtils;
+import io.kestra.plugin.googleworkspace.UtilsTest;
+
+import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -130,7 +132,8 @@ class LoadTest {
 
     @Test
     void loadAVRO() throws Exception {
-        RunContext runContext = runContextFactory.of();;
+        RunContext runContext = runContextFactory.of();
+        ;
         URI source = getSource(".avro");
 
         Load task = Load.builder()
@@ -261,18 +264,30 @@ class LoadTest {
             TenantService.MAIN_TENANT,
             null,
             new URI("/" + IdUtils.create() + ".csv"),
-            new FileInputStream(new File(Objects.requireNonNull(LoadTest.class.getClassLoader()
-                    .getResource("examples/addresses.csv"))
-                .toURI()))
+            new FileInputStream(
+                new File(
+                    Objects.requireNonNull(
+                        LoadTest.class.getClassLoader()
+                            .getResource("examples/addresses.csv")
+                    )
+                        .toURI()
+                )
+            )
         );
 
         URI source2 = storageInterface.put(
             TenantService.MAIN_TENANT,
             null,
             new URI("/" + IdUtils.create() + ".csv"),
-            new FileInputStream(new File(Objects.requireNonNull(LoadTest.class.getClassLoader()
-                    .getResource("examples/addresses-small.csv"))
-                .toURI()))
+            new FileInputStream(
+                new File(
+                    Objects.requireNonNull(
+                        LoadTest.class.getClassLoader()
+                            .getResource("examples/addresses-small.csv")
+                    )
+                        .toURI()
+                )
+            )
         );
 
         Load load1 = Load.builder()
@@ -317,18 +332,30 @@ class LoadTest {
             TenantService.MAIN_TENANT,
             null,
             new URI("/" + IdUtils.create() + ".csv"),
-            new FileInputStream(new File(Objects.requireNonNull(LoadTest.class.getClassLoader()
-                    .getResource("examples/addresses.csv"))
-                .toURI()))
+            new FileInputStream(
+                new File(
+                    Objects.requireNonNull(
+                        LoadTest.class.getClassLoader()
+                            .getResource("examples/addresses.csv")
+                    )
+                        .toURI()
+                )
+            )
         );
 
         URI source2 = storageInterface.put(
             TenantService.MAIN_TENANT,
             null,
             new URI("/" + IdUtils.create() + ".csv"),
-            new FileInputStream(new File(Objects.requireNonNull(LoadTest.class.getClassLoader()
-                    .getResource("examples/addresses-small.csv"))
-                .toURI()))
+            new FileInputStream(
+                new File(
+                    Objects.requireNonNull(
+                        LoadTest.class.getClassLoader()
+                            .getResource("examples/addresses-small.csv")
+                    )
+                        .toURI()
+                )
+            )
         );
 
         Load load1 = Load.builder()
@@ -382,8 +409,12 @@ class LoadTest {
             TenantService.MAIN_TENANT,
             null,
             new URI("/" + IdUtils.create() + extension),
-            new FileInputStream(new File(Objects.requireNonNull(resource)
-                .toURI()))
+            new FileInputStream(
+                new File(
+                    Objects.requireNonNull(resource)
+                        .toURI()
+                )
+            )
         );
     }
 

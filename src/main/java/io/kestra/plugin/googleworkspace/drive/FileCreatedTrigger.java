@@ -1,23 +1,5 @@
 package io.kestra.plugin.googleworkspace.drive;
 
-import com.google.api.client.util.DateTime;
-import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.model.File;
-import com.google.api.services.drive.model.FileList;
-import com.google.api.services.drive.model.User;
-import io.kestra.core.models.annotations.Example;
-import io.kestra.core.models.annotations.Plugin;
-import io.kestra.core.models.conditions.ConditionContext;
-import io.kestra.core.models.executions.Execution;
-import io.kestra.core.models.property.Property;
-import io.kestra.core.models.triggers.*;
-import io.kestra.core.runners.RunContext;
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
-import org.slf4j.Logger;
-
 import java.io.InputStream;
 import java.net.URI;
 import java.time.Duration;
@@ -28,6 +10,26 @@ import java.time.temporal.TemporalAmount;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+
+import com.google.api.client.util.DateTime;
+import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.model.File;
+import com.google.api.services.drive.model.FileList;
+import com.google.api.services.drive.model.User;
+
+import io.kestra.core.models.annotations.Example;
+import io.kestra.core.models.annotations.Plugin;
+import io.kestra.core.models.conditions.ConditionContext;
+import io.kestra.core.models.executions.Execution;
+import io.kestra.core.models.property.Property;
+import io.kestra.core.models.triggers.*;
+import io.kestra.core.runners.RunContext;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @ToString
@@ -167,7 +169,8 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
 
         Instant lastCreatedTime = context.getNextExecutionDate() != null
             ? context.getNextExecutionDate().toInstant().minus((TemporalAmount) this.interval)
-            : Instant.now().minus((TemporalAmount) this.interval);;
+            : Instant.now().minus((TemporalAmount) this.interval);
+        ;
 
         String query = buildQuery(runContext, String.valueOf(lastCreatedTime));
         logger.debug("Executing Drive query: {}", query);
@@ -202,9 +205,9 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
         // Process first file and create execution
         List<Output.FileMetadata> outputFiles = new ArrayList<>();
 
-        for (File file: files) {
+        for (File file : files) {
             URI kestraUri = null;
-            try{
+            try {
                 InputStream fileContent = driveService.files()
                     .get(file.getId())
                     .executeMediaAsInputStream();
@@ -273,7 +276,6 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
             }
             queryParts.add("'" + email + "' in owners");
         }
-
 
         // Filter by creation time (only get files created after last check)
         if (lastCreatedTime != null) {

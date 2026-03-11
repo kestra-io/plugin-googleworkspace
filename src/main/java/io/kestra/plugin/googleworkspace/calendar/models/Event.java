@@ -1,6 +1,5 @@
 package io.kestra.plugin.googleworkspace.calendar.models;
 
-import com.google.api.services.calendar.model.EventDateTime;
 import lombok.Builder;
 import lombok.Data;
 import lombok.With;
@@ -20,7 +19,8 @@ public class Event {
     private final String location;
 
     public static Event of(com.google.api.services.calendar.model.Event event) {
-        if (event == null) return null;
+        if (event == null)
+            return null;
         return Event.builder()
             .id(event.getId())
             .status(event.getStatus())

@@ -1,21 +1,24 @@
 package io.kestra.plugin.googleworkspace.mail;
 
-import com.google.api.services.gmail.Gmail;
-import com.google.api.services.gmail.model.Message;
-import com.google.api.services.gmail.model.MessagePart;
-import com.google.api.services.gmail.model.MessagePartHeader;
-import io.kestra.core.junit.annotations.KestraTest;
-import io.kestra.core.models.property.Property;
-import io.kestra.core.runners.RunContext;
-import io.kestra.core.runners.RunContextFactory;
-import jakarta.inject.Inject;
+import java.util.List;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
 
-import java.util.List;
+import com.google.api.services.gmail.Gmail;
+import com.google.api.services.gmail.model.Message;
+import com.google.api.services.gmail.model.MessagePart;
+import com.google.api.services.gmail.model.MessagePartHeader;
+
+import io.kestra.core.junit.annotations.KestraTest;
+import io.kestra.core.models.property.Property;
+import io.kestra.core.runners.RunContext;
+import io.kestra.core.runners.RunContextFactory;
+
+import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -43,12 +46,15 @@ class GetTest {
     @BeforeAll
     static void setupMocks() throws Exception {
         // Mock Gmail.Users.Messages.Get constructor and its execute() method
-        gmailGetMock = Mockito.mockConstruction(Gmail.Users.Messages.Get.class, (mock, context) -> {
-            MessagePart payload = new MessagePart().setHeaders(List.of(
-                new MessagePartHeader().setName("Subject").setValue("Mocked Subject"),
-                new MessagePartHeader().setName("From").setValue("mock@kestra.io"),
-                new MessagePartHeader().setName("To").setValue("test@kestra.io")
-            ));
+        gmailGetMock = Mockito.mockConstruction(Gmail.Users.Messages.Get.class, (mock, context) ->
+        {
+            MessagePart payload = new MessagePart().setHeaders(
+                List.of(
+                    new MessagePartHeader().setName("Subject").setValue("Mocked Subject"),
+                    new MessagePartHeader().setName("From").setValue("mock@kestra.io"),
+                    new MessagePartHeader().setName("To").setValue("test@kestra.io")
+                )
+            );
 
             Message fakeMessage = new Message()
                 .setId("mock-message-id")

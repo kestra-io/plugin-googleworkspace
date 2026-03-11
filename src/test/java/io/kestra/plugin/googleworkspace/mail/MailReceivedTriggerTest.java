@@ -1,8 +1,19 @@
 package io.kestra.plugin.googleworkspace.mail;
 
+import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
+
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.ListMessagesResponse;
 import com.google.api.services.gmail.model.Message;
+
 import io.kestra.core.junit.annotations.KestraTest;
 import io.kestra.core.models.executions.Execution;
 import io.kestra.core.models.property.Property;
@@ -10,16 +21,8 @@ import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.utils.IdUtils;
 import io.kestra.core.utils.TestsUtils;
 import io.kestra.plugin.googleworkspace.mail.models.EmailMetadata;
-import jakarta.inject.Inject;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.mockito.MockedConstruction;
-import org.mockito.Mockito;
 
-import java.time.Duration;
-import java.util.List;
-import java.util.Optional;
+import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -44,7 +47,8 @@ class MailReceivedTriggerTest {
     @BeforeAll
     static void setupMocks() throws Exception {
         // --- Mock Gmail.Users.Messages.List constructor + execute() ---
-        gmailListMock = Mockito.mockConstruction(Gmail.Users.Messages.List.class, (mock, context) -> {
+        gmailListMock = Mockito.mockConstruction(Gmail.Users.Messages.List.class, (mock, context) ->
+        {
             Message fakeMsg = new Message()
                 .setId("mock-message-id")
                 .setThreadId("mock-thread-id");
@@ -57,18 +61,23 @@ class MailReceivedTriggerTest {
         });
 
         // --- Mock Gmail.Users.Messages.Get constructor + execute() ---
-        gmailGetMock = Mockito.mockConstruction(Gmail.Users.Messages.Get.class, (mock, context) -> {
+        gmailGetMock = Mockito.mockConstruction(Gmail.Users.Messages.Get.class, (mock, context) ->
+        {
             Message fakeFullMessage = new Message()
                 .setId("mock-message-id")
                 .setThreadId("mock-thread-id")
                 .setInternalDate(System.currentTimeMillis())
                 .setSnippet("Mocked Snippet")
-                .setPayload(new com.google.api.services.gmail.model.MessagePart()
-                    .setHeaders(List.of(
-                        new com.google.api.services.gmail.model.MessagePartHeader().setName("Subject").setValue("Mocked Subject"),
-                        new com.google.api.services.gmail.model.MessagePartHeader().setName("From").setValue("mock@kestra.io"),
-                        new com.google.api.services.gmail.model.MessagePartHeader().setName("To").setValue("test@kestra.io")
-                    )));
+                .setPayload(
+                    new com.google.api.services.gmail.model.MessagePart()
+                        .setHeaders(
+                            List.of(
+                                new com.google.api.services.gmail.model.MessagePartHeader().setName("Subject").setValue("Mocked Subject"),
+                                new com.google.api.services.gmail.model.MessagePartHeader().setName("From").setValue("mock@kestra.io"),
+                                new com.google.api.services.gmail.model.MessagePartHeader().setName("To").setValue("test@kestra.io")
+                            )
+                        )
+                );
 
             // Return "this" mock when setFormat() is called
             Mockito.when(mock.setFormat(Mockito.anyString())).thenReturn(mock);
@@ -81,8 +90,10 @@ class MailReceivedTriggerTest {
 
     @AfterAll
     static void tearDownMocks() {
-        if (gmailListMock != null) gmailListMock.close();
-        if (gmailGetMock != null) gmailGetMock.close();
+        if (gmailListMock != null)
+            gmailListMock.close();
+        if (gmailGetMock != null)
+            gmailGetMock.close();
         System.out.println("🧹 Gmail mocks released");
     }
 
@@ -120,7 +131,8 @@ class MailReceivedTriggerTest {
     void noNewMessages() throws Exception {
         // Instead of creating a new construction mock, just reconfigure the existing one
         gmailListMock.close(); // Unregister the previous mock first
-        gmailListMock = Mockito.mockConstruction(Gmail.Users.Messages.List.class, (mock, context) -> {
+        gmailListMock = Mockito.mockConstruction(Gmail.Users.Messages.List.class, (mock, context) ->
+        {
             ListMessagesResponse emptyResponse = new ListMessagesResponse()
                 .setMessages(null)
                 .setResultSizeEstimate(0L);

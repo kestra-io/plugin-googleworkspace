@@ -1,9 +1,10 @@
 package io.kestra.plugin.googleworkspace;
 
-import io.kestra.core.models.property.Property;
-import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.util.List;
+
+import io.kestra.core.models.property.Property;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public interface OAuthInterface {
     @Schema(
@@ -13,7 +14,7 @@ public interface OAuthInterface {
     Property<String> getClientId();
 
     @Schema(
-        title = "OAuth 2.0 Client Secret", 
+        title = "OAuth 2.0 Client Secret",
         description = "The OAuth 2.0 client secret from Google Cloud Console"
     )
     Property<String> getClientSecret();

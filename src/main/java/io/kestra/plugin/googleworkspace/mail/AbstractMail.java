@@ -1,5 +1,9 @@
 package io.kestra.plugin.googleworkspace.mail;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.List;
+
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -11,19 +15,17 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.UserCredentials;
+
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.Task;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.googleworkspace.OAuthInterface;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.util.List;
 
 @SuperBuilder
 @ToString
@@ -61,11 +63,13 @@ public abstract class AbstractMail extends Task implements OAuthInterface {
     protected Property<String> accessToken;
 
     @Builder.Default
-    protected Property<List<String>> scopes = Property.ofValue(List.of(
-        GmailScopes.GMAIL_MODIFY,
-        GmailScopes.GMAIL_READONLY,
-        GmailScopes.GMAIL_SEND
-    ));
+    protected Property<List<String>> scopes = Property.ofValue(
+        List.of(
+            GmailScopes.GMAIL_MODIFY,
+            GmailScopes.GMAIL_READONLY,
+            GmailScopes.GMAIL_SEND
+        )
+    );
 
     @Builder.Default
     protected Property<Integer> readTimeout = Property.ofValue(120);

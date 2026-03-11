@@ -1,19 +1,20 @@
 package io.kestra.plugin.googleworkspace.sheets;
 
-import io.kestra.core.exceptions.IllegalVariableEvaluationException;
-import io.kestra.core.models.property.Property;
-import io.kestra.core.runners.RunContext;
-import io.kestra.core.serializers.FileSerde;
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.kestra.core.exceptions.IllegalVariableEvaluationException;
+import io.kestra.core.models.property.Property;
+import io.kestra.core.runners.RunContext;
+import io.kestra.core.serializers.FileSerde;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import reactor.core.publisher.Flux;
 
 @SuperBuilder
@@ -81,12 +82,12 @@ public abstract class AbstractRead extends AbstractSheet {
 
             for (int i = 1; i < values.size(); i++) {
                 List<Object> row = values.get(i);
-                    Map<String, Object> resultRows = new LinkedHashMap<>();
+                Map<String, Object> resultRows = new LinkedHashMap<>();
 
-                    for (int j = 0; j < headers.size(); j++) {
-                        resultRows.put((String) headers.get(j), j < row.size() ? row.get(j) : null);
-                    }
-                    result.add(resultRows);
+                for (int j = 0; j < headers.size(); j++) {
+                    resultRows.put((String) headers.get(j), j < row.size() ? row.get(j) : null);
+                }
+                result.add(resultRows);
             }
         } else {
             result.addAll(values);

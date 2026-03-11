@@ -1,22 +1,23 @@
 package io.kestra.plugin.googleworkspace.calendar;
 
-import io.kestra.core.exceptions.IllegalVariableEvaluationException;
-import io.kestra.core.models.annotations.PluginProperty;
-import io.kestra.core.models.property.Property;
-import io.kestra.core.runners.RunContext;
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.Event.Creator;
 import com.google.api.services.calendar.model.EventAttendee;
 import com.google.api.services.calendar.model.EventDateTime;
-import com.google.api.services.calendar.model.Event.Creator;
+
+import io.kestra.core.exceptions.IllegalVariableEvaluationException;
+import io.kestra.core.models.annotations.PluginProperty;
+import io.kestra.core.models.property.Property;
+import io.kestra.core.runners.RunContext;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @ToString
@@ -144,7 +145,7 @@ public abstract class AbstractInsertEvent extends AbstractCalendar {
 
         if (attendees != null && attendees.size() > 0) {
             List<EventAttendee> eventAttendees = new ArrayList<>();
-            for (Attendee attendee: attendees){
+            for (Attendee attendee : attendees) {
                 EventAttendee eventAttendee = new EventAttendee().setDisplayName(runContext.render(attendee.displayName).as(String.class).orElse(null))
                     .setEmail(runContext.render(attendee.email).as(String.class).orElse(null));
                 eventAttendees.add(eventAttendee);

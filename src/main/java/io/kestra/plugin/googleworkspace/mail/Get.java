@@ -1,25 +1,27 @@
 package io.kestra.plugin.googleworkspace.mail;
 
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import com.google.api.client.util.Base64;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.Message;
 import com.google.api.services.gmail.model.MessagePart;
 import com.google.api.services.gmail.model.MessagePartHeader;
-import com.google.api.client.util.Base64;
+
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.googleworkspace.mail.models.Attachment;
+
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import jakarta.validation.constraints.NotNull;
-
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @SuperBuilder
 @ToString
@@ -157,8 +159,8 @@ public class Get extends AbstractMail implements RunnableTask<Get.Output> {
             java.util.List<Attachment> attachments = new ArrayList<>();
             String[] bodyContent = extractBodyAndAttachments(payload, attachments);
             builder.textPlain(bodyContent[0])
-                   .textHtml(bodyContent[1])
-                   .attachments(attachments);
+                .textHtml(bodyContent[1])
+                .attachments(attachments);
         }
 
         return builder.build();
@@ -182,8 +184,10 @@ public class Get extends AbstractMail implements RunnableTask<Get.Output> {
             // Multipart message
             for (MessagePart subPart : part.getParts()) {
                 String[] subResult = extractBodyAndAttachments(subPart, attachments);
-                if (result[0] == null) result[0] = subResult[0];
-                if (result[1] == null) result[1] = subResult[1];
+                if (result[0] == null)
+                    result[0] = subResult[0];
+                if (result[1] == null)
+                    result[1] = subResult[1];
             }
         } else {
             // Single part message
@@ -221,8 +225,10 @@ public class Get extends AbstractMail implements RunnableTask<Get.Output> {
         java.util.List<MessagePartHeader> headers = part.getHeaders();
         if (headers != null) {
             for (MessagePartHeader header : headers) {
-                if ("Content-Disposition".equalsIgnoreCase(header.getName()) &&
-                    header.getValue() != null && header.getValue().contains("attachment")) {
+                if (
+                    "Content-Disposition".equalsIgnoreCase(header.getName()) &&
+                        header.getValue() != null && header.getValue().contains("attachment")
+                ) {
                     return true;
                 }
             }

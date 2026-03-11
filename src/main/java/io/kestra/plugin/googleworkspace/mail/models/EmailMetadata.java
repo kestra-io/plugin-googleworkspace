@@ -1,13 +1,13 @@
 package io.kestra.plugin.googleworkspace.mail.models;
 
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Map;
 
 @Builder
 @Getter

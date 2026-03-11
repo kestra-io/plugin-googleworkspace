@@ -1,11 +1,11 @@
 package io.kestra.plugin.googleworkspace.drive.models;
 
+import java.time.Instant;
+import java.util.List;
+
 import lombok.Builder;
 import lombok.Data;
 import lombok.With;
-
-import java.time.Instant;
-import java.util.List;
 
 @Data
 @Builder

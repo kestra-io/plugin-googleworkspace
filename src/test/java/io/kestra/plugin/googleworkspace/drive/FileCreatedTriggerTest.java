@@ -1,22 +1,24 @@
 package io.kestra.plugin.googleworkspace.drive;
 
-import com.google.api.client.util.DateTime;
-import com.google.api.services.drive.model.File;
-import com.google.api.services.drive.model.User;
-import com.devskiller.friendly_id.FriendlyId;
-import io.kestra.core.models.property.Property;
-import io.kestra.core.runners.RunContextFactory;
-import io.kestra.core.utils.IdUtils;
-import io.kestra.plugin.googleworkspace.UtilsTest;
-import io.kestra.core.junit.annotations.KestraTest;
-import jakarta.inject.Inject;
+import java.time.Duration;
+import java.util.*;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
-import java.util.*;
-import java.util.List;
+import com.devskiller.friendly_id.FriendlyId;
+import com.google.api.client.util.DateTime;
+import com.google.api.services.drive.model.File;
+import com.google.api.services.drive.model.User;
+
+import io.kestra.core.junit.annotations.KestraTest;
+import io.kestra.core.models.property.Property;
+import io.kestra.core.runners.RunContextFactory;
+import io.kestra.core.utils.IdUtils;
+
+import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -192,10 +194,12 @@ class FileCreatedTriggerTest {
             .setModifiedTime(new DateTime(now - 5000))
             .setWebViewLink("https://drive.google.com/file/d/" + fileId + "/view")
             .setParents(List.of(folderId))
-            .setOwners(List.of(
-                new User()
-                    .setDisplayName("Test User")
-                    .setEmailAddress("testuser@example.com")
-            ));
+            .setOwners(
+                List.of(
+                    new User()
+                        .setDisplayName("Test User")
+                        .setEmailAddress("testuser@example.com")
+                )
+            );
     }
 }

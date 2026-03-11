@@ -1,7 +1,16 @@
 package io.kestra.plugin.googleworkspace.calendar;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIf;
+
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
+
 import io.kestra.core.junit.annotations.KestraTest;
 import io.kestra.core.models.conditions.ConditionContext;
 import io.kestra.core.models.property.Property;
@@ -10,14 +19,8 @@ import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.utils.IdUtils;
 import io.kestra.plugin.googleworkspace.UtilsTest;
-import jakarta.inject.Inject;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIf;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
-import java.util.Map;
+import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -50,7 +53,8 @@ class EventCreatedTriggerTest {
             .build();
 
         // This should not throw any exception for valid configuration
-        assertDoesNotThrow(() -> {
+        assertDoesNotThrow(() ->
+        {
             trigger.evaluate(conditionContext, triggerContext);
         });
     }
@@ -76,7 +80,8 @@ class EventCreatedTriggerTest {
             .build();
 
         // This should throw during evaluation due to invalid interval
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () ->
+        {
             trigger.evaluate(conditionContext, triggerContext);
         });
     }
@@ -134,15 +139,13 @@ class EventCreatedTriggerTest {
             .setUpdated(new DateTime(System.currentTimeMillis()));
 
         // Add start and end times
-        com.google.api.services.calendar.model.EventDateTime start =
-            new com.google.api.services.calendar.model.EventDateTime()
-                .setDateTime(new DateTime(System.currentTimeMillis() + 3600000)) // In 1 hour
-                .setTimeZone("UTC");
+        com.google.api.services.calendar.model.EventDateTime start = new com.google.api.services.calendar.model.EventDateTime()
+            .setDateTime(new DateTime(System.currentTimeMillis() + 3600000)) // In 1 hour
+            .setTimeZone("UTC");
 
-        com.google.api.services.calendar.model.EventDateTime end =
-            new com.google.api.services.calendar.model.EventDateTime()
-                .setDateTime(new DateTime(System.currentTimeMillis() + 7200000)) // in 2 hours
-                .setTimeZone("UTC");
+        com.google.api.services.calendar.model.EventDateTime end = new com.google.api.services.calendar.model.EventDateTime()
+            .setDateTime(new DateTime(System.currentTimeMillis() + 7200000)) // in 2 hours
+            .setTimeZone("UTC");
 
         googleEvent.setStart(start);
         googleEvent.setEnd(end);
@@ -187,10 +190,14 @@ class EventCreatedTriggerTest {
             .setStatus("tentative")
             .setCreated(new DateTime(Instant.now().toEpochMilli()));
 
-        assertThat("CONFIRMED trigger should accept confirmed events",
-            confirmedTrigger.isNewEvent(confirmedEvent, lastCreatedTime, runContext), is(true));
-        assertThat("CONFIRMED trigger should reject tentative events",
-            confirmedTrigger.isNewEvent(tentativeEvent, lastCreatedTime, runContext), is(false));
+        assertThat(
+            "CONFIRMED trigger should accept confirmed events",
+            confirmedTrigger.isNewEvent(confirmedEvent, lastCreatedTime, runContext), is(true)
+        );
+        assertThat(
+            "CONFIRMED trigger should reject tentative events",
+            confirmedTrigger.isNewEvent(tentativeEvent, lastCreatedTime, runContext), is(false)
+        );
 
         // Test TENTATIVE filter
         var tentativeTrigger = EventCreatedTrigger.builder()
@@ -199,10 +206,14 @@ class EventCreatedTriggerTest {
             .eventStatus(Property.ofValue(EventCreatedTrigger.EventStatus.TENTATIVE))
             .build();
 
-        assertThat("TENTATIVE trigger should accept tentative events",
-            tentativeTrigger.isNewEvent(tentativeEvent, lastCreatedTime, runContext), is(true));
-        assertThat("TENTATIVE trigger should reject confirmed events",
-            tentativeTrigger.isNewEvent(confirmedEvent, lastCreatedTime, runContext), is(false));
+        assertThat(
+            "TENTATIVE trigger should accept tentative events",
+            tentativeTrigger.isNewEvent(tentativeEvent, lastCreatedTime, runContext), is(true)
+        );
+        assertThat(
+            "TENTATIVE trigger should reject confirmed events",
+            tentativeTrigger.isNewEvent(confirmedEvent, lastCreatedTime, runContext), is(false)
+        );
 
         // Test CANCELLED filter
         var cancelledTrigger = EventCreatedTrigger.builder()
@@ -215,10 +226,14 @@ class EventCreatedTriggerTest {
             .setStatus("cancelled")
             .setCreated(new DateTime(Instant.now().toEpochMilli()));
 
-        assertThat("CANCELLED trigger should accept cancelled events",
-            cancelledTrigger.isNewEvent(cancelledEvent, lastCreatedTime, runContext), is(true));
-        assertThat("CANCELLED trigger should reject confirmed events",
-            cancelledTrigger.isNewEvent(confirmedEvent, lastCreatedTime, runContext), is(false));
+        assertThat(
+            "CANCELLED trigger should accept cancelled events",
+            cancelledTrigger.isNewEvent(cancelledEvent, lastCreatedTime, runContext), is(true)
+        );
+        assertThat(
+            "CANCELLED trigger should reject confirmed events",
+            cancelledTrigger.isNewEvent(confirmedEvent, lastCreatedTime, runContext), is(false)
+        );
     }
 
     @Test
@@ -243,12 +258,18 @@ class EventCreatedTriggerTest {
         Event noOrganizerEvent = new Event()
             .setCreated(new DateTime(Instant.now().toEpochMilli()));
 
-        assertThat("Should accept events from specified organizer",
-            trigger.isNewEvent(matchingEvent, lastCreatedTime, runContext), is(true));
-        assertThat("Should reject events from different organizer",
-            trigger.isNewEvent(nonMatchingEvent, lastCreatedTime, runContext), is(false));
-        assertThat("Should reject events without organizer",
-            trigger.isNewEvent(noOrganizerEvent, lastCreatedTime, runContext), is(true)); // No filter means accept
+        assertThat(
+            "Should accept events from specified organizer",
+            trigger.isNewEvent(matchingEvent, lastCreatedTime, runContext), is(true)
+        );
+        assertThat(
+            "Should reject events from different organizer",
+            trigger.isNewEvent(nonMatchingEvent, lastCreatedTime, runContext), is(false)
+        );
+        assertThat(
+            "Should reject events without organizer",
+            trigger.isNewEvent(noOrganizerEvent, lastCreatedTime, runContext), is(true)
+        ); // No filter means accept
     }
 
     @Test
@@ -269,12 +290,16 @@ class EventCreatedTriggerTest {
         Event oldEvent = new Event()
             .setCreated(new DateTime(lastCreatedTime.minusSeconds(600).toEpochMilli()));
 
-        assertThat("Should accept events created after lastCreatedTime",
-            trigger.isNewEvent(newEvent, lastCreatedTime, runContext), is(true));
-        assertThat("Should reject events created before lastCreatedTime",
-            trigger.isNewEvent(oldEvent, lastCreatedTime, runContext), is(false));
+        assertThat(
+            "Should accept events created after lastCreatedTime",
+            trigger.isNewEvent(newEvent, lastCreatedTime, runContext), is(true)
+        );
+        assertThat(
+            "Should reject events created before lastCreatedTime",
+            trigger.isNewEvent(oldEvent, lastCreatedTime, runContext), is(false)
+        );
     }
-    
+
     @Test
     void shouldRejectMaxEventsPerPollBelowMinimum() {
         var trigger = EventCreatedTrigger.builder()
@@ -294,12 +319,15 @@ class EventCreatedTriggerTest {
             .triggerId(trigger.getId())
             .build();
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+        {
             trigger.evaluate(conditionContext, triggerContext);
         });
 
-        assertThat("Error message should mention valid range",
-            exception.getMessage(), containsString("between 1 and 2500"));
+        assertThat(
+            "Error message should mention valid range",
+            exception.getMessage(), containsString("between 1 and 2500")
+        );
     }
 
     @Test
@@ -321,12 +349,15 @@ class EventCreatedTriggerTest {
             .triggerId(trigger.getId())
             .build();
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+        {
             trigger.evaluate(conditionContext, triggerContext);
         });
 
-        assertThat("Error message should mention valid range",
-            exception.getMessage(), containsString("between 1 and 2500"));
+        assertThat(
+            "Error message should mention valid range",
+            exception.getMessage(), containsString("between 1 and 2500")
+        );
     }
 
     @Test
@@ -359,12 +390,18 @@ class EventCreatedTriggerTest {
             .setOrganizer(new Event.Organizer().setEmail("other@company.com"))
             .setStatus("confirmed");
 
-        assertThat("Should accept event matching all filters",
-            trigger.isNewEvent(matchingEvent, lastCreatedTime, runContext), is(true));
-        assertThat("Should reject event with wrong status",
-            trigger.isNewEvent(wrongStatusEvent, lastCreatedTime, runContext), is(false));
-        assertThat("Should reject event with wrong organizer",
-            trigger.isNewEvent(wrongOrganizerEvent, lastCreatedTime, runContext), is(false));
+        assertThat(
+            "Should accept event matching all filters",
+            trigger.isNewEvent(matchingEvent, lastCreatedTime, runContext), is(true)
+        );
+        assertThat(
+            "Should reject event with wrong status",
+            trigger.isNewEvent(wrongStatusEvent, lastCreatedTime, runContext), is(false)
+        );
+        assertThat(
+            "Should reject event with wrong organizer",
+            trigger.isNewEvent(wrongOrganizerEvent, lastCreatedTime, runContext), is(false)
+        );
     }
 
     // ===== Integration Tests (require real credentials) =====

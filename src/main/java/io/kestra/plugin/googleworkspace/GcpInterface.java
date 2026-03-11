@@ -1,9 +1,10 @@
 package io.kestra.plugin.googleworkspace;
 
-import io.kestra.core.models.property.Property;
-import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.util.List;
+
+import io.kestra.core.models.property.Property;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public interface GcpInterface {
     @Schema(

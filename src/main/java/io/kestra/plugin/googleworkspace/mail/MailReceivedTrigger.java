@@ -1,5 +1,13 @@
 package io.kestra.plugin.googleworkspace.mail;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.util.*;
+import java.util.List;
+
+import org.slf4j.Logger;
+
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -12,6 +20,7 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.UserCredentials;
+
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.conditions.ConditionContext;
@@ -21,18 +30,12 @@ import io.kestra.core.models.triggers.*;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.googleworkspace.OAuthInterface;
 import io.kestra.plugin.googleworkspace.mail.models.EmailMetadata;
+
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
-import jakarta.validation.constraints.NotNull;
-import org.slf4j.Logger;
-
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.util.*;
-import java.util.List;
 
 @SuperBuilder
 @ToString
@@ -127,11 +130,13 @@ public class MailReceivedTrigger extends AbstractTrigger implements PollingTrigg
     protected Property<String> accessToken;
 
     @Builder.Default
-    protected Property<List<String>> scopes = Property.ofValue(List.of(
-        "https://www.googleapis.com/auth/gmail.modify",
-        "https://www.googleapis.com/auth/gmail.readonly",
-        "https://www.googleapis.com/auth/gmail.send"
-    ));
+    protected Property<List<String>> scopes = Property.ofValue(
+        List.of(
+            "https://www.googleapis.com/auth/gmail.modify",
+            "https://www.googleapis.com/auth/gmail.readonly",
+            "https://www.googleapis.com/auth/gmail.send"
+        )
+    );
 
     @Builder.Default
     protected Property<Integer> readTimeout = Property.ofValue(120);
@@ -361,7 +366,7 @@ public class MailReceivedTrigger extends AbstractTrigger implements PollingTrigg
     }
 
     private List<EmailMetadata> filterAndEnrichMessages(Gmail gmail, List<Message> messages,
-                                                               Instant cutoffTime, RunContext runContext, Logger logger) throws Exception {
+        Instant cutoffTime, RunContext runContext, Logger logger) throws Exception {
         List<EmailMetadata> newMessages = new ArrayList<>();
         int maxMessages = runContext.render(this.maxMessagesPerPoll).as(Integer.class).orElse(50);
 
@@ -435,8 +440,8 @@ public class MailReceivedTrigger extends AbstractTrigger implements PollingTrigg
         if (message.getPayload() != null && message.getPayload().getHeaders() != null) {
             Map<String, String> headers = new HashMap<>();
 
-            message.getPayload().getHeaders().forEach(header ->
-                headers.put(header.getName().toLowerCase(), header.getValue())
+            message.getPayload().getHeaders().forEach(
+                header -> headers.put(header.getName().toLowerCase(), header.getValue())
             );
 
             builder.headers(headers)

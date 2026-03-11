@@ -1,23 +1,24 @@
 package io.kestra.plugin.googleworkspace.calendar;
 
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Events;
+
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
-import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.serializers.JacksonMapper;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import java.util.List;
-import java.util.Map;
 
 @SuperBuilder
 @ToString
@@ -28,22 +29,22 @@ import java.util.Map;
     examples = @Example(
         full = true,
         code = """
-            id: googleworkspace_calendar_list_events
-            namespace: company.team
+                id: googleworkspace_calendar_list_events
+                namespace: company.team
 
-            tasks:
-              - id: list_events
-                type: io.kestra.plugin.googleworkspace.calendar.ListEvents
-                serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
-                calendarId: team@company.com
-                timeMin: "2025-08-10T00:00:00Z"
-                timeMax: "2025-08-12T00:00:00Z"
-                q: "standup"
-                singleEvents: true
-                orderBy: startTime
-                showDeleted: false
-                maxResults: 100
-        """
+                tasks:
+                  - id: list_events
+                    type: io.kestra.plugin.googleworkspace.calendar.ListEvents
+                    serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
+                    calendarId: team@company.com
+                    timeMin: "2025-08-10T00:00:00Z"
+                    timeMax: "2025-08-12T00:00:00Z"
+                    q: "standup"
+                    singleEvents: true
+                    orderBy: startTime
+                    showDeleted: false
+                    maxResults: 100
+            """
     )
 )
 @Schema(
@@ -131,7 +132,7 @@ public class ListEvents extends AbstractCalendar implements RunnableTask<ListEve
         if (rTimeMax != null) {
             req.setTimeMax(new DateTime(rTimeMax));
         }
-        if (rQuery   != null) {
+        if (rQuery != null) {
             req.setQ(rQuery);
         }
 
@@ -143,28 +144,27 @@ public class ListEvents extends AbstractCalendar implements RunnableTask<ListEve
 
         req.setShowDeleted(rShowDeleted);
 
-        if (rMaxResults  != null) {
+        if (rMaxResults != null) {
             req.setMaxResults(rMaxResults);
         }
 
-        if (rPageToken   != null) {
+        if (rPageToken != null) {
             req.setPageToken(rPageToken);
         }
 
         Events rResp = req.execute();
 
-        List<io.kestra.plugin.googleworkspace.calendar.models.Event> rEvents =
-            rResp.getItems() == null
-                ? List.of()
-                : rResp.getItems().stream()
+        List<io.kestra.plugin.googleworkspace.calendar.models.Event> rEvents = rResp.getItems() == null
+            ? List.of()
+            : rResp.getItems().stream()
                 .map(io.kestra.plugin.googleworkspace.calendar.models.Event::of)
                 .toList();
 
-        List<Map<String, Object>> rMetadataList =
-            rResp.getItems() == null
-                ? List.of()
-                : rResp.getItems().stream()
-                .map(ev -> JacksonMapper.ofJson().convertValue(ev, new TypeReference<Map<String, Object>>() {}))
+        List<Map<String, Object>> rMetadataList = rResp.getItems() == null
+            ? List.of()
+            : rResp.getItems().stream()
+                .map(ev -> JacksonMapper.ofJson().convertValue(ev, new TypeReference<Map<String, Object>>() {
+                }))
                 .toList();
 
         return Output.builder()

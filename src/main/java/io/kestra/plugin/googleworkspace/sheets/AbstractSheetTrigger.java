@@ -1,23 +1,24 @@
 package io.kestra.plugin.googleworkspace.sheets;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
+
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.triggers.AbstractTrigger;
 import io.kestra.core.runners.RunContext;
+
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
 
 @SuperBuilder
 @ToString
@@ -39,10 +40,12 @@ public abstract class AbstractSheetTrigger extends AbstractTrigger {
         description = "Scopes applied to the service account credentials; defaults to Sheets readonly and Drive metadata readonly"
     )
     @Builder.Default
-    protected Property<List<String>> scopes = Property.ofValue(Arrays.asList(
-        "https://www.googleapis.com/auth/spreadsheets.readonly",
-        "https://www.googleapis.com/auth/drive.metadata.readonly"
-    ));
+    protected Property<List<String>> scopes = Property.ofValue(
+        Arrays.asList(
+            "https://www.googleapis.com/auth/spreadsheets.readonly",
+            "https://www.googleapis.com/auth/drive.metadata.readonly"
+        )
+    );
 
     protected Sheets sheetsConnection(RunContext runContext) throws Exception {
         GoogleCredentials credentials;

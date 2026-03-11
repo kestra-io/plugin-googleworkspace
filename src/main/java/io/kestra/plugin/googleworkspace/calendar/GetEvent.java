@@ -1,21 +1,24 @@
 package io.kestra.plugin.googleworkspace.calendar;
 
+import java.util.Map;
+
+import org.slf4j.Logger;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
+
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.serializers.JacksonMapper;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.slf4j.Logger;
-
-import java.util.Map;
 
 @SuperBuilder
 @ToString
@@ -80,16 +83,18 @@ public class GetEvent extends AbstractCalendar implements RunnableTask<GetEvent.
         String rCalendarId = runContext.render(calendarId).as(String.class).orElseThrow();
         String rEventId = runContext.render(eventId).as(String.class).orElseThrow();
         Integer rMaxAttendees = runContext.render(maxAttendees).as(Integer.class).orElse(null);
-        Boolean rAlwaysIncludeEmail= runContext.render(alwaysIncludeEmail).as(Boolean.class).orElse(false);
+        Boolean rAlwaysIncludeEmail = runContext.render(alwaysIncludeEmail).as(Boolean.class).orElse(false);
 
         var req = service.events().get(rCalendarId, rEventId);
-        if (rMaxAttendees != null) req.setMaxAttendees(rMaxAttendees);
+        if (rMaxAttendees != null)
+            req.setMaxAttendees(rMaxAttendees);
         req.setAlwaysIncludeEmail(rAlwaysIncludeEmail);
 
         Event googleEvent = req.execute();
 
         Map<String, Object> eventMetadata = JacksonMapper.ofJson().convertValue(
-            googleEvent, new TypeReference<Map<String, Object>>() {}
+            googleEvent, new TypeReference<Map<String, Object>>() {
+            }
         );
 
         logger.debug("fetched event '{}' from calendar '{}'", rEventId, rCalendarId);

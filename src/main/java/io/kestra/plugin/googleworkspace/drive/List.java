@@ -1,24 +1,26 @@
 package io.kestra.plugin.googleworkspace.drive;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.FileList;
+
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Metric;
 import io.kestra.core.models.annotations.Plugin;
-import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.executions.metrics.Counter;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.googleworkspace.drive.models.File;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.slf4j.Logger;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 @SuperBuilder
 @ToString
@@ -45,9 +47,9 @@ import java.util.stream.Collectors;
     },
     metrics = {
         @Metric(
-            name= "size",
-            type= Counter.TYPE,
-            unit= "count",
+            name = "size",
+            type = Counter.TYPE,
+            unit = "count",
             description = "Number of files returned by the list query"
         )
     }
@@ -82,10 +84,11 @@ public class List extends AbstractDrive implements RunnableTask<List.Output> {
             .setQ(query);
 
         if (this.corpora != null) {
-            list.setCorpora(runContext.render(this.corpora).asList(Corpora.class)
-                .stream()
-                .map(Enum::name)
-                .collect(Collectors.joining(","))
+            list.setCorpora(
+                runContext.render(this.corpora).asList(Corpora.class)
+                    .stream()
+                    .map(Enum::name)
+                    .collect(Collectors.joining(","))
             );
         }
 
@@ -110,11 +113,12 @@ public class List extends AbstractDrive implements RunnableTask<List.Output> {
                 .setIncludeItemsFromAllDrives(true)
                 .execute();
 
-            result.addAll(fileList
-                .getFiles()
-                .stream()
-                .map(io.kestra.plugin.googleworkspace.drive.models.File::of)
-                .collect(Collectors.toList())
+            result.addAll(
+                fileList
+                    .getFiles()
+                    .stream()
+                    .map(io.kestra.plugin.googleworkspace.drive.models.File::of)
+                    .collect(Collectors.toList())
             );
 
             pageToken = fileList.getNextPageToken();

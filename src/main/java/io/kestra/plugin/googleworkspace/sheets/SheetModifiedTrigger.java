@@ -1,11 +1,19 @@
 package io.kestra.plugin.googleworkspace.sheets;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.Revision;
 import com.google.api.services.drive.model.RevisionList;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.Sheet;
 import com.google.api.services.sheets.v4.model.Spreadsheet;
+
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.conditions.ConditionContext;
@@ -13,17 +21,11 @@ import io.kestra.core.models.executions.Execution;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.triggers.*;
 import io.kestra.core.runners.RunContext;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 import static io.kestra.core.models.triggers.StatefulTriggerService.*;
 import static io.kestra.core.utils.Rethrow.throwFunction;
@@ -221,8 +223,9 @@ public class SheetModifiedTrigger extends AbstractSheetTrigger implements Pollin
         Map<String, Entry> state = readState(runContext, rStateKey, rStateTtl);
 
         List<ModificationOutput> toFire = revisions.stream()
-            .flatMap(throwFunction(revision -> {
-                String revisionUri = String.format("sheet://%s/revision/%s",rSpreadsheetId, revision.getId());
+            .flatMap(throwFunction(revision ->
+            {
+                String revisionUri = String.format("sheet://%s/revision/%s", rSpreadsheetId, revision.getId());
 
                 String version = revision.getId();
 
@@ -296,10 +299,8 @@ public class SheetModifiedTrigger extends AbstractSheetTrigger implements Pollin
         return Optional.of(TriggerService.generateExecution(this, conditionContext, context, output));
     }
 
-    private ChangeDetails fetchChangeDetails(Sheets sheets, String rSpreadsheetId, String finalRSheetName, String finalRange, RunContext runContext) throws Exception{
-        String rangeSpec = finalRSheetName != null ?
-            (finalRange != null ? finalRSheetName + "!" + finalRange : finalRSheetName) :
-            finalRange;
+    private ChangeDetails fetchChangeDetails(Sheets sheets, String rSpreadsheetId, String finalRSheetName, String finalRange, RunContext runContext) throws Exception {
+        String rangeSpec = finalRSheetName != null ? (finalRange != null ? finalRSheetName + "!" + finalRange : finalRSheetName) : finalRange;
 
         var res = sheets.spreadsheets().values()
             .get(rSpreadsheetId, rangeSpec != null ? rangeSpec : "")

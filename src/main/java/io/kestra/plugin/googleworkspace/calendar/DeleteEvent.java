@@ -1,19 +1,18 @@
 package io.kestra.plugin.googleworkspace.calendar;
 
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.calendar.Calendar;
-import com.google.api.services.calendar.model.Event;
+
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.models.tasks.VoidOutput;
 import io.kestra.core.runners.RunContext;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.slf4j.Logger;
 
 @SuperBuilder
 @ToString
@@ -62,7 +61,7 @@ public class DeleteEvent extends AbstractCalendar implements RunnableTask<VoidOu
     @Schema(
         title = "Send update emails",
         description = "Whether Google should email attendees about the deletion; default none",
-        allowableValues = {"all", "none", "externalOnly"}
+        allowableValues = { "all", "none", "externalOnly" }
     )
     @Builder.Default
     protected Property<String> sendUpdates = Property.ofValue("none");
@@ -76,9 +75,9 @@ public class DeleteEvent extends AbstractCalendar implements RunnableTask<VoidOu
         String rSendUpdates = runContext.render(sendUpdates).as(String.class).orElse("none");
 
         service.events()
-                .delete(rCalendarId, rEventId)
-                .setSendUpdates(rSendUpdates)
-                .execute();
+            .delete(rCalendarId, rEventId)
+            .setSendUpdates(rSendUpdates)
+            .execute();
 
         return null;
     }

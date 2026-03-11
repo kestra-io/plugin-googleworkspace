@@ -1,5 +1,11 @@
 package io.kestra.plugin.googleworkspace.chat;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.Map;
+
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.http.HttpRequest;
 import io.kestra.core.http.client.configurations.HttpConfiguration;
@@ -10,15 +16,10 @@ import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.models.tasks.Task;
 import io.kestra.core.models.tasks.VoidOutput;
 import io.kestra.core.runners.RunContext;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-import java.util.Map;
 
 @SuperBuilder
 @ToString
@@ -39,10 +40,12 @@ public abstract class AbstractChatConnection extends Task implements RunnableTas
         if (this.options != null) {
 
             configuration
-                .timeout(TimeoutConfiguration.builder()
-                    .connectTimeout(this.options.getConnectTimeout())
-                    .readIdleTimeout(this.options.getReadIdleTimeout())
-                .build())
+                .timeout(
+                    TimeoutConfiguration.builder()
+                        .connectTimeout(this.options.getConnectTimeout())
+                        .readIdleTimeout(this.options.getReadIdleTimeout())
+                        .build()
+                )
                 .defaultCharset(this.options.getDefaultCharset());
         }
 
@@ -113,6 +116,6 @@ public abstract class AbstractChatConnection extends Task implements RunnableTas
             title = "Custom HTTP request headers",
             description = "Optional headers to add to every request"
         )
-        public Property<Map<String,String>> headers;
+        public Property<Map<String, String>> headers;
     }
 }

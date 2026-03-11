@@ -1,19 +1,20 @@
 package io.kestra.plugin.googleworkspace.calendar;
 
-import com.google.api.services.calendar.Calendar;
-import com.google.api.services.calendar.CalendarScopes;
-import com.google.auth.http.HttpCredentialsAdapter;
-import io.kestra.core.exceptions.IllegalVariableEvaluationException;
-import io.kestra.core.models.annotations.PluginProperty;
-import io.kestra.core.models.property.Property;
-import io.kestra.core.runners.RunContext;
-import io.kestra.plugin.googleworkspace.AbstractTask;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
-
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
+
+import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.CalendarScopes;
+import com.google.auth.http.HttpCredentialsAdapter;
+
+import io.kestra.core.exceptions.IllegalVariableEvaluationException;
+import io.kestra.core.models.property.Property;
+import io.kestra.core.runners.RunContext;
+import io.kestra.plugin.googleworkspace.AbstractTask;
+
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @ToString

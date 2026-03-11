@@ -1,22 +1,25 @@
 package io.kestra.plugin.googleworkspace.sheets;
 
+import java.net.URI;
+import java.util.List;
+
+import org.slf4j.Logger;
+
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.AppendValuesResponse;
 import com.google.api.services.sheets.v4.model.ClearValuesRequest;
 import com.google.api.services.sheets.v4.model.UpdateValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
+
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.slf4j.Logger;
-
-import java.net.URI;
-import java.util.List;
 
 @SuperBuilder
 @ToString
@@ -28,48 +31,48 @@ import java.util.List;
     description = "Reads data from Kestra storage (CSV/JSON/ION/AVRO/PARQUET/ORC) and writes it to a sheet range. Supports append, overwrite, or update modes; header parsing optional."
 )
 @Plugin(
-	examples = {
-		@Example(
-			title = "Load data into a Google Workspace spreadsheet from an input file",
-			full = true,
-			code = """
-			    id: googleworkspace_sheets_load
-				namespace: company.team
+    examples = {
+        @Example(
+            title = "Load data into a Google Workspace spreadsheet from an input file",
+            full = true,
+            code = """
+                   id: googleworkspace_sheets_load
+                namespace: company.team
 
-				inputs:
-				  - id: file
-				    type: FILE
-				  - id: serviceAccount
-				    type: STRING
+                inputs:
+                  - id: file
+                    type: FILE
+                  - id: serviceAccount
+                    type: STRING
 
-				tasks:
-				  - id: load_data
-				    type: io.kestra.plugin.googleworkspace.sheets.Load
-				    from: "{{ inputs.file }}"
-				    spreadsheetId: xxxxxxxxxxxxxxxxx
-				    range: Sheet2
-				    serviceAccount: "{{ inputs.serviceAccount }}"
-				    csvOptions:
-				      fieldDelimiter: ";"
-			    """
-		)
-	}
+                tasks:
+                  - id: load_data
+                    type: io.kestra.plugin.googleworkspace.sheets.Load
+                    from: "{{ inputs.file }}"
+                    spreadsheetId: xxxxxxxxxxxxxxxxx
+                    range: Sheet2
+                    serviceAccount: "{{ inputs.serviceAccount }}"
+                    csvOptions:
+                      fieldDelimiter: ";"
+                   """
+        )
+    }
 )
 public class Load extends AbstractLoad implements RunnableTask<Load.Output> {
     private static final String VALUE_INPUT_OPTION = "RAW";
 
-	@Schema(
-		title = "Source file URI",
+    @Schema(
+        title = "Source file URI",
         description = "kestra:// URI of the file to load"
-	)
-	private Property<String> from;
+    )
+    private Property<String> from;
 
-	@Schema(
-		title = "Target sheet or range",
+    @Schema(
+        title = "Target sheet or range",
         description = "Sheet name or A1 range to write into; default Sheet1"
-	)
-	@Builder.Default
-	private Property<String> range = Property.ofValue("Sheet1");
+    )
+    @Builder.Default
+    private Property<String> range = Property.ofValue("Sheet1");
 
     @Schema(
         title = "How to write the data into the sheet",
@@ -88,7 +91,7 @@ public class Load extends AbstractLoad implements RunnableTask<Load.Output> {
         Logger logger = runContext.logger();
 
         URI from = URI.create(runContext.render(this.from).as(String.class).orElseThrow());
-		List<List<Object>> values = this.parse(runContext, from);
+        List<List<Object>> values = this.parse(runContext, from);
 
         String rSpreadsheetId = runContext.render(this.spreadsheetId).as(String.class).orElseThrow();
         String rTargetRange = runContext.render(this.range).as(String.class).orElseThrow();
@@ -154,11 +157,16 @@ public class Load extends AbstractLoad implements RunnableTask<Load.Output> {
         };
     }
 
-    private record WriteResult(String range, int rows, int columns) {}
+    private record WriteResult(String range, int rows, int columns) {
+    }
 
     @Getter
     @NoArgsConstructor
-    public enum InsertType { UPDATE, OVERWRITE, APPEND }
+    public enum InsertType {
+        UPDATE,
+        OVERWRITE,
+        APPEND
+    }
 
     @Getter
     @Builder
@@ -166,16 +174,16 @@ public class Load extends AbstractLoad implements RunnableTask<Load.Output> {
         @Schema(title = "Spreadsheet range written")
         private String range;
 
-		@Schema(
-			title = "Rows written"
-		)
-		private int rows;
+        @Schema(
+            title = "Rows written"
+        )
+        private int rows;
 
-		@Schema(
-			title = "Columns written"
-		)
-		private int columns;
+        @Schema(
+            title = "Columns written"
+        )
+        private int columns;
 
-	}
+    }
 
 }

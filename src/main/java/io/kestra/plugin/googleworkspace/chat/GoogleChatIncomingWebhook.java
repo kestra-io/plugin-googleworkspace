@@ -1,5 +1,7 @@
 package io.kestra.plugin.googleworkspace.chat;
 
+import java.net.URI;
+
 import io.kestra.core.http.HttpRequest;
 import io.kestra.core.http.HttpResponse;
 import io.kestra.core.http.client.HttpClient;
@@ -9,6 +11,7 @@ import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.VoidOutput;
 import io.kestra.core.runners.RunContext;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.EqualsAndHashCode;
@@ -16,8 +19,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-
-import java.net.URI;
 
 @SuperBuilder
 @ToString
@@ -102,9 +103,11 @@ public class GoogleChatIncomingWebhook extends AbstractChatConnection {
                 .addHeader("Content-Type", "application/json")
                 .uri(URI.create(url))
                 .method("POST")
-                .body(HttpRequest.StringRequestBody.builder()
-                    .content(payload)
-                    .build())
+                .body(
+                    HttpRequest.StringRequestBody.builder()
+                        .content(payload)
+                        .build()
+                )
                 .build();
 
             HttpResponse<String> response = client.request(request, String.class);
