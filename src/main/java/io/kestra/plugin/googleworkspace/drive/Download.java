@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -59,6 +60,7 @@ public class Download extends AbstractDrive implements RunnableTask<Download.Out
         description = "Drive file ID; supports Shared Drives"
     )
     @NotNull
+    @PluginProperty(group = "main")
     private Property<String> fileId;
 
     @Override

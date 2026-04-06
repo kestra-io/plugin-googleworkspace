@@ -29,6 +29,7 @@ import lombok.experimental.SuperBuilder;
 
 import static io.kestra.core.models.triggers.StatefulTriggerService.*;
 import static io.kestra.core.utils.Rethrow.throwFunction;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @NoArgsConstructor
@@ -133,6 +134,7 @@ public class SheetModifiedTrigger extends AbstractSheetTrigger implements Pollin
         title = "Polling interval",
         description = "How often to check for sheet modifications; default PT5M"
     )
+    @PluginProperty(group = "execution")
     private final Duration interval = Duration.ofMinutes(5);
 
     @Schema(
@@ -140,18 +142,21 @@ public class SheetModifiedTrigger extends AbstractSheetTrigger implements Pollin
         description = "Spreadsheet identifier from the URL (docs.google.com/spreadsheets/d/{ID}/...)"
     )
     @NotNull
+    @PluginProperty(group = "main")
     private Property<String> spreadsheetId;
 
     @Schema(
         title = "Sheet name filter",
         description = "Optional tab name to monitor; monitors all tabs when empty"
     )
+    @PluginProperty(group = "advanced")
     private Property<String> sheetName;
 
     @Schema(
         title = "Range filter",
         description = "Optional A1 range (e.g., A1:D10) to scope change checks"
     )
+    @PluginProperty(group = "advanced")
     private Property<String> range;
 
     @Schema(
@@ -159,18 +164,21 @@ public class SheetModifiedTrigger extends AbstractSheetTrigger implements Pollin
         description = "If true, fetches sheet data for a lightweight diff summary; increases API calls"
     )
     @Builder.Default
+    @PluginProperty(group = "advanced")
     private Property<Boolean> includeDetails = Property.ofValue(false);
 
     @Schema(
         title = "State key",
         description = "Custom key for state storage; defaults to trigger ID"
     )
+    @PluginProperty(group = "connection")
     private Property<String> stateKey;
 
     @Schema(
         title = "State TTL",
         description = "Optional TTL for stored revisions, e.g., P7D"
     )
+    @PluginProperty(group = "advanced")
     private Property<Duration> stateTtl;
 
     @Schema(
@@ -178,6 +186,7 @@ public class SheetModifiedTrigger extends AbstractSheetTrigger implements Pollin
         description = "CREATE (new revisions only), UPDATE, or CREATE_OR_UPDATE (default)"
     )
     @Builder.Default
+    @PluginProperty(group = "advanced")
     private Property<On> on = Property.ofValue(On.CREATE_OR_UPDATE);
 
     @Override
@@ -345,40 +354,47 @@ public class SheetModifiedTrigger extends AbstractSheetTrigger implements Pollin
             title = "Revision ID",
             description = "Drive revision identifier"
         )
+        @PluginProperty(group = "advanced")
         private final String revisionId;
 
         @Schema(
             title = "Modified time",
             description = "When the revision was created"
         )
+        @PluginProperty(group = "advanced")
         private final Instant modifiedTime;
 
         @Schema(
             title = "Spreadsheet title"
         )
+        @PluginProperty(group = "advanced")
         private final String spreadsheetTitle;
 
         @Schema(
             title = "Spreadsheet ID"
         )
+        @PluginProperty(group = "advanced")
         private final String spreadsheetId;
 
         @Schema(
             title = "Last modifying user",
             description = "Display name of the editor if available"
         )
+        @PluginProperty(group = "advanced")
         private final String lastModifyingUser;
 
         @Schema(
             title = "Sheet name",
             description = "Tab name when filter applied"
         )
+        @PluginProperty(group = "advanced")
         private final String sheetName;
 
         @Schema(
             title = "Change details",
             description = "Basic range/size info when includeDetails=true"
         )
+        @PluginProperty(group = "advanced")
         private final ChangeDetails changeDetails;
     }
 
@@ -389,24 +405,28 @@ public class SheetModifiedTrigger extends AbstractSheetTrigger implements Pollin
             title = "Affected range",
             description = "A1 range evaluated for change details"
         )
+        @PluginProperty(group = "advanced")
         private final String affectedRange;
 
         @Schema(
             title = "Row count",
             description = "Rows present in the range"
         )
+        @PluginProperty(group = "advanced")
         private final Integer rowCount;
 
         @Schema(
             title = "Column count",
             description = "Columns present in the range"
         )
+        @PluginProperty(group = "advanced")
         private final Integer columnCount;
 
         @Schema(
             title = "Has data",
             description = "True if any cell in the range contains data"
         )
+        @PluginProperty(group = "advanced")
         private final Boolean hasData;
     }
 }

@@ -81,7 +81,7 @@ public class GoogleChatIncomingWebhook extends AbstractChatConnection {
         title = "Incoming Google Chat webhook URL",
         description = "Full Chat webhook endpoint (e.g. https://chat.googleapis.com/v1/spaces/.../messages); threadKey may be included"
     )
-    @PluginProperty(dynamic = true)
+    @PluginProperty(dynamic = true, group = "main")
     @NotBlank
     protected String url;
 
@@ -89,6 +89,7 @@ public class GoogleChatIncomingWebhook extends AbstractChatConnection {
         title = "JSON payload sent to Chat",
         description = "Raw JSON body sent to Chat"
     )
+    @PluginProperty(group = "main")
     protected Property<String> payload;
 
     @Override

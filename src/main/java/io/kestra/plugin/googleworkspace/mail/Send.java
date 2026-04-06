@@ -28,6 +28,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -92,48 +93,56 @@ public class Send extends AbstractMail implements RunnableTask<Send.Output> {
         description = "Primary recipient email addresses"
     )
     @NotNull
+    @PluginProperty(group = "main")
     private Property<List<String>> to;
 
     @Schema(
         title = "CC recipients",
         description = "Carbon copy addresses"
     )
+    @PluginProperty(group = "advanced")
     private Property<List<String>> cc;
 
     @Schema(
         title = "BCC recipients",
         description = "Blind carbon copy addresses"
     )
+    @PluginProperty(group = "advanced")
     private Property<List<String>> bcc;
 
     @Schema(
         title = "Subject",
         description = "Subject line"
     )
+    @PluginProperty(group = "main")
     private Property<String> subject;
 
     @Schema(
         title = "Plain text body",
         description = "Plain text content"
     )
+    @PluginProperty(group = "advanced")
     private Property<String> textBody;
 
     @Schema(
         title = "HTML body",
         description = "HTML content"
     )
+    @PluginProperty(group = "advanced")
     private Property<String> htmlBody;
 
     @Schema(
         title = "From address",
         description = "Sender email; defaults to authenticated Gmail user"
     )
+    @PluginProperty(group = "source")
     private Property<String> from;
 
     @Schema(
         title = "Attachments",
         description = "List of kestra:// file URIs to attach"
     )
+    @PluginProperty(group = "advanced")
     private Property<List<String>> attachments;
 
     @Override

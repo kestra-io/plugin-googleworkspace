@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -57,24 +58,28 @@ public class ListEvents extends AbstractCalendar implements RunnableTask<ListEve
         description = "Email-style calendar shared with the service account, e.g. team@company.com"
     )
     @NotNull
+    @PluginProperty(group = "main")
     protected Property<String> calendarId;
 
     @Schema(
         title = "Start time lower bound",
         description = "RFC3339 timestamp for earliest event start (timeMin)"
     )
+    @PluginProperty(group = "advanced")
     protected Property<String> timeMin;
 
     @Schema(
         title = "End time upper bound",
         description = "RFC3339 timestamp for latest event end (timeMax)"
     )
+    @PluginProperty(group = "advanced")
     protected Property<String> timeMax;
 
     @Schema(
         title = "Keyword search",
         description = "Free-text query across summary, description, and location"
     )
+    @PluginProperty(group = "advanced")
     protected Property<String> q;
 
     @Schema(
@@ -82,12 +87,14 @@ public class ListEvents extends AbstractCalendar implements RunnableTask<ListEve
         description = "When true (default), expands recurring events"
     )
     @Builder.Default
+    @PluginProperty(group = "advanced")
     protected Property<Boolean> singleEvents = Property.ofValue(true);
 
     @Schema(
         title = "Order by",
         description = "startTime (requires singleEvents=true) or updated"
     )
+    @PluginProperty(group = "processing")
     protected Property<String> orderBy;
 
     @Schema(
@@ -95,18 +102,21 @@ public class ListEvents extends AbstractCalendar implements RunnableTask<ListEve
         description = "Whether to include cancelled events; default false"
     )
     @Builder.Default
+    @PluginProperty(group = "advanced")
     protected Property<Boolean> showDeleted = Property.ofValue(false);
 
     @Schema(
         title = "Max results",
         description = "Number of events per page (1–2500)"
     )
+    @PluginProperty(group = "processing")
     protected Property<Integer> maxResults;
 
     @Schema(
         title = "Page token",
         description = "Pagination token from a previous response"
     )
+    @PluginProperty(group = "connection")
     protected Property<String> pageToken;
 
     @Override

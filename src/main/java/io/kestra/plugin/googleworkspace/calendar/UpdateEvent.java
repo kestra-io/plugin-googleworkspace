@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -65,6 +66,7 @@ public class UpdateEvent extends AbstractCalendar implements RunnableTask<Update
         description = "Email-style calendar shared with the service account"
     )
     @NotNull
+    @PluginProperty(group = "main")
     protected Property<String> calendarId;
 
     @Schema(
@@ -72,6 +74,7 @@ public class UpdateEvent extends AbstractCalendar implements RunnableTask<Update
         description = "Identifier of the event to update"
     )
     @NotNull
+    @PluginProperty(group = "main")
     protected Property<String> eventId;
 
     @Schema(
@@ -79,6 +82,7 @@ public class UpdateEvent extends AbstractCalendar implements RunnableTask<Update
         description = "When true (default) sends PATCH; false sends full UPDATE"
     )
     @Builder.Default
+    @PluginProperty(group = "advanced")
     protected Property<Boolean> patch = Property.ofValue(true);
 
     @Schema(
@@ -86,12 +90,14 @@ public class UpdateEvent extends AbstractCalendar implements RunnableTask<Update
         description = "Controls attendee notification: all, externalOnly, or none (default)"
     )
     @Builder.Default
+    @PluginProperty(group = "advanced")
     protected Property<String> sendUpdates = Property.ofValue("none");
 
     @Schema(
         title = "Title",
         description = "New event title (optional)"
     )
+    @PluginProperty(group = "advanced")
     protected Property<String> summary;
 
     @Schema(
@@ -99,12 +105,14 @@ public class UpdateEvent extends AbstractCalendar implements RunnableTask<Update
         description = "New description; supports templating"
     )
     @io.kestra.core.models.annotations.PluginProperty(dynamic = true)
+    @PluginProperty(group = "advanced")
     protected String description;
 
     @Schema(
         title = "Location",
         description = "Free-form location to set"
     )
+    @PluginProperty(group = "advanced")
     protected Property<String> location;
 
     @Schema(
@@ -132,6 +140,7 @@ public class UpdateEvent extends AbstractCalendar implements RunnableTask<Update
         title = "Event status",
         description = "Status value: confirmed, tentative, or cancelled"
     )
+    @PluginProperty(group = "advanced")
     protected Property<String> status;
 
     @Override

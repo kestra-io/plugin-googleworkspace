@@ -16,6 +16,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import reactor.core.publisher.Flux;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -31,6 +32,7 @@ public abstract class AbstractRead extends AbstractSheet {
         title = "Spreadsheet ID"
     )
     @NotNull
+    @PluginProperty(group = "main")
     protected Property<String> spreadsheetId;
 
     @Schema(
@@ -39,6 +41,7 @@ public abstract class AbstractRead extends AbstractSheet {
     )
     @NotNull
     @Builder.Default
+    @PluginProperty(group = "main")
     protected Property<ValueRender> valueRender = Property.ofValue(ValueRender.UNFORMATTED_VALUE);
 
     @Schema(
@@ -47,6 +50,7 @@ public abstract class AbstractRead extends AbstractSheet {
     )
     @NotNull
     @Builder.Default
+    @PluginProperty(group = "main")
     protected Property<DateTimeRender> dateTimeRender = Property.ofValue(DateTimeRender.FORMATTED_STRING);
 
     @Builder.Default
@@ -54,6 +58,7 @@ public abstract class AbstractRead extends AbstractSheet {
         title = "Treat first row as header",
         description = "When true, maps rows to objects using first row keys; default true"
     )
+    @PluginProperty(group = "processing")
     protected final Property<Boolean> header = Property.ofValue(true);
 
     @Schema(
@@ -61,6 +66,7 @@ public abstract class AbstractRead extends AbstractSheet {
         description = "If true, data is returned in output; otherwise written to storage"
     )
     @Builder.Default
+    @PluginProperty(group = "execution")
     protected final Property<Boolean> fetch = Property.ofValue(false);
 
     @Schema(
@@ -68,6 +74,7 @@ public abstract class AbstractRead extends AbstractSheet {
         description = "If true, writes ION file to storage; default true"
     )
     @Builder.Default
+    @PluginProperty(group = "advanced")
     protected final Property<Boolean> store = Property.ofValue(true);
 
     protected List<Object> transform(List<List<Object>> values, RunContext runContext) throws IllegalVariableEvaluationException {

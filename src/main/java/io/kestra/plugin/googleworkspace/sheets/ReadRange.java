@@ -19,6 +19,7 @@ import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -61,6 +62,7 @@ public class ReadRange extends AbstractRead implements RunnableTask<ReadRange.Ou
         title = "Range",
         description = "A1 notation range (e.g., Sheet1!A1:D10); required"
     )
+    @PluginProperty(group = "advanced")
     private Property<String> range;
 
     @Override

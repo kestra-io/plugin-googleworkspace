@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -61,6 +62,7 @@ public class Export extends AbstractDrive implements RunnableTask<Export.Output>
         description = "Google Workspace file ID to export; supports Shared Drives"
     )
     @NotNull
+    @PluginProperty(group = "main")
     private Property<String> fileId;
 
     @Schema(
@@ -68,6 +70,7 @@ public class Export extends AbstractDrive implements RunnableTask<Export.Output>
         description = "Target MIME type, e.g. text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
     @NotNull
+    @PluginProperty(group = "main")
     private Property<String> contentType;
 
     @Override

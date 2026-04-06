@@ -24,6 +24,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import reactor.core.publisher.Flux;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -96,6 +97,7 @@ public class List extends AbstractMail implements RunnableTask<List.Output> {
         title = "Gmail search query",
         description = "Gmail search syntax (e.g., is:unread, from:sender@example.com, subject:important)"
     )
+    @PluginProperty(group = "main")
     private Property<String> query;
 
     @Schema(
@@ -109,6 +111,7 @@ public class List extends AbstractMail implements RunnableTask<List.Output> {
         description = "Max messages to return (default 100, capped at 500)"
     )
     @Builder.Default
+    @PluginProperty(group = "processing")
     private Property<Integer> maxResults = Property.ofValue(100);
 
     @Schema(
@@ -116,6 +119,7 @@ public class List extends AbstractMail implements RunnableTask<List.Output> {
         description = "Whether to include SPAM and TRASH messages"
     )
     @Builder.Default
+    @PluginProperty(group = "advanced")
     private Property<Boolean> includeSpamTrash = Property.ofValue(false);
 
     @Schema(
@@ -124,6 +128,7 @@ public class List extends AbstractMail implements RunnableTask<List.Output> {
     )
     @NotNull
     @Builder.Default
+    @PluginProperty(group = "processing")
     private Property<FetchType> fetchType = Property.ofValue(FetchType.FETCH);
 
     @Override

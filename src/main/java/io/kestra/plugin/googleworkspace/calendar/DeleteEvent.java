@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -49,6 +50,7 @@ public class DeleteEvent extends AbstractCalendar implements RunnableTask<VoidOu
         description = "Email-style calendar shared with the service account"
     )
     @NotNull
+    @PluginProperty(group = "main")
     protected Property<String> calendarId;
 
     @Schema(
@@ -56,6 +58,7 @@ public class DeleteEvent extends AbstractCalendar implements RunnableTask<VoidOu
         description = "Identifier of the event to delete"
     )
     @NotNull
+    @PluginProperty(group = "main")
     protected Property<String> eventId;
 
     @Schema(
@@ -64,6 +67,7 @@ public class DeleteEvent extends AbstractCalendar implements RunnableTask<VoidOu
         allowableValues = { "all", "none", "externalOnly" }
     )
     @Builder.Default
+    @PluginProperty(group = "advanced")
     protected Property<String> sendUpdates = Property.ofValue("none");
 
     @Override

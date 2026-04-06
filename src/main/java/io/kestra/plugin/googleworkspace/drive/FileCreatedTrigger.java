@@ -30,6 +30,7 @@ import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -119,24 +120,28 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
         description = "Drive scopes to request; default metadata read-only"
     )
     @Builder.Default
+    @PluginProperty(group = "advanced")
     protected Property<List<String>> scopes = Property.ofValue(List.of("https://www.googleapis.com/auth/drive.metadata.readonly"));
 
     @Schema(
         title = "Folder ID to monitor",
         description = "Google Drive folder ID; monitors entire Drive if omitted"
     )
+    @PluginProperty(group = "advanced")
     protected Property<String> folderId;
 
     @Schema(
         title = "MIME type filters",
         description = "Restrict to listed MIME types (e.g., application/pdf). Empty means all types."
     )
+    @PluginProperty(group = "advanced")
     protected Property<List<String>> mimeTypes;
 
     @Schema(
         title = "Owner email filter",
         description = "Only files owned by this email trigger executions; must be a valid email"
     )
+    @PluginProperty(group = "advanced")
     protected Property<String> ownerEmail;
 
     @Schema(
@@ -144,6 +149,7 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
         description = "When true, query is recursive through subfolders; default false"
     )
     @Builder.Default
+    @PluginProperty(group = "advanced")
     protected Property<Boolean> includeSubfolders = Property.ofValue(false);
 
     @Schema(
@@ -151,6 +157,7 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
         description = "How often to poll for new files; minimum PT1M, default PT1H"
     )
     @Builder.Default
+    @PluginProperty(group = "execution")
     protected Duration interval = Duration.ofHours(1);
 
     @Schema(
@@ -158,6 +165,7 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
         description = "Upper bound on files returned each poll; default 100"
     )
     @Builder.Default
+    @PluginProperty(group = "execution")
     protected Property<Integer> maxFilesPerPoll = Property.ofValue(100);
 
     @Override

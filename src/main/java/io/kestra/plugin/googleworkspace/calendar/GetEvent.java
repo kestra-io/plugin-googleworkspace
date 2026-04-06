@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -53,6 +54,7 @@ public class GetEvent extends AbstractCalendar implements RunnableTask<GetEvent.
         description = "Email-style calendar shared with the service account, e.g. team@company.com"
     )
     @NotNull
+    @PluginProperty(group = "main")
     protected Property<String> calendarId;
 
     @Schema(
@@ -60,12 +62,14 @@ public class GetEvent extends AbstractCalendar implements RunnableTask<GetEvent.
         description = "Identifier of the event to fetch"
     )
     @NotNull
+    @PluginProperty(group = "main")
     protected Property<String> eventId;
 
     @Schema(
         title = "Maximum attendees",
         description = "Upper bound of attendees returned; omit to use API default"
     )
+    @PluginProperty(group = "advanced")
     protected Property<Integer> maxAttendees;
 
     @Schema(
@@ -73,6 +77,7 @@ public class GetEvent extends AbstractCalendar implements RunnableTask<GetEvent.
         description = "Whether organizer/attendee emails are returned; default false"
     )
     @Builder.Default
+    @PluginProperty(group = "advanced")
     protected Property<Boolean> alwaysIncludeEmail = Property.ofValue(false);
 
     @Override

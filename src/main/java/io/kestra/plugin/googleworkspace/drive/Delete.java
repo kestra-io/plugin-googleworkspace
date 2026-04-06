@@ -13,6 +13,7 @@ import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -44,6 +45,7 @@ public class Delete extends AbstractDrive implements RunnableTask<Delete.Output>
         title = "File ID",
         description = "ID of the file to delete; enable supportsAllDrives is handled automatically"
     )
+    @PluginProperty(group = "source")
     private Property<String> fileId;
 
     @Override

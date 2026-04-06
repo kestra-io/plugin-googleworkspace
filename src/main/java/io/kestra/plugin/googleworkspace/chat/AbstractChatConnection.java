@@ -31,7 +31,7 @@ public abstract class AbstractChatConnection extends Task implements RunnableTas
         title = "Configure HTTP client options",
         description = "Optional HTTP settings (timeouts, charset, headers) applied to webhook calls"
     )
-    @PluginProperty(dynamic = true)
+    @PluginProperty(dynamic = true, group = "advanced")
     protected RequestOptions options;
 
     protected HttpConfiguration httpClientConfigurationWithOptions() throws IllegalVariableEvaluationException {
@@ -75,6 +75,7 @@ public abstract class AbstractChatConnection extends Task implements RunnableTas
             title = "Connect timeout for webhook calls",
             description = "Max time to open the connection before failing"
         )
+        @PluginProperty(group = "execution")
         private final Property<Duration> connectTimeout;
 
         @Schema(
@@ -82,6 +83,7 @@ public abstract class AbstractChatConnection extends Task implements RunnableTas
             description = "Max time to read data before failing; default PT10S"
         )
         @Builder.Default
+        @PluginProperty(group = "execution")
         private final Property<Duration> readTimeout = Property.ofValue(Duration.ofSeconds(10));
 
         @Schema(
@@ -89,6 +91,7 @@ public abstract class AbstractChatConnection extends Task implements RunnableTas
             description = "Idle time on an open connection before closing; default PT5M"
         )
         @Builder.Default
+        @PluginProperty(group = "execution")
         private final Property<Duration> readIdleTimeout = Property.ofValue(Duration.of(5, ChronoUnit.MINUTES));
 
         @Schema(
@@ -96,6 +99,7 @@ public abstract class AbstractChatConnection extends Task implements RunnableTas
             description = "How long an idle connection stays in the pool; default PT0S"
         )
         @Builder.Default
+        @PluginProperty(group = "execution")
         private final Property<Duration> connectionPoolIdleTimeout = Property.ofValue(Duration.ofSeconds(0));
 
         @Schema(
@@ -103,6 +107,7 @@ public abstract class AbstractChatConnection extends Task implements RunnableTas
             description = "Maximum response body length; default 10MB"
         )
         @Builder.Default
+        @PluginProperty(group = "execution")
         private final Property<Integer> maxContentLength = Property.ofValue(1024 * 1024 * 10);
 
         @Schema(
@@ -110,12 +115,14 @@ public abstract class AbstractChatConnection extends Task implements RunnableTas
             description = "Request charset; default UTF-8"
         )
         @Builder.Default
+        @PluginProperty(group = "advanced")
         private final Property<Charset> defaultCharset = Property.ofValue(StandardCharsets.UTF_8);
 
         @Schema(
             title = "Custom HTTP request headers",
             description = "Optional headers to add to every request"
         )
+        @PluginProperty(group = "advanced")
         public Property<Map<String, String>> headers;
     }
 }

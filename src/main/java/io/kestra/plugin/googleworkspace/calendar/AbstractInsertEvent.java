@@ -31,6 +31,7 @@ public abstract class AbstractInsertEvent extends AbstractCalendar {
         description = "Email-style calendar to create the event in; must be shared with the service account"
     )
     @NotNull
+    @PluginProperty(group = "main")
     protected Property<String> calendarId;
 
     @Schema(
@@ -38,19 +39,21 @@ public abstract class AbstractInsertEvent extends AbstractCalendar {
         description = "Required summary shown in the calendar"
     )
     @NotNull
+    @PluginProperty(group = "main")
     protected Property<String> summary;
 
     @Schema(
         title = "Event description",
         description = "Optional body text; supports templating"
     )
-    @PluginProperty(dynamic = true)
+    @PluginProperty(dynamic = true, group = "advanced")
     protected String description;
 
     @Schema(
         title = "Location",
         description = "Free-form place text such as city, room, or address"
     )
+    @PluginProperty(group = "advanced")
     protected Property<String> location;
 
     @Schema(
@@ -58,7 +61,7 @@ public abstract class AbstractInsertEvent extends AbstractCalendar {
         description = "RFC3339 datetime for the start; include offset"
     )
     @NotNull
-    @PluginProperty
+    @PluginProperty(group = "main")
     protected CalendarTime startTime;
 
     @Schema(
@@ -66,21 +69,21 @@ public abstract class AbstractInsertEvent extends AbstractCalendar {
         description = "RFC3339 datetime for the end; must be after start"
     )
     @NotNull
-    @PluginProperty
+    @PluginProperty(group = "main")
     protected CalendarTime endTime;
 
     @Schema(
         title = "Creator",
         description = "Optional explicit creator shown on the event"
     )
-    @PluginProperty
+    @PluginProperty(group = "advanced")
     protected Attendee creator;
 
     @Schema(
         title = "Attendees",
         description = "Replaces the attendee list on creation"
     )
-    @PluginProperty
+    @PluginProperty(group = "advanced")
     protected List<Attendee> attendees;
 
     @Builder
@@ -94,12 +97,14 @@ public abstract class AbstractInsertEvent extends AbstractCalendar {
             title = "Datetime",
             description = "RFC3339 timestamp with offset, e.g. 2024-11-28T09:00:00-07:00"
         )
+        @PluginProperty(group = "advanced")
         protected Property<String> dateTime;
 
         @Schema(
             title = "Timezone",
             description = "IANA timezone, e.g. America/Los_Angeles"
         )
+        @PluginProperty(group = "processing")
         protected Property<String> timeZone;
     }
 
@@ -114,12 +119,14 @@ public abstract class AbstractInsertEvent extends AbstractCalendar {
             title = "Attendee name",
             description = "Optional display name"
         )
+        @PluginProperty(group = "advanced")
         protected Property<String> displayName;
 
         @Schema(
             title = "Attendee email",
             description = "Email address of the attendee"
         )
+        @PluginProperty(group = "advanced")
         protected Property<String> email;
     }
 
