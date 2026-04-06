@@ -26,31 +26,35 @@ public abstract class AbstractCreate extends AbstractDrive {
         title = "Destination folders",
         description = "Parent folder IDs; leave empty for My Drive root"
     )
+    @PluginProperty(group = "advanced")
     protected Property<List<String>> parents;
 
     @Schema(
         title = "File name",
         description = "Display name; not necessarily unique inside a folder"
     )
+    @PluginProperty(group = "advanced")
     protected Property<String> name;
 
     @Schema(
         title = "File description",
         description = "Optional short description; supports templating"
     )
-    @PluginProperty(dynamic = true)
+    @PluginProperty(dynamic = true, group = "advanced")
     protected String description;
 
     @Schema(
         title = "MIME type",
         description = "Explicit MIME type; Drive auto-detects if omitted. Google MIME types import content when possible. Supported import formats: https://developers.google.com/drive/api/v3/mime-types"
     )
+    @PluginProperty(group = "advanced")
     protected Property<String> mimeType;
 
     @Schema(
         title = "Shared Drive ID",
         description = "Target Shared Drive (teamDriveId) when writing outside My Drive"
     )
+    @PluginProperty(group = "advanced")
     protected Property<String> teamDriveId;
 
     protected File file(RunContext runContext) throws IllegalVariableEvaluationException {

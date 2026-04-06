@@ -36,6 +36,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -107,6 +108,7 @@ public class MailReceivedTrigger extends AbstractTrigger implements PollingTrigg
         description = "The OAuth 2.0 client ID from Google Cloud Console"
     )
     @NotNull
+    @PluginProperty(group = "main")
     protected Property<String> clientId;
 
     @Schema(
@@ -114,6 +116,7 @@ public class MailReceivedTrigger extends AbstractTrigger implements PollingTrigg
         description = "The OAuth 2.0 client secret from Google Cloud Console"
     )
     @NotNull
+    @PluginProperty(group = "main")
     protected Property<String> clientSecret;
 
     @Schema(
@@ -121,12 +124,14 @@ public class MailReceivedTrigger extends AbstractTrigger implements PollingTrigg
         description = "The OAuth 2.0 refresh token obtained through the authorization flow"
     )
     @NotNull
+    @PluginProperty(group = "main")
     protected Property<String> refreshToken;
 
     @Schema(
         title = "OAuth 2.0 Access Token",
         description = "The OAuth 2.0 access token (optional, will be generated from refresh token if not provided)"
     )
+    @PluginProperty(group = "connection")
     protected Property<String> accessToken;
 
     @Builder.Default
@@ -145,12 +150,14 @@ public class MailReceivedTrigger extends AbstractTrigger implements PollingTrigg
         title = "Gmail search query",
         description = "Gmail search string (e.g., is:unread, from:sender@example.com, subject:important); empty monitors all"
     )
+    @PluginProperty(group = "processing")
     private Property<String> query;
 
     @Schema(
         title = "Label filters",
         description = "Label IDs to restrict search (INBOX, SENT, UNREAD, etc.); empty searches all"
     )
+    @PluginProperty(group = "advanced")
     private Property<List<String>> labelIds;
 
     @Schema(
@@ -158,6 +165,7 @@ public class MailReceivedTrigger extends AbstractTrigger implements PollingTrigg
         description = "Whether to include SPAM and TRASH messages"
     )
     @Builder.Default
+    @PluginProperty(group = "advanced")
     private Property<Boolean> includeSpamTrash = Property.ofValue(false);
 
     @Schema(
@@ -165,6 +173,7 @@ public class MailReceivedTrigger extends AbstractTrigger implements PollingTrigg
         description = "How often to check for new emails; minimum PT1M, default PT5M"
     )
     @Builder.Default
+    @PluginProperty(group = "execution")
     protected Duration interval = Duration.ofMinutes(5);
 
     @Schema(
@@ -172,12 +181,14 @@ public class MailReceivedTrigger extends AbstractTrigger implements PollingTrigg
         description = "Upper bound on messages processed each poll; default 50"
     )
     @Builder.Default
+    @PluginProperty(group = "execution")
     protected Property<Integer> maxMessagesPerPoll = Property.ofValue(50);
 
     @Schema(
         title = "Initial lookback window",
         description = "How far back to look on first run; defaults to polling interval"
     )
+    @PluginProperty(group = "advanced")
     private Property<Duration> initialLookback;
 
     @Override

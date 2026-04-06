@@ -13,6 +13,7 @@ import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -57,8 +58,11 @@ import lombok.experimental.SuperBuilder;
 )
 public class GoogleChatExecution extends GoogleChatTemplate implements ExecutionInterface {
     @Builder.Default
+    @PluginProperty(group = "advanced")
     private final Property<String> executionId = Property.ofExpression("{{ execution.id }}");
+    @PluginProperty(group = "destination")
     private Property<Map<String, Object>> customFields;
+    @PluginProperty(group = "destination")
     private Property<String> customMessage;
 
     @Override

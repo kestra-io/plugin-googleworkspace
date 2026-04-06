@@ -73,6 +73,7 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
         title = "Sheet titles to include",
         description = "Optional list of sheet names; empty reads all sheets"
     )
+    @PluginProperty(group = "processing")
     private Property<List<String>> selectedSheetsTitle;
 
     @Override

@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -35,6 +36,7 @@ public abstract class AbstractDriveTrigger extends AbstractTrigger {
         title = "Service account key",
         description = "Google service account JSON with Drive scope; if omitted, Application Default Credentials are used"
     )
+    @PluginProperty(group = "execution")
     protected Property<String> serviceAccount;
 
     public Drive from(RunContext runContext) throws Exception {

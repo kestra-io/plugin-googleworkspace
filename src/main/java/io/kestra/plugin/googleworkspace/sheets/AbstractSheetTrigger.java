@@ -19,6 +19,7 @@ import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -33,6 +34,7 @@ public abstract class AbstractSheetTrigger extends AbstractTrigger {
         title = "Service account key",
         description = "Service account JSON with Sheets and Drive access; must cover spreadsheets.readonly and drive.metadata.readonly scopes"
     )
+    @PluginProperty(group = "execution")
     protected Property<String> serviceAccount;
 
     @Schema(
@@ -40,6 +42,7 @@ public abstract class AbstractSheetTrigger extends AbstractTrigger {
         description = "Scopes applied to the service account credentials; defaults to Sheets readonly and Drive metadata readonly"
     )
     @Builder.Default
+    @PluginProperty(group = "advanced")
     protected Property<List<String>> scopes = Property.ofValue(
         Arrays.asList(
             "https://www.googleapis.com/auth/spreadsheets.readonly",

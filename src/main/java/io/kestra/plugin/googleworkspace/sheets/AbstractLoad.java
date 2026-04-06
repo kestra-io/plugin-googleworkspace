@@ -34,6 +34,7 @@ public abstract class AbstractLoad extends AbstractSheet {
         description = "Target spreadsheet to load data into"
     )
     @NotNull
+    @PluginProperty(group = "main")
     protected Property<String> spreadsheetId;
 
     @Builder.Default
@@ -41,24 +42,28 @@ public abstract class AbstractLoad extends AbstractSheet {
         title = "Treat first row as header",
         description = "When true, first row becomes column names; default false"
     )
+    @PluginProperty(group = "processing")
     protected final Property<Boolean> header = Property.ofValue(false);
 
     @Schema(
         title = "CSV parsing options"
     )
     @Builder.Default
+    @PluginProperty(group = "advanced")
     private CsvOptions csvOptions = CsvOptions.builder().build();
 
     @Schema(
         title = "Avro schema",
         description = "Optional schema string to read Avro payloads"
     )
+    @PluginProperty(group = "connection")
     private Property<String> avroSchema;
 
     @Schema(
         title = "Input file format",
         description = "Optional override; otherwise inferred from file extension"
     )
+    @PluginProperty(group = "processing")
     private Property<Format> format;
 
     protected List<List<Object>> parse(RunContext runContext, URI from) throws Exception {
@@ -121,18 +126,20 @@ public abstract class AbstractLoad extends AbstractSheet {
             description = "Single-character separator; default comma"
         )
         @Builder.Default
+        @PluginProperty(group = "processing")
         private Property<String> fieldDelimiter = Property.ofValue(",");
 
         @Schema(
             title = "Skip leading rows",
             description = "Number of initial rows to skip; default 0"
         )
-        @PluginProperty
+        @PluginProperty(group = "advanced")
         private Property<Long> skipLeadingRows;
 
         @Schema(
             title = "CSV quote character"
         )
+        @PluginProperty(group = "advanced")
         private Property<String> quote;
 
         @Schema(
@@ -140,6 +147,7 @@ public abstract class AbstractLoad extends AbstractSheet {
             description = "Character set used; default UTF-8"
         )
         @Builder.Default
+        @PluginProperty(group = "processing")
         private Property<String> encoding = Property.ofValue("UTF-8");
 
     }

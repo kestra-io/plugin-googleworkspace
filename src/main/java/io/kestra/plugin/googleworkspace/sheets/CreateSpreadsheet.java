@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -54,6 +55,7 @@ public class CreateSpreadsheet extends AbstractSheet implements RunnableTask<Cre
         description = "Title to assign to the new spreadsheet"
     )
     @NotNull
+    @PluginProperty(group = "main")
     private Property<String> title;
 
     @Override

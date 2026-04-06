@@ -18,6 +18,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -31,18 +32,21 @@ public abstract class GoogleChatTemplate extends GoogleChatIncomingWebhook {
         description = "Classpath PEB template rendered into the Chat payload",
         hidden = true
     )
+    @PluginProperty(group = "advanced")
     protected Property<String> templateUri;
 
     @Schema(
         title = "Variables used to render template",
         description = "Map rendered into the template context"
     )
+    @PluginProperty(group = "advanced")
     protected Property<Map<String, Object>> templateRenderMap;
 
     @Schema(
         title = "Text override for message",
         description = "Plain text that overrides or supplements the template output"
     )
+    @PluginProperty(group = "advanced")
     protected Property<String> text;
 
     @SuppressWarnings("unchecked")

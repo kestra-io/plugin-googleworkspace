@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -82,6 +83,7 @@ public class Get extends AbstractMail implements RunnableTask<Get.Output> {
         description = "Gmail message ID to fetch"
     )
     @NotNull
+    @PluginProperty(group = "main")
     private Property<String> messageId;
 
     @Schema(
@@ -89,6 +91,7 @@ public class Get extends AbstractMail implements RunnableTask<Get.Output> {
         description = "minimal, full, raw, or metadata; defaults to full"
     )
     @Builder.Default
+    @PluginProperty(group = "processing")
     private Property<String> format = Property.ofValue("full");
 
     @Override

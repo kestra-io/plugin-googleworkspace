@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -53,6 +54,7 @@ public class DeleteSpreadsheet extends AbstractSheet implements RunnableTask<Del
         description = "ID of the spreadsheet to delete"
     )
     @NotNull
+    @PluginProperty(group = "main")
     private Property<String> spreadsheetId;
 
     @Override

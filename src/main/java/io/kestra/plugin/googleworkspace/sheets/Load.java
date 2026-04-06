@@ -20,6 +20,7 @@ import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -65,6 +66,7 @@ public class Load extends AbstractLoad implements RunnableTask<Load.Output> {
         title = "Source file URI",
         description = "kestra:// URI of the file to load"
     )
+    @PluginProperty(group = "source")
     private Property<String> from;
 
     @Schema(
@@ -72,6 +74,7 @@ public class Load extends AbstractLoad implements RunnableTask<Load.Output> {
         description = "Sheet name or A1 range to write into; default Sheet1"
     )
     @Builder.Default
+    @PluginProperty(group = "advanced")
     private Property<String> range = Property.ofValue("Sheet1");
 
     @Schema(
@@ -83,6 +86,7 @@ public class Load extends AbstractLoad implements RunnableTask<Load.Output> {
             """
     )
     @Builder.Default
+    @PluginProperty(group = "advanced")
     private Property<InsertType> insertType = Property.ofValue(InsertType.UPDATE);
 
     @Override

@@ -29,6 +29,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -145,6 +146,7 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
         description = "Email-style calendar IDs shared with the service account; each calendar is polled separately."
     )
     @NotNull
+    @PluginProperty(group = "main")
     protected Property<List<String>> calendarIds;
 
     @Schema(
@@ -152,18 +154,21 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
         description = "Only events matching this search term will trigger an execution. " +
             "The search applies to event title, description, and location fields."
     )
+    @PluginProperty(group = "advanced")
     protected Property<String> searchQuery;
 
     @Schema(
         title = "Organizer email filter",
         description = "Only events organized by this email address trigger an execution"
     )
+    @PluginProperty(group = "advanced")
     protected Property<String> organizerEmail;
 
     @Schema(
         title = "Event status filter",
         description = "Only events with this status trigger executions (CONFIRMED, TENTATIVE, CANCELLED)"
     )
+    @PluginProperty(group = "advanced")
     protected Property<EventStatus> eventStatus;
 
     @Schema(
@@ -171,6 +176,7 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
         description = "How frequently to check for new events; minimum PT1M, default PT5M"
     )
     @Builder.Default
+    @PluginProperty(group = "execution")
     protected Duration interval = Duration.ofMinutes(5);
 
     @Schema(
@@ -178,6 +184,7 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
         description = "Upper bound on new events processed per calendar per poll; default 100, valid range 1-" + MAX_EVENTS_PER_POLL + " (API limit)"
     )
     @Builder.Default
+    @PluginProperty(group = "execution")
     protected Property<Integer> maxEventsPerPoll = Property.ofValue(100);
 
     @Override
@@ -398,27 +405,35 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
     @Getter
     public static class EventMetadata implements io.kestra.core.models.tasks.Output {
         @Schema(title = "The event ID")
+        @PluginProperty(group = "advanced")
         private String id;
 
         @Schema(title = "The event title/summary")
+        @PluginProperty(group = "advanced")
         private String summary;
 
         @Schema(title = "The event description")
+        @PluginProperty(group = "advanced")
         private String description;
 
         @Schema(title = "The event location")
+        @PluginProperty(group = "advanced")
         private String location;
 
         @Schema(title = "The event status")
+        @PluginProperty(group = "advanced")
         private String status;
 
         @Schema(title = "Link to the event in Google Calendar")
+        @PluginProperty(group = "advanced")
         private String htmlLink;
 
         @Schema(title = "When the event was created")
+        @PluginProperty(group = "advanced")
         private ZonedDateTime created;
 
         @Schema(title = "When the event was last updated")
+        @PluginProperty(group = "advanced")
         private ZonedDateTime updated;
 
         @Schema(title = "The start time of the event")
@@ -431,9 +446,11 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
         private EventCreatedTrigger.Organizer organizer;
 
         @Schema(title = "Visibility of the event")
+        @PluginProperty(group = "advanced")
         private String visibility;
 
         @Schema(title = "Type of the event")
+        @PluginProperty(group = "advanced")
         private String eventType;
     }
 
@@ -441,12 +458,15 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
     @Getter
     public static class EventDateTime {
         @Schema(title = "The date and time")
+        @PluginProperty(group = "advanced")
         private ZonedDateTime dateTime;
 
         @Schema(title = "The date (for all-day events)")
+        @PluginProperty(group = "advanced")
         private String date;
 
         @Schema(title = "The time zone")
+        @PluginProperty(group = "processing")
         private String timeZone;
     }
 
@@ -454,12 +474,15 @@ public class EventCreatedTrigger extends AbstractCalendarTrigger implements Poll
     @Getter
     public static class Organizer {
         @Schema(title = "The organizer's email")
+        @PluginProperty(group = "advanced")
         private String email;
 
         @Schema(title = "The organizer's display name")
+        @PluginProperty(group = "advanced")
         private String displayName;
 
         @Schema(title = "Whether this is the current user")
+        @PluginProperty(group = "advanced")
         private Boolean self;
     }
 }

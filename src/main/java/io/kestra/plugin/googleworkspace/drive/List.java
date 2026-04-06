@@ -21,6 +21,7 @@ import io.kestra.plugin.googleworkspace.drive.models.File;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -63,6 +64,7 @@ public class List extends AbstractDrive implements RunnableTask<List.Output> {
         title = "Drive search query",
         description = "Drive v3 search string; if empty, lists all files accessible to the service account. See Search Files API."
     )
+    @PluginProperty(group = "main")
     private Property<String> query;
 
     @Schema(

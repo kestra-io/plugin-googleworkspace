@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -95,12 +96,14 @@ public class Upload extends AbstractCreate implements RunnableTask<Upload.Output
         description = "kestra:// URI of the file to upload"
     )
     @NotNull
+    @PluginProperty(group = "main")
     private Property<String> from;
 
     @Schema(
         title = "Existing file ID",
         description = "When set, updates that file; otherwise a new file is created"
     )
+    @PluginProperty(group = "source")
     private Property<String> fileId;
 
     @Schema(
@@ -108,6 +111,7 @@ public class Upload extends AbstractCreate implements RunnableTask<Upload.Output
         description = "RFC2045 content type of the uploaded data (e.g., text/csv, application/pdf)"
     )
     @NotNull
+    @PluginProperty(group = "main")
     private Property<String> contentType;
 
     @Override
