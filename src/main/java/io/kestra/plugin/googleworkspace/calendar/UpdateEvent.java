@@ -104,8 +104,7 @@ public class UpdateEvent extends AbstractCalendar implements RunnableTask<Update
         title = "Description",
         description = "New description; supports templating"
     )
-    @io.kestra.core.models.annotations.PluginProperty(dynamic = true)
-    @PluginProperty(group = "advanced")
+    @PluginProperty(dynamic = true, group = "advanced")
     protected String description;
 
     @Schema(
