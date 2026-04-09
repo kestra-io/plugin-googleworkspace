@@ -16,10 +16,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
 
 @KestraTest
-@DisabledIf(
-    value = "isServiceAccountNotExists",
-    disabledReason = "Disabled for CI/CD"
-)
+//@DisabledIf(
+//    value = "isServiceAccountNotExists",
+//    disabledReason = "Disabled for CI/CD"
+//)
 class DeleteEventTest {
     @Inject
     private RunContextFactory runContextFactory;
