@@ -109,7 +109,7 @@ class MailReceivedTriggerTest {
             .build();
 
         var context = TestsUtils.mockTrigger(runContextFactory, trigger);
-        Optional<Execution> execution = trigger.evaluate(context.getKey(), context.getValue());
+        Optional<Execution> execution = trigger.evaluate(context.getKey(), context.getValue().context());
 
         // Assert execution succeeded
         assertThat(execution.isPresent(), is(true));
@@ -150,7 +150,7 @@ class MailReceivedTriggerTest {
             .build();
 
         var context = TestsUtils.mockTrigger(runContextFactory, trigger);
-        Optional<Execution> execution = trigger.evaluate(context.getKey(), context.getValue());
+        Optional<Execution> execution = trigger.evaluate(context.getKey(), context.getValue().context());
 
         // Expect no execution triggered
         assertThat(execution.isPresent(), is(false));
