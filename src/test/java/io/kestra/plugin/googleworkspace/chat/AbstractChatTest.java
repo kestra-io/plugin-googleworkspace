@@ -7,6 +7,9 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
+import io.kestra.core.queues.QueueInterface;
+import io.kestra.core.utils.TestsUtils;
+import jakarta.inject.Named;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +23,7 @@ import io.kestra.core.utils.Await;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.runtime.server.EmbeddedServer;
 import jakarta.inject.Inject;
+import reactor.core.publisher.Flux;
 
 import static io.kestra.core.tenant.TenantService.MAIN_TENANT;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -35,9 +39,9 @@ public class AbstractChatTest {
     @Inject
     protected ApplicationContext applicationContext;
 
-//    @Inject
-//    @Named(QueueFactoryInterface.EXECUTION_NAMED)
-//    protected QueueInterface<Execution> executionQueue;
+    @Inject
+    @Named(QueueFactoryInterface.EXECUTION_NAMED)
+    protected QueueInterface<Execution> executionQueue;
 
     @Inject
     protected TestRunnerUtils runnerUtils;
@@ -85,13 +89,13 @@ public class AbstractChatTest {
         CountDownLatch queueCount = new CountDownLatch(1);
         AtomicReference<Execution> last = new AtomicReference<>();
 
-//        Flux<Execution> receive = TestsUtils.receive(executionQueue, execution ->
-//        {
-//            if (execution.getLeft().getFlowId().equals(notificationFlowId)) {
-//                last.set(execution.getLeft());
-//                queueCount.countDown();
-//            }
-//        });
+        Flux<Execution> receive = TestsUtils.receive(executionQueue, execution ->
+        {
+            if (execution.getLeft().getFlowId().equals(notificationFlowId)) {
+                last.set(execution.getLeft());
+                queueCount.countDown();
+            }
+        });
 
         Execution execution;
 
@@ -108,7 +112,7 @@ public class AbstractChatTest {
         assertThat(triggeredExecution, notNullValue());
         assertThat(triggeredExecution.getTrigger().getVariables().get("executionId"), is(execution.getId()));
 
-//        receive.blockLast();
+        receive.blockLast();
 
         return execution;
     }
