@@ -4,8 +4,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Objects;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import io.kestra.core.junit.annotations.KestraTest;
 import io.kestra.core.repositories.LocalFlowRepositoryLoader;
@@ -17,6 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @KestraTest
 public class GoogleChatExecutionTest extends AbstractChatTest {
 
@@ -26,10 +28,8 @@ public class GoogleChatExecutionTest extends AbstractChatTest {
     @Inject
     protected LocalFlowRepositoryLoader repositoryLoader;
 
-    @BeforeEach
+    @BeforeAll
     protected void init() throws IOException, URISyntaxException {
-        FakeWebhookController.data = null;
-
         repositoryLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("flows/common")));
         repositoryLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("flows/chat")));
         this.runner.run();
@@ -42,7 +42,10 @@ public class GoogleChatExecutionTest extends AbstractChatTest {
             "google"
         );
 
-        String receivedData = waitForWebhookData(() -> FakeWebhookController.data, 5000);
+        String receivedData = waitForWebhookData(
+            () -> FakeWebhookController.data != null && FakeWebhookController.data.contains(failedExecution.getId()) ? FakeWebhookController.data : null,
+            5000
+        );
 
         assertThat(receivedData, containsString("https://mysuperhost.com/kestra/ui"));
         assertThat(receivedData, containsString(failedExecution.getId()));
@@ -58,7 +61,10 @@ public class GoogleChatExecutionTest extends AbstractChatTest {
             "google-successful"
         );
 
-        String receivedData = waitForWebhookData(() -> FakeWebhookController.data, 5000);
+        String receivedData = waitForWebhookData(
+            () -> FakeWebhookController.data != null && FakeWebhookController.data.contains(execution.getId()) ? FakeWebhookController.data : null,
+            5000
+        );
 
         assertThat(receivedData, containsString("https://mysuperhost.com/kestra/ui"));
         assertThat(receivedData, containsString(execution.getId()));
