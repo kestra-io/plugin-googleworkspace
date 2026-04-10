@@ -2,4 +2,4 @@ id: main-flow-that-fails
 namespace: io.kestra.tests
 tasks:
   - id: failed
-    type: io.kestra.core.tasks.executions.Fail
+    type: io.kestra.core.tasks.execution.Fail
