@@ -26,6 +26,8 @@ import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import io.kestra.core.models.conditions.ConditionContext;
+import java.util.Map;
 
 /**
  * Unit test for MailReceivedTrigger.
@@ -108,8 +110,8 @@ class MailReceivedTriggerTest {
             .interval(Duration.ofMinutes(1))
             .build();
 
-        var context = TestsUtils.mockTrigger(runContextFactory, trigger);
-        Optional<Execution> execution = trigger.evaluate(context.getKey(), context.getValue());
+        Map.Entry<ConditionContext, io.kestra.core.scheduler.model.TriggerState> context = TestsUtils.mockTrigger(runContextFactory, trigger);
+        Optional<Execution> execution = trigger.evaluate(context.getKey(), context.getValue().context());
 
         // Assert execution succeeded
         assertThat(execution.isPresent(), is(true));
@@ -149,8 +151,8 @@ class MailReceivedTriggerTest {
             .interval(Duration.ofMinutes(1))
             .build();
 
-        var context = TestsUtils.mockTrigger(runContextFactory, trigger);
-        Optional<Execution> execution = trigger.evaluate(context.getKey(), context.getValue());
+        Map.Entry<ConditionContext, io.kestra.core.scheduler.model.TriggerState> context = TestsUtils.mockTrigger(runContextFactory, trigger);
+        Optional<Execution> execution = trigger.evaluate(context.getKey(), context.getValue().context());
 
         // Expect no execution triggered
         assertThat(execution.isPresent(), is(false));
