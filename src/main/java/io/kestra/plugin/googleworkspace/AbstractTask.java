@@ -1,5 +1,6 @@
 package io.kestra.plugin.googleworkspace;
 
+import io.kestra.core.models.annotations.PluginProperty;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -34,6 +35,7 @@ import lombok.experimental.SuperBuilder;
 public abstract class AbstractTask extends Task implements GcpInterface {
     protected static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 
+    @PluginProperty(secret = true)
     protected Property<String> serviceAccount;
 
     @Builder.Default

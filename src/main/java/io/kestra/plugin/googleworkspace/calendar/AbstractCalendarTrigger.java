@@ -35,7 +35,7 @@ public abstract class AbstractCalendarTrigger extends AbstractTrigger implements
         title = "Service account key",
         description = "Google service account JSON with Calendar API scope. Share each target calendar with this account email; if omitted, Application Default Credentials are used."
     )
-    @PluginProperty(group = "execution")
+    @PluginProperty(secret = true, group = "execution")
     protected Property<String> serviceAccount;
 
     protected Calendar connection(RunContext runContext) throws Exception {

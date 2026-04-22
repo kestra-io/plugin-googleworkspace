@@ -36,7 +36,7 @@ public abstract class AbstractDriveTrigger extends AbstractTrigger {
         title = "Service account key",
         description = "Google service account JSON with Drive scope; if omitted, Application Default Credentials are used"
     )
-    @PluginProperty(group = "execution")
+    @PluginProperty(secret = true, group = "execution")
     protected Property<String> serviceAccount;
 
     public Drive from(RunContext runContext) throws Exception {

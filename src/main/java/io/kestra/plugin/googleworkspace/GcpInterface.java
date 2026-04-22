@@ -11,7 +11,7 @@ public interface GcpInterface {
     @Schema(
         title = "The GCP service account key"
     )
-    @PluginProperty(group = "execution")
+    @PluginProperty(secret = true, group = "execution")
     Property<String> getServiceAccount();
 
     @Schema(

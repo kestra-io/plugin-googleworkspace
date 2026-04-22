@@ -19,21 +19,21 @@ public interface OAuthInterface {
         title = "OAuth 2.0 Client Secret",
         description = "The OAuth 2.0 client secret from Google Cloud Console"
     )
-    @PluginProperty(group = "connection")
+    @PluginProperty(secret = true, group = "connection")
     Property<String> getClientSecret();
 
     @Schema(
         title = "OAuth 2.0 Refresh Token",
         description = "The OAuth 2.0 refresh token obtained through the authorization flow"
     )
-    @PluginProperty(group = "connection")
+    @PluginProperty(secret = true, group = "connection")
     Property<String> getRefreshToken();
 
     @Schema(
         title = "OAuth 2.0 Access Token",
         description = "The OAuth 2.0 access token (optional, will be generated from refresh token if not provided)"
     )
-    @PluginProperty(group = "connection")
+    @PluginProperty(secret = true, group = "connection")
     Property<String> getAccessToken();
 
     @Schema(

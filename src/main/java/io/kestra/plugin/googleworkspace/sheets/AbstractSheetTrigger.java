@@ -34,7 +34,7 @@ public abstract class AbstractSheetTrigger extends AbstractTrigger {
         title = "Service account key",
         description = "Service account JSON with Sheets and Drive access; must cover spreadsheets.readonly and drive.metadata.readonly scopes"
     )
-    @PluginProperty(group = "execution")
+    @PluginProperty(secret = true, group = "execution")
     protected Property<String> serviceAccount;
 
     @Schema(

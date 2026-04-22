@@ -49,7 +49,7 @@ public abstract class AbstractMail extends Task implements OAuthInterface {
         description = "Google OAuth 2.0 client secret"
     )
     @NotNull
-    @PluginProperty(group = "main")
+    @PluginProperty(secret = true, group = "main")
     protected Property<String> clientSecret;
 
     @Schema(
@@ -57,14 +57,14 @@ public abstract class AbstractMail extends Task implements OAuthInterface {
         description = "Refresh token obtained via OAuth consent; used to mint access tokens"
     )
     @NotNull
-    @PluginProperty(group = "main")
+    @PluginProperty(secret = true, group = "main")
     protected Property<String> refreshToken;
 
     @Schema(
         title = "OAuth access token",
         description = "Optional access token; if absent, one is fetched from the refresh token"
     )
-    @PluginProperty(group = "connection")
+    @PluginProperty(secret = true, group = "connection")
     protected Property<String> accessToken;
 
     @Builder.Default

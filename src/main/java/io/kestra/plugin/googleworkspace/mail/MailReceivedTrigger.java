@@ -116,7 +116,7 @@ public class MailReceivedTrigger extends AbstractTrigger implements PollingTrigg
         description = "The OAuth 2.0 client secret from Google Cloud Console"
     )
     @NotNull
-    @PluginProperty(group = "main")
+    @PluginProperty(secret = true, group = "main")
     protected Property<String> clientSecret;
 
     @Schema(
@@ -124,14 +124,14 @@ public class MailReceivedTrigger extends AbstractTrigger implements PollingTrigg
         description = "The OAuth 2.0 refresh token obtained through the authorization flow"
     )
     @NotNull
-    @PluginProperty(group = "main")
+    @PluginProperty(secret = true, group = "main")
     protected Property<String> refreshToken;
 
     @Schema(
         title = "OAuth 2.0 Access Token",
         description = "The OAuth 2.0 access token (optional, will be generated from refresh token if not provided)"
     )
-    @PluginProperty(group = "connection")
+    @PluginProperty(secret = true, group = "connection")
     protected Property<String> accessToken;
 
     @Builder.Default
