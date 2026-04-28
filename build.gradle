@@ -1,15 +1,15 @@
 plugins {
-    id 'io.kestra.gradle.spotless-conventions' version '1.0.2'
+    id 'io.kestra.gradle.spotless-conventions' version '1.1.0'
     id "com.vanniktech.maven.publish" version "0.36.0"
-    id "io.kestra.gradle.inject-bom-versions" version "1.0.0"
+    id "io.kestra.gradle.inject-bom-versions" version "1.1.0"
     id 'java-library'
     id "idea"
     id 'jacoco'
     id "com.adarshr.test-logger" version "4.0.0"
-    id "org.sonarqube" version "7.2.2.6593"
-    id "com.gradleup.shadow" version "9.3.2"
+    id "org.sonarqube" version "7.2.3.7755"
+    id "com.gradleup.shadow" version "9.4.1"
     id 'signing'
-    id "com.github.ben-manes.versions" version "0.53.0"
+    id "com.github.ben-manes.versions" version "0.54.0"
     id 'net.researchgate.release' version '3.1.0'
 }
 
@@ -76,7 +76,7 @@ dependencies {
     // for org.apache.hadoop.hive.ql.exec.vector following bump for orc-core and orc-mapreduce to 2.1.2
     // those 2 deps should maybe be removed after upgrading again orc deps in the future
     api('org.apache.hive:hive-storage-api:4.2.0') // for Parquet parsing
-    api('com.google.protobuf:protobuf-java:4.33.5') // for ORC parsing
+    api('com.google.protobuf:protobuf-java:4.34.1') // for ORC parsing
 
     compileOnly 'com.fasterxml.jackson.core:jackson-databind'
 
