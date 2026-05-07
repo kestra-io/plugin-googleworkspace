@@ -15,9 +15,7 @@ tasks:
 triggers:
   - id: on_failure
     type: io.kestra.plugin.core.trigger.Flow
-    preconditions:
-      id: flow_trigger
-      flows:
-        - namespace: io.kestra.tests
-          flowId: main-flow-that-fails
-          states: [ FAILED ]
+    dependsOn:
+      - namespace: io.kestra.tests
+        flowId: main-flow-that-fails
+        states: [ FAILED ]
