@@ -1,4 +1,5 @@
 @PluginSubGroup(
+    title = "Google Chat",
     description = "This sub-group of plugins contains tasks for Google Chat notifications.",
     categories = PluginSubGroup.PluginCategory.BUSINESS
 )
