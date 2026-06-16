@@ -85,7 +85,7 @@ import io.kestra.core.models.annotations.PluginProperty;
                     values: "{{ trigger.events }}"
                     tasks:
                       - id: send_notification
-                        type: io.kestra.plugin.notifications.slack.SlackIncomingWebhook
+                        type: io.kestra.plugin.slack.notifications.SlackIncomingWebhook
                         url: "{{ secret('SLACK_WEBHOOK') }}"
                         payload: |
                           {
