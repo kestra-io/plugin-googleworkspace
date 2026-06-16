@@ -15,8 +15,8 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.RawLocalFileSystem;
 import org.apache.hadoop.hive.ql.exec.vector.*;
 import org.apache.orc.OrcFile;
 import org.apache.orc.Reader;
@@ -182,9 +182,11 @@ public class DataParser {
         }
 
         Configuration configuration = new Configuration();
-        FileSystem fileSystem = FileSystem.get(configuration);
-        Path path = new Path(tempFile.getPath());
-        try (Reader reader = OrcFile.createReader(path, OrcFile.readerOptions(configuration).filesystem(fileSystem))) {
+        Path path = new Path(tempFile.toURI());
+        try (
+            RawLocalFileSystem fileSystem = new RawLocalFileSystem();
+            Reader reader = createOrcReader(configuration, path, fileSystem)
+        ) {
             TypeDescription schema = reader.getSchema();
             VectorizedRowBatch rowBatch = schema.createRowBatch();
 
@@ -214,6 +216,11 @@ public class DataParser {
         }
 
         return result;
+    }
+
+    private Reader createOrcReader(Configuration configuration, Path path, RawLocalFileSystem fileSystem) throws IOException {
+        fileSystem.initialize(path.toUri(), configuration);
+        return OrcFile.createReader(path, OrcFile.readerOptions(configuration).filesystem(fileSystem));
     }
 
     private Object getValue(ColumnVector vector, int row) {
