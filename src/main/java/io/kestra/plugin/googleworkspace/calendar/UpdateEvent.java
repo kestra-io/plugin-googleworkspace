@@ -118,21 +118,21 @@ public class UpdateEvent extends AbstractCalendar implements RunnableTask<Update
         title = "New start time",
         description = "Replacement start datetime/timezone"
     )
-    @io.kestra.core.models.annotations.PluginProperty
+    @io.kestra.core.models.annotations.PluginProperty(group = "main")
     protected AbstractInsertEvent.CalendarTime startTime;
 
     @Schema(
         title = "New end time",
         description = "Replacement end datetime/timezone"
     )
-    @io.kestra.core.models.annotations.PluginProperty
+    @io.kestra.core.models.annotations.PluginProperty(group = "main")
     protected AbstractInsertEvent.CalendarTime endTime;
 
     @Schema(
         title = "Attendees",
         description = "Replaces the attendee list with the provided entries"
     )
-    @io.kestra.core.models.annotations.PluginProperty
+    @io.kestra.core.models.annotations.PluginProperty(group = "main")
     protected List<AbstractInsertEvent.Attendee> attendees;
 
     @Schema(
