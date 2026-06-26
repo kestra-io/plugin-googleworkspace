@@ -37,7 +37,7 @@ import io.kestra.core.models.annotations.PluginProperty;
             title = "Load data into a Google Workspace spreadsheet from an input file",
             full = true,
             code = """
-                   id: googleworkspace_sheets_load
+                id: googleworkspace_sheets_load
                 namespace: company.team
 
                 inputs:
