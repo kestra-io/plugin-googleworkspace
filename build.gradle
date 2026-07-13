@@ -1,13 +1,15 @@
 plugins {
-    id 'io.kestra.gradle.spotless-conventions' version '1.1.0'
-    id "com.vanniktech.maven.publish" version "0.36.0"
-    id "io.kestra.gradle.inject-bom-versions" version "1.1.0"
+    id 'io.kestra.gradle.repository-conventions' version '1.2.5'
+    id "io.kestra.gradle.plugin-doc-lint" version "1.2.5"
+    id 'io.kestra.gradle.spotless-conventions' version '1.2.5'
+    id "com.vanniktech.maven.publish" version "0.37.0"
+    id "io.kestra.gradle.inject-bom-versions" version "1.2.5"
     id 'java-library'
     id "idea"
     id 'jacoco'
     id "com.adarshr.test-logger" version "4.0.0"
-    id "org.sonarqube" version "7.2.3.7755"
-    id "com.gradleup.shadow" version "9.4.1"
+    id "org.sonarqube" version "7.3.1.8318"
+    id "com.gradleup.shadow" version "9.4.3"
     id 'signing'
     id "com.github.ben-manes.versions" version "0.54.0"
     id 'net.researchgate.release' version '3.1.0'
@@ -54,7 +56,7 @@ dependencies {
     // Google libraries are managed by the the Kestra Platform so they are aligned on all plugins
     api platform('com.google.cloud:libraries-bom')
     api 'com.google.api-client:google-api-client:2.9.0'
-    api 'com.google.auth:google-auth-library-oauth2-http:1.46.0'
+    api 'com.google.auth:google-auth-library-oauth2-http:1.48.0'
     api 'com.google.apis:google-api-services-drive:v3-rev20251210-2.0.0'
     api 'com.google.apis:google-api-services-sheets:v4-rev20251110-2.0.0'
     api 'com.google.apis:google-api-services-calendar:v3-rev20251207-2.0.0'
@@ -67,8 +69,8 @@ dependencies {
     compileOnly'org.slf4j:slf4j-api'
 
     // For Parquet and Avro parsing
-    api('org.apache.parquet:parquet-avro:1.17.0')
-    api('org.apache.parquet:parquet-hadoop:1.17.0')
+    api('org.apache.parquet:parquet-avro:1.17.1')
+    api('org.apache.parquet:parquet-hadoop:1.17.1')
 
     // For ORC parsing
     api('org.apache.orc:orc-core:2.3.0')
@@ -76,7 +78,7 @@ dependencies {
     // for org.apache.hadoop.hive.ql.exec.vector following bump for orc-core and orc-mapreduce to 2.1.2
     // those 2 deps should maybe be removed after upgrading again orc deps in the future
     api('org.apache.hive:hive-storage-api:4.2.0') // for Parquet parsing
-    api('com.google.protobuf:protobuf-java:4.34.1') // for ORC parsing
+    api('com.google.protobuf:protobuf-java:4.35.1') // for ORC parsing
 
     compileOnly 'com.fasterxml.jackson.core:jackson-databind'
 
