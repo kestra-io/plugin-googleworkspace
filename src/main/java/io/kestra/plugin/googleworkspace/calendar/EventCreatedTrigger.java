@@ -56,12 +56,12 @@ import io.kestra.core.models.annotations.PluginProperty;
                     type: io.kestra.plugin.core.log.Log
                     message: "Found {{ trigger.events | length }} new event(s)"
                   - id: log_each_event
-                    type: io.kestra.plugin.core.flow.ForEach
+                    type: io.kestra.plugin.core.flow.Loop
                     values: "{{ trigger.events }}"
                     tasks:
                       - id: log_event
                         type: io.kestra.plugin.core.log.Log
-                        message: "Event: {{ taskrun.value.summary }} ({{ taskrun.value.id }})"
+                        message: "Event: {{ item.value.summary }} ({{ item.value.id }})"
 
                 triggers:
                   - id: watch_calendar
@@ -81,7 +81,7 @@ import io.kestra.core.models.annotations.PluginProperty;
 
                 tasks:
                   - id: notify_meetings
-                    type: io.kestra.plugin.core.flow.ForEach
+                    type: io.kestra.plugin.core.flow.Loop
                     values: "{{ trigger.events }}"
                     tasks:
                       - id: send_notification
@@ -89,7 +89,7 @@ import io.kestra.core.models.annotations.PluginProperty;
                         url: "{{ secret('SLACK_WEBHOOK') }}"
                         payload: |
                           {
-                            "text": "New meeting scheduled: {{ taskrun.value.summary }} on {{ taskrun.value.start.dateTime }}"
+                            "text": "New meeting scheduled: {{ item.value.summary }} on {{ item.value.start.dateTime }}"
                           }
 
                 triggers:
@@ -111,12 +111,12 @@ import io.kestra.core.models.annotations.PluginProperty;
 
                 tasks:
                   - id: log_events
-                    type: io.kestra.plugin.core.flow.ForEach
+                    type: io.kestra.plugin.core.flow.Loop
                     values: "{{ trigger.events }}"
                     tasks:
                       - id: log_event
                         type: io.kestra.plugin.core.log.Log
-                        message: "Event by {{ taskrun.value.organizer.email }}: {{ taskrun.value.summary }}"
+                        message: "Event by {{ item.value.organizer.email }}: {{ item.value.summary }}"
 
                 triggers:
                   - id: watch_multiple_calendars
