@@ -4,7 +4,7 @@ Access Google Drive, Sheets, Calendar, Gmail, and Chat from Kestra flows using t
 
 ## Authentication
 
-**Service account** (Drive, Sheets, Calendar): set `serviceAccount` to the JSON key content of a GCP service account with the appropriate Workspace API scope enabled. Store it in a [secret](https://kestra.io/docs/concepts/secret) and reference it with `{{ secret('GWS_SERVICE_ACCOUNT') }}`. Apply globally with [plugin defaults](https://kestra.io/docs/workflow-components/plugin-defaults) if all tasks in a flow target the same account.
+**Service account** (Drive, Sheets, Calendar): set `serviceAccount` to the JSON key content of a GCP service account with the appropriate Workspace API scope enabled. Store it in a [secret](https://kestra.io/docs/concepts/secret) and reference it with `{{ secret('GWS_SERVICE_ACCOUNT') }}`.
 
 **OAuth 2.0** (Gmail/Mail): set `clientId`, `clientSecret`, and `refreshToken` on mail tasks. These are obtained from a Google Cloud OAuth 2.0 client ID credential. Store all three in secrets.
 
