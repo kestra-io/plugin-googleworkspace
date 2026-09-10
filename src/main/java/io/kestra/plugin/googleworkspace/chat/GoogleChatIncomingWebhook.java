@@ -225,13 +225,9 @@ public class GoogleChatIncomingWebhook extends AbstractChatConnection {
 
             runContext.logger().debug("Response: {}", response.getBody());
 
-            if (response.getStatus().getCode() != 200) {
-                throw new IllegalStateException(
-                    "Google Chat webhook failed with HTTP " + response.getStatus().getCode() + ": " + response.getBody()
-                );
+            if (response.getStatus().getCode() == 200) {
+                runContext.logger().info("Request succeeded");
             }
-
-            runContext.logger().info("Request succeeded");
         }
     }
 }
