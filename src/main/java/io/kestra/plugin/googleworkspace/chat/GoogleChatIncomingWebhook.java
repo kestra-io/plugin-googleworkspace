@@ -1,6 +1,22 @@
 package io.kestra.plugin.googleworkspace.chat;
 
 import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.slf4j.Logger;
+
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.chat.v1.HangoutsChat;
+import com.google.api.services.chat.v1.model.Message;
 
 import io.kestra.core.http.HttpRequest;
 import io.kestra.core.http.HttpResponse;
@@ -92,15 +108,98 @@ public class GoogleChatIncomingWebhook extends AbstractChatConnection {
     @PluginProperty(group = "main")
     protected Property<String> payload;
 
+    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+
+    /** A Chat webhook URL is the spaces.messages.create path with its credentials in the query string. */
+    private static final Pattern WEBHOOK_PATH = Pattern.compile("^/v1/(spaces/[^/]+)/messages/?$");
+
     @Override
     public VoidOutput run(RunContext runContext) throws Exception {
-        String url = runContext.render(this.url);
+        final Logger logger = runContext.logger();
 
+        String rUrl = runContext.render(this.url);
+        String rPayload = runContext.render(this.payload).as(String.class).orElse(null);
+
+        logger.debug("Send Google Chat webhook: {}", rPayload);
+
+        URI uri = URI.create(rUrl);
+        Matcher matcher = WEBHOOK_PATH.matcher(uri.getPath() == null ? "" : uri.getPath());
+
+        if (matcher.matches()) {
+            this.send(runContext, uri, matcher.group(1), rPayload);
+        } else {
+            // Google hands the URL out as one opaque string, so post an unrecognised shape verbatim
+            logger.debug("URL is not the Chat API message path, posting it as-is");
+            this.post(runContext, rUrl, rPayload);
+        }
+
+        return null;
+    }
+
+    private void send(RunContext runContext, URI uri, String space, String payload) throws Exception {
+        Message message = payload == null
+            ? new Message()
+            : JSON_FACTORY.createJsonParser(payload).parse(Message.class);
+
+        HangoutsChat chat = new HangoutsChat.Builder(
+            GoogleNetHttpTransport.newTrustedTransport(),
+            JSON_FACTORY,
+            this.requestInitializer(runContext)
+        )
+            .setApplicationName("Kestra")
+            .setRootUrl(uri.getScheme() + "://" + uri.getAuthority() + "/")
+            .build();
+
+        HangoutsChat.Spaces.Messages.Create create = chat.spaces().messages().create(space, message);
+        queryParameters(uri).forEach(create::set);
+
+        Message sent = create.execute();
+
+        runContext.logger().info("Google Chat message sent ({})", sent.getName());
+    }
+
+    /** Carries the `options` timeouts and headers over to the Google transport. */
+    private HttpRequestInitializer requestInitializer(RunContext runContext) throws Exception {
+        if (this.options == null) {
+            return request -> request.setReadTimeout((int) DEFAULT_READ_TIMEOUT.toMillis());
+        }
+
+        var rConnectTimeout = runContext.render(this.options.getConnectTimeout()).as(Duration.class);
+        var rReadTimeout = runContext.render(this.options.getReadIdleTimeout()).as(Duration.class);
+        Map<String, String> rHeaders = this.options.getHeaders() == null
+            ? Map.of()
+            : runContext.render(this.options.getHeaders()).asMap(String.class, String.class);
+
+        return request -> {
+            rConnectTimeout.ifPresent(timeout -> request.setConnectTimeout((int) timeout.toMillis()));
+            request.setReadTimeout((int) rReadTimeout.orElse(DEFAULT_READ_TIMEOUT).toMillis());
+            rHeaders.forEach((name, value) -> request.getHeaders().set(name, value));
+        };
+    }
+
+    private static Map<String, String> queryParameters(URI uri) {
+        Map<String, String> parameters = new LinkedHashMap<>();
+
+        if (uri.getRawQuery() == null) {
+            return parameters;
+        }
+
+        for (String pair : uri.getRawQuery().split("&")) {
+            int separator = pair.indexOf('=');
+            if (separator > 0) {
+                parameters.put(
+                    URLDecoder.decode(pair.substring(0, separator), StandardCharsets.UTF_8),
+                    URLDecoder.decode(pair.substring(separator + 1), StandardCharsets.UTF_8)
+                );
+            }
+        }
+
+        return parameters;
+    }
+
+    private void post(RunContext runContext, String url, String payload) throws Exception {
         try (HttpClient client = new HttpClient(runContext, super.httpClientConfigurationWithOptions())) {
-            String payload = runContext.render(this.payload).as(String.class).orElse(null);
-
-            runContext.logger().debug("Send Discord webhook: {}", payload);
-            HttpRequest request = HttpRequest.builder()
+            HttpRequest request = super.createRequestBuilder(runContext)
                 .addHeader("Content-Type", "application/json")
                 .uri(URI.create(url))
                 .method("POST")
@@ -115,10 +214,13 @@ public class GoogleChatIncomingWebhook extends AbstractChatConnection {
 
             runContext.logger().debug("Response: {}", response.getBody());
 
-            if (response.getStatus().getCode() == 200) {
-                runContext.logger().info("Request succeeded");
+            if (response.getStatus().getCode() != 200) {
+                throw new IllegalStateException(
+                    "Google Chat webhook failed with HTTP " + response.getStatus().getCode() + ": " + response.getBody()
+                );
             }
+
+            runContext.logger().info("Request succeeded");
         }
-        return null;
     }
 }

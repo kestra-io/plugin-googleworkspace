@@ -34,6 +34,9 @@ public abstract class AbstractChatConnection extends Task implements RunnableTas
     @PluginProperty(dynamic = true, group = "advanced")
     protected RequestOptions options;
 
+    /** Matches the readIdleTimeout default, so an unset `options` keeps the ceiling it had before the SDK. */
+    protected static final Duration DEFAULT_READ_TIMEOUT = Duration.of(5, ChronoUnit.MINUTES);
+
     protected HttpConfiguration httpClientConfigurationWithOptions() throws IllegalVariableEvaluationException {
         HttpConfiguration.HttpConfigurationBuilder configuration = HttpConfiguration.builder();
 

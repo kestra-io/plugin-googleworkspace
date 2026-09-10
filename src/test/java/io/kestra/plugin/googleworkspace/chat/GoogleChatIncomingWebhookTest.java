@@ -20,6 +20,7 @@ import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
 
 @KestraTest
 public class GoogleChatIncomingWebhookTest {
@@ -62,6 +63,28 @@ public class GoogleChatIncomingWebhookTest {
         task.run(runContext);
 
         assertThat(FakeWebhookController.data, containsString("Google test webhook notification"));
+    }
+
+    @Test
+    void runViaChatApiPath() throws Exception {
+        RunContext runContext = runContextFactory.of(Map.of());
+
+        EmbeddedServer embeddedServer = applicationContext.getBean(EmbeddedServer.class);
+        embeddedServer.start();
+
+        FakeWebhookController.data = null;
+        FakeWebhookController.queryParameters.clear();
+
+        GoogleChatIncomingWebhook task = GoogleChatIncomingWebhook.builder()
+            .url(embeddedServer.getURI() + "/v1/spaces/AAAAtest/messages?key=test-key&token=test-token")
+            .payload(Property.ofValue("{\"text\":\"sent through the Chat SDK\"}"))
+            .build();
+
+        task.run(runContext);
+
+        assertThat(FakeWebhookController.data, containsString("sent through the Chat SDK"));
+        assertThat(FakeWebhookController.queryParameters.get("key"), is("test-key"));
+        assertThat(FakeWebhookController.queryParameters.get("token"), is("test-token"));
     }
 
 }
