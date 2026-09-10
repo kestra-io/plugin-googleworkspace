@@ -15,6 +15,7 @@ import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.not;
 
 @KestraTest
@@ -29,6 +30,7 @@ public class GoogleChatExecutionTest extends AbstractChatTest {
     @BeforeEach
     protected void init() throws IOException, URISyntaxException {
         FakeWebhookController.data = null;
+        FakeWebhookController.headers.clear();
 
         repositoryLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("flows/common")));
         repositoryLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("flows/chat")));
@@ -65,5 +67,7 @@ public class GoogleChatExecutionTest extends AbstractChatTest {
         assertThat(FakeWebhookController.data, not(containsString("Failed on task `failed`")));
         assertThat(FakeWebhookController.data, containsString("Final task ID success"));
         assertThat(receivedData, containsString("Kestra Google notification"));
+        // this flow points at the Chat API path, so the templated payload must survive the typed Message round trip
+        assertThat(FakeWebhookController.headers, hasKey("x-goog-api-client"));
     }
 }

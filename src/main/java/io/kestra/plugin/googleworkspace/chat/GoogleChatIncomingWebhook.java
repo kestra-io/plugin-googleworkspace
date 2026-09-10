@@ -1,6 +1,27 @@
 package io.kestra.plugin.googleworkspace.chat;
 
+import java.io.IOException;
 import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.slf4j.Logger;
+
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.chat.v1.HangoutsChat;
+import com.google.api.services.chat.v1.model.Message;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 
 import io.kestra.core.http.HttpRequest;
 import io.kestra.core.http.HttpResponse;
@@ -92,15 +113,132 @@ public class GoogleChatIncomingWebhook extends AbstractChatConnection {
     @PluginProperty(group = "main")
     protected Property<String> payload;
 
+    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+
+    private static final Supplier<HttpTransport> TRANSPORT = Suppliers.memoize(() ->
+    {
+        try {
+            return GoogleNetHttpTransport.newTrustedTransport();
+        } catch (GeneralSecurityException | IOException e) {
+            throw new IllegalStateException("Unable to build the Google HTTP transport", e);
+        }
+    });
+
+    /** A Chat webhook URL is the spaces.messages.create path with its credentials in the query string. */
+    private static final Pattern WEBHOOK_PATH = Pattern.compile("^/v1/(spaces/[^/]+)/messages/?$");
+
     @Override
     public VoidOutput run(RunContext runContext) throws Exception {
-        String url = runContext.render(this.url);
+        final Logger logger = runContext.logger();
 
+        String rUrl = runContext.render(this.url);
+        String rPayload = runContext.render(this.payload).as(String.class).orElse(null);
+
+        logger.debug("Send Google Chat webhook: {}", rPayload);
+
+        URI uri = URI.create(rUrl);
+        Matcher matcher = WEBHOOK_PATH.matcher(uri.getPath() == null ? "" : uri.getPath());
+
+        Message message = matcher.matches() ? message(rPayload, logger) : null;
+
+        if (message == null) {
+            // Google treats the webhook URL as opaque, so anything we cannot read stays a verbatim POST
+            logger.debug("URL or payload is not in the Chat API shape, posting it as-is");
+            this.post(runContext, rUrl, rPayload);
+        } else {
+            this.send(runContext, uri, matcher.group(1), message);
+        }
+
+        return null;
+    }
+
+    /** Returns null when the payload is not a Chat message object, leaving the caller to post it unchanged. */
+    private static Message message(String payload, Logger logger) {
+        if (payload == null) {
+            return null;
+        }
+
+        try {
+            return JSON_FACTORY.createJsonParser(payload).parse(Message.class);
+        } catch (Exception e) {
+            logger.trace("Payload did not parse as a Chat message: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    private void send(RunContext runContext, URI uri, String space, Message message) throws Exception {
+        HangoutsChat chat = new HangoutsChat.Builder(
+            TRANSPORT.get(),
+            JSON_FACTORY,
+            this.requestInitializer(runContext)
+        )
+            .setApplicationName("Kestra")
+            .setRootUrl(uri.getScheme() + "://" + uri.getAuthority() + "/")
+            .build();
+
+        HangoutsChat.Spaces.Messages.Create create = chat.spaces().messages().create(space, message);
+        queryParameters(uri).forEach(create::set);
+
+        Message sent = create.execute();
+
+        runContext.logger().info("Google Chat message sent ({})", sent.getName());
+    }
+
+    /** Carries the `options` timeouts and headers over to the Google transport. */
+    private HttpRequestInitializer requestInitializer(RunContext runContext) throws Exception {
+        if (this.options == null) {
+            return request -> request.setReadTimeout((int) DEFAULT_READ_TIMEOUT.toMillis());
+        }
+
+        var rConnectTimeout = runContext.render(this.options.getConnectTimeout()).as(Duration.class);
+        var rReadTimeout = runContext.render(this.options.getReadTimeout()).as(Duration.class);
+        Map<String, String> rHeaders = this.options.getHeaders() == null
+            ? Map.of()
+            : runContext.render(this.options.getHeaders()).asMap(String.class, String.class);
+
+        return request ->
+        {
+            rConnectTimeout.ifPresent(timeout -> request.setConnectTimeout((int) timeout.toMillis()));
+            request.setReadTimeout((int) rReadTimeout.orElse(DEFAULT_READ_TIMEOUT).toMillis());
+            rHeaders.forEach((name, value) -> request.getHeaders().set(name, value));
+        };
+    }
+
+    static Map<String, String> queryParameters(URI uri) {
+        Map<String, String> parameters = new LinkedHashMap<>();
+
+        if (uri.getRawQuery() == null) {
+            return parameters;
+        }
+
+        for (String pair : uri.getRawQuery().split("&")) {
+            int separator = pair.indexOf('=');
+            if (separator > 0) {
+                parameters.put(
+                    percentDecode(pair.substring(0, separator)),
+                    percentDecode(pair.substring(separator + 1))
+                );
+            }
+        }
+
+        return parameters;
+    }
+
+    /**
+     * URLDecoder is form decoding, where a literal `+` becomes a space, and it rejects a bare `%`. A `key` or
+     * `token` may contain either, and neither is worth failing the task over, so fall back to the raw value.
+     */
+    private static String percentDecode(String value) {
+        try {
+            return URLDecoder.decode(value.replace("+", "%2B"), StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            return value;
+        }
+    }
+
+    private void post(RunContext runContext, String url, String payload) throws Exception {
         try (HttpClient client = new HttpClient(runContext, super.httpClientConfigurationWithOptions())) {
-            String payload = runContext.render(this.payload).as(String.class).orElse(null);
-
-            runContext.logger().debug("Send Discord webhook: {}", payload);
-            HttpRequest request = HttpRequest.builder()
+            HttpRequest request = super.createRequestBuilder(runContext)
                 .addHeader("Content-Type", "application/json")
                 .uri(URI.create(url))
                 .method("POST")
@@ -119,6 +257,5 @@ public class GoogleChatIncomingWebhook extends AbstractChatConnection {
                 runContext.logger().info("Request succeeded");
             }
         }
-        return null;
     }
 }

@@ -9,7 +9,7 @@ inputs:
 tasks:
   - id: google-successful
     type: io.kestra.plugin.googleworkspace.chat.GoogleChatExecution
-    url: "{{ inputs.url }}/webhook-unit-test"
+    url: "{{ inputs.url }}/v1/spaces/AAQAexec/messages?key=k&token=t"
     executionId: "{{trigger.executionId}}"
 
 triggers:

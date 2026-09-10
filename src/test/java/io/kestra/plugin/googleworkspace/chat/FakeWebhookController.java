@@ -11,19 +11,52 @@ import io.micronaut.http.annotation.Consumes;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
 
-@Controller("/webhook-unit-test")
+@Controller
 public class FakeWebhookController {
     public static String data;
     public static Map<String, String> headers = new HashMap<>();
+    public static Map<String, String> queryParameters = new HashMap<>();
 
-    @Post
+    /** Stubs the real spaces.messages.create path the Chat SDK builds from a webhook URL. */
+    @Post("/v1/spaces/{space}/messages")
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED })
+    public HttpResponse<String> createMessage(HttpRequest<?> request, String space, @Body String data) {
+        FakeWebhookController.data = data;
+        request.getHeaders().forEach((name, values) ->
+        {
+            if (!values.isEmpty()) {
+                headers.put(name, values.get(0));
+            }
+        });
+        request.getParameters().forEach((name, values) ->
+        {
+            if (!values.isEmpty()) {
+                queryParameters.put(name, values.get(0));
+            }
+        });
+
+        return HttpResponse.ok("{\"name\":\"" + space + "/messages/unit-test\"}")
+            .contentType(MediaType.APPLICATION_JSON);
+    }
+
+    /** A non-Chat-API path that returns 400, to prove what the verbatim fallback does with an error status. */
+    @Post("/webhook-unit-test/reject")
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED })
+    public HttpResponse<String> reject(@Body String data) {
+        FakeWebhookController.data = data;
+
+        return HttpResponse.<String> badRequest("{\"error\":{\"code\":400,\"message\":\"bad payload\"}}")
+            .contentType(MediaType.APPLICATION_JSON);
+    }
+
+    @Post("/webhook-unit-test")
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED })
     public HttpResponse<String> post(@Body String data) {
         FakeWebhookController.data = data;
         return HttpResponse.ok("ok");
     }
 
-    @Post("/with-headers")
+    @Post("/webhook-unit-test/with-headers")
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED })
     public HttpResponse<String> postWithHeaders(HttpRequest<?> request, @Body String data) {
 

@@ -27,6 +27,9 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @NoArgsConstructor
 public abstract class AbstractChatConnection extends Task implements RunnableTask<VoidOutput> {
+    /** Matches the readIdleTimeout default, so an unset `options` keeps the ceiling it had before the SDK. */
+    protected static final Duration DEFAULT_READ_TIMEOUT = Duration.of(5, ChronoUnit.MINUTES);
+
     @Schema(
         title = "Configure HTTP client options",
         description = "Optional HTTP settings (timeouts, charset, headers) applied to webhook calls"
@@ -112,7 +115,7 @@ public abstract class AbstractChatConnection extends Task implements RunnableTas
 
         @Schema(
             title = "Default charset for requests",
-            description = "Request charset; default UTF-8"
+            description = "Request charset, default UTF-8. Only applies when the URL is not a Chat API message path, the Chat API is UTF-8 only."
         )
         @Builder.Default
         @PluginProperty(group = "advanced")
