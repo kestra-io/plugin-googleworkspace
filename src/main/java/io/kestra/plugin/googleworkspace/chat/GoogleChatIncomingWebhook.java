@@ -125,22 +125,33 @@ public class GoogleChatIncomingWebhook extends AbstractChatConnection {
         URI uri = URI.create(rUrl);
         Matcher matcher = WEBHOOK_PATH.matcher(uri.getPath() == null ? "" : uri.getPath());
 
-        if (matcher.matches()) {
-            this.send(runContext, uri, matcher.group(1), rPayload);
-        } else {
-            // Google hands the URL out as one opaque string, so post an unrecognised shape verbatim
-            logger.debug("URL is not the Chat API message path, posting it as-is");
+        Message message = matcher.matches() ? message(rPayload) : null;
+
+        if (message == null) {
+            // Google treats the webhook URL as opaque, so anything we cannot read stays a verbatim POST
+            logger.debug("URL or payload is not in the Chat API shape, posting it as-is");
             this.post(runContext, rUrl, rPayload);
+        } else {
+            this.send(runContext, uri, matcher.group(1), message);
         }
 
         return null;
     }
 
-    private void send(RunContext runContext, URI uri, String space, String payload) throws Exception {
-        Message message = payload == null
-            ? new Message()
-            : JSON_FACTORY.createJsonParser(payload).parse(Message.class);
+    /** Returns null when the payload is not a Chat message object, leaving the caller to post it unchanged. */
+    private static Message message(String payload) {
+        if (payload == null) {
+            return null;
+        }
 
+        try {
+            return JSON_FACTORY.createJsonParser(payload).parse(Message.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void send(RunContext runContext, URI uri, String space, Message message) throws Exception {
         HangoutsChat chat = new HangoutsChat.Builder(
             GoogleNetHttpTransport.newTrustedTransport(),
             JSON_FACTORY,

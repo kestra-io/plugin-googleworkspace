@@ -87,4 +87,26 @@ public class GoogleChatIncomingWebhookTest {
         assertThat(FakeWebhookController.queryParameters.get("token"), is("test-token"));
     }
 
+    /** A payload the Chat model cannot read must still be posted unchanged, as it was before the SDK. */
+    @Test
+    void postsAnUnparseablePayloadVerbatim() throws Exception {
+        RunContext runContext = runContextFactory.of(Map.of());
+
+        EmbeddedServer embeddedServer = applicationContext.getBean(EmbeddedServer.class);
+        embeddedServer.start();
+
+        for (String payload : new String[] { "not json at all", "[{\"text\":\"an array\"}]" }) {
+            FakeWebhookController.data = null;
+
+            GoogleChatIncomingWebhook task = GoogleChatIncomingWebhook.builder()
+                .url(embeddedServer.getURI() + "/v1/spaces/AAAAtest/messages?key=k&token=t")
+                .payload(Property.ofValue(payload))
+                .build();
+
+            task.run(runContext);
+
+            assertThat(FakeWebhookController.data, is(payload));
+        }
+    }
+
 }
