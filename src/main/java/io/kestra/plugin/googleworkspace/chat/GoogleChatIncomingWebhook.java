@@ -191,7 +191,7 @@ public class GoogleChatIncomingWebhook extends AbstractChatConnection {
         }
 
         var rConnectTimeout = runContext.render(this.options.getConnectTimeout()).as(Duration.class);
-        var rReadTimeout = runContext.render(this.options.getReadIdleTimeout()).as(Duration.class);
+        var rReadTimeout = runContext.render(this.options.getReadTimeout()).as(Duration.class);
         Map<String, String> rHeaders = this.options.getHeaders() == null
             ? Map.of()
             : runContext.render(this.options.getHeaders()).asMap(String.class, String.class);
@@ -224,9 +224,16 @@ public class GoogleChatIncomingWebhook extends AbstractChatConnection {
         return parameters;
     }
 
-    /** URLDecoder is form decoding, where a literal `+` becomes a space. A `key` or `token` may contain one. */
+    /**
+     * URLDecoder is form decoding, where a literal `+` becomes a space, and it rejects a bare `%`. A `key` or
+     * `token` may contain either, and neither is worth failing the task over, so fall back to the raw value.
+     */
     private static String percentDecode(String value) {
-        return URLDecoder.decode(value.replace("+", "%2B"), StandardCharsets.UTF_8);
+        try {
+            return URLDecoder.decode(value.replace("+", "%2B"), StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            return value;
+        }
     }
 
     private void post(RunContext runContext, String url, String payload) throws Exception {

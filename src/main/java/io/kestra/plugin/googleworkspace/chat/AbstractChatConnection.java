@@ -115,7 +115,7 @@ public abstract class AbstractChatConnection extends Task implements RunnableTas
 
         @Schema(
             title = "Default charset for requests",
-            description = "Request charset; default UTF-8"
+            description = "Request charset, default UTF-8. Only applies when the URL is not a Chat API message path, the Chat API is UTF-8 only."
         )
         @Builder.Default
         @PluginProperty(group = "advanced")
