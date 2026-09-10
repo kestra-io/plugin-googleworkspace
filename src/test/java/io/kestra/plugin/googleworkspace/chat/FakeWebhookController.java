@@ -22,6 +22,12 @@ public class FakeWebhookController {
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED })
     public HttpResponse<String> createMessage(HttpRequest<?> request, String space, @Body String data) {
         FakeWebhookController.data = data;
+        request.getHeaders().forEach((name, values) ->
+        {
+            if (!values.isEmpty()) {
+                headers.put(name, values.get(0));
+            }
+        });
         request.getParameters().forEach((name, values) ->
         {
             if (!values.isEmpty()) {

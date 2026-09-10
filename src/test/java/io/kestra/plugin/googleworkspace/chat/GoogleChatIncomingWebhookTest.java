@@ -20,7 +20,9 @@ import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 
 @KestraTest
 public class GoogleChatIncomingWebhookTest {
@@ -74,6 +76,7 @@ public class GoogleChatIncomingWebhookTest {
 
         FakeWebhookController.data = null;
         FakeWebhookController.queryParameters.clear();
+        FakeWebhookController.headers.clear();
 
         GoogleChatIncomingWebhook task = GoogleChatIncomingWebhook.builder()
             .url(embeddedServer.getURI() + "/v1/spaces/AAAAtest/messages?key=test-key&token=test-token")
@@ -82,6 +85,8 @@ public class GoogleChatIncomingWebhookTest {
 
         task.run(runContext);
 
+        // only the Google client library sends this, so it proves the SDK made the call and not the fallback
+        assertThat(FakeWebhookController.headers, hasKey("x-goog-api-client"));
         assertThat(FakeWebhookController.data, containsString("sent through the Chat SDK"));
         assertThat(FakeWebhookController.queryParameters.get("key"), is("test-key"));
         assertThat(FakeWebhookController.queryParameters.get("token"), is("test-token"));
@@ -97,6 +102,7 @@ public class GoogleChatIncomingWebhookTest {
 
         for (String payload : new String[] { "not json at all", "[{\"text\":\"an array\"}]" }) {
             FakeWebhookController.data = null;
+            FakeWebhookController.headers.clear();
 
             GoogleChatIncomingWebhook task = GoogleChatIncomingWebhook.builder()
                 .url(embeddedServer.getURI() + "/v1/spaces/AAAAtest/messages?key=k&token=t")
@@ -106,6 +112,7 @@ public class GoogleChatIncomingWebhookTest {
             task.run(runContext);
 
             assertThat(FakeWebhookController.data, is(payload));
+            assertThat(FakeWebhookController.headers, not(hasKey("x-goog-api-client")));
         }
     }
 
