@@ -1,8 +1,10 @@
 package io.kestra.plugin.googleworkspace.chat;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -13,10 +15,13 @@ import org.slf4j.Logger;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.chat.v1.HangoutsChat;
 import com.google.api.services.chat.v1.model.Message;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 
 import io.kestra.core.http.HttpRequest;
 import io.kestra.core.http.HttpResponse;
@@ -110,6 +115,15 @@ public class GoogleChatIncomingWebhook extends AbstractChatConnection {
 
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 
+    private static final Supplier<HttpTransport> TRANSPORT = Suppliers.memoize(() ->
+    {
+        try {
+            return GoogleNetHttpTransport.newTrustedTransport();
+        } catch (GeneralSecurityException | IOException e) {
+            throw new IllegalStateException("Unable to build the Google HTTP transport", e);
+        }
+    });
+
     /** A Chat webhook URL is the spaces.messages.create path with its credentials in the query string. */
     private static final Pattern WEBHOOK_PATH = Pattern.compile("^/v1/(spaces/[^/]+)/messages/?$");
 
@@ -125,7 +139,7 @@ public class GoogleChatIncomingWebhook extends AbstractChatConnection {
         URI uri = URI.create(rUrl);
         Matcher matcher = WEBHOOK_PATH.matcher(uri.getPath() == null ? "" : uri.getPath());
 
-        Message message = matcher.matches() ? message(rPayload) : null;
+        Message message = matcher.matches() ? message(rPayload, logger) : null;
 
         if (message == null) {
             // Google treats the webhook URL as opaque, so anything we cannot read stays a verbatim POST
@@ -139,7 +153,7 @@ public class GoogleChatIncomingWebhook extends AbstractChatConnection {
     }
 
     /** Returns null when the payload is not a Chat message object, leaving the caller to post it unchanged. */
-    private static Message message(String payload) {
+    private static Message message(String payload, Logger logger) {
         if (payload == null) {
             return null;
         }
@@ -147,13 +161,14 @@ public class GoogleChatIncomingWebhook extends AbstractChatConnection {
         try {
             return JSON_FACTORY.createJsonParser(payload).parse(Message.class);
         } catch (Exception e) {
+            logger.trace("Payload did not parse as a Chat message: {}", e.getMessage());
             return null;
         }
     }
 
     private void send(RunContext runContext, URI uri, String space, Message message) throws Exception {
         HangoutsChat chat = new HangoutsChat.Builder(
-            GoogleNetHttpTransport.newTrustedTransport(),
+            TRANSPORT.get(),
             JSON_FACTORY,
             this.requestInitializer(runContext)
         )
@@ -181,14 +196,15 @@ public class GoogleChatIncomingWebhook extends AbstractChatConnection {
             ? Map.of()
             : runContext.render(this.options.getHeaders()).asMap(String.class, String.class);
 
-        return request -> {
+        return request ->
+        {
             rConnectTimeout.ifPresent(timeout -> request.setConnectTimeout((int) timeout.toMillis()));
             request.setReadTimeout((int) rReadTimeout.orElse(DEFAULT_READ_TIMEOUT).toMillis());
             rHeaders.forEach((name, value) -> request.getHeaders().set(name, value));
         };
     }
 
-    private static Map<String, String> queryParameters(URI uri) {
+    static Map<String, String> queryParameters(URI uri) {
         Map<String, String> parameters = new LinkedHashMap<>();
 
         if (uri.getRawQuery() == null) {
@@ -199,13 +215,18 @@ public class GoogleChatIncomingWebhook extends AbstractChatConnection {
             int separator = pair.indexOf('=');
             if (separator > 0) {
                 parameters.put(
-                    URLDecoder.decode(pair.substring(0, separator), StandardCharsets.UTF_8),
-                    URLDecoder.decode(pair.substring(separator + 1), StandardCharsets.UTF_8)
+                    percentDecode(pair.substring(0, separator)),
+                    percentDecode(pair.substring(separator + 1))
                 );
             }
         }
 
         return parameters;
+    }
+
+    /** URLDecoder is form decoding, where a literal `+` becomes a space. A `key` or `token` may contain one. */
+    private static String percentDecode(String value) {
+        return URLDecoder.decode(value.replace("+", "%2B"), StandardCharsets.UTF_8);
     }
 
     private void post(RunContext runContext, String url, String payload) throws Exception {

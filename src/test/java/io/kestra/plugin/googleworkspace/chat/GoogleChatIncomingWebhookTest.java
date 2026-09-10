@@ -92,6 +92,33 @@ public class GoogleChatIncomingWebhookTest {
         assertThat(FakeWebhookController.queryParameters.get("token"), is("test-token"));
     }
 
+    /** `options.headers` was rendered and then dropped before this change, so lock in that it is now sent. */
+    @Test
+    void sendsConfiguredHeaders() throws Exception {
+        RunContext runContext = runContextFactory.of(Map.of());
+
+        EmbeddedServer embeddedServer = applicationContext.getBean(EmbeddedServer.class);
+        embeddedServer.start();
+
+        FakeWebhookController.headers.clear();
+
+        GoogleChatIncomingWebhook task = GoogleChatIncomingWebhook.builder()
+            .url(embeddedServer.getURI() + "/v1/spaces/AAAAtest/messages?key=k&token=t")
+            .payload(Property.ofValue("{\"text\":\"with a custom header\"}"))
+            .options(
+                AbstractChatConnection.RequestOptions.builder()
+                    .headers(Property.ofValue(Map.of("X-Custom-Header", "kestra")))
+                    .build()
+            )
+            .build();
+
+        task.run(runContext);
+
+        assertThat(FakeWebhookController.headers, hasKey("x-goog-api-client"));
+        // the Google client lowercases header names, which HTTP treats as equivalent
+        assertThat(FakeWebhookController.headers.get("x-custom-header"), is("kestra"));
+    }
+
     /** A payload the Chat model cannot read must still be posted unchanged, as it was before the SDK. */
     @Test
     void postsAnUnparseablePayloadVerbatim() throws Exception {
