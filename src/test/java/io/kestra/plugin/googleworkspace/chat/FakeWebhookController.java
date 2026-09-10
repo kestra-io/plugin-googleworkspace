@@ -39,6 +39,16 @@ public class FakeWebhookController {
             .contentType(MediaType.APPLICATION_JSON);
     }
 
+    /** A non-Chat-API path that returns 400, to prove what the verbatim fallback does with an error status. */
+    @Post("/webhook-unit-test/reject")
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED })
+    public HttpResponse<String> reject(@Body String data) {
+        FakeWebhookController.data = data;
+
+        return HttpResponse.<String> badRequest("{\"error\":{\"code\":400,\"message\":\"bad payload\"}}")
+            .contentType(MediaType.APPLICATION_JSON);
+    }
+
     @Post("/webhook-unit-test")
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED })
     public HttpResponse<String> post(@Body String data) {

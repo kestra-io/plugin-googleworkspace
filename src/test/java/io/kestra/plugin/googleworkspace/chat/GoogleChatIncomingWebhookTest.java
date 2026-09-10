@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @KestraTest
 public class GoogleChatIncomingWebhookTest {
@@ -90,6 +91,21 @@ public class GoogleChatIncomingWebhookTest {
         assertThat(FakeWebhookController.data, containsString("sent through the Chat SDK"));
         assertThat(FakeWebhookController.queryParameters.get("key"), is("test-key"));
         assertThat(FakeWebhookController.queryParameters.get("token"), is("test-token"));
+    }
+
+    /** The fallback path must fail on a non-2xx exactly as it did before the SDK, this pins that. */
+    @Test
+    void verbatimPathFailsOnNonSuccess() {
+        RunContext runContext = runContextFactory.of(Map.of());
+        EmbeddedServer embeddedServer = applicationContext.getBean(EmbeddedServer.class);
+        embeddedServer.start();
+
+        GoogleChatIncomingWebhook task = GoogleChatIncomingWebhook.builder()
+            .url(embeddedServer.getURI() + "/webhook-unit-test/reject")
+            .payload(Property.ofValue("{\"text\":\"rejected\"}"))
+            .build();
+
+        assertThrows(Exception.class, () -> task.run(runContext));
     }
 
     /** `options.headers` was rendered and then dropped before this change, so lock in that it is now sent. */
