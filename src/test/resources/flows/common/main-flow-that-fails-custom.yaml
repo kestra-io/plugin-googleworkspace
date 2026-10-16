@@ -1,0 +1,5 @@
+id: main-flow-that-fails-custom
+namespace: io.kestra.tests
+tasks:
+  - id: failed
+    type: io.kestra.plugin.core.execution.Fail
