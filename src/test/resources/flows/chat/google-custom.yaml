@@ -1,0 +1,27 @@
+id: google-custom
+namespace: io.kestra.tests
+
+inputs:
+  - id: url
+    type: STRING
+    defaults: "http://localhost:59443"
+
+tasks:
+  - id: google-custom
+    type: io.kestra.plugin.googleworkspace.chat.GoogleChatExecution
+    url: "{{ inputs.url }}/webhook-unit-test"
+    executionId: "{{trigger.executionId}}"
+    customMessage: "Custom failure message for Google Chat"
+    customFields:
+      environment: "production"
+      team: "sre-core"
+
+triggers:
+  - id: on_failure
+    type: io.kestra.plugin.core.trigger.Flow
+    preconditions:
+      id: flow_trigger
+      flows:
+        - namespace: io.kestra.tests
+          flowId: main-flow-that-fails-custom
+          states: [ FAILED ]
