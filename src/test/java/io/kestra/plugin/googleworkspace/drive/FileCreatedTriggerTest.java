@@ -13,15 +13,24 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.User;
 
+import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.model.FileList;
+
 import io.kestra.core.junit.annotations.KestraTest;
 import io.kestra.core.models.property.Property;
+import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.utils.IdUtils;
 
 import jakarta.inject.Inject;
 
+import org.mockito.Mockito;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @KestraTest
 class FileCreatedTriggerTest {
@@ -180,6 +189,117 @@ class FileCreatedTriggerTest {
 
         assertThat(trigger2.getInterval(), is(Duration.ofSeconds(30)));
         assertThat(trigger2.getFolderId(), notNullValue());
+    }
+
+
+    @Test
+    void buildQuery_defaultIncludeSubfolders_onlyDirectParent() throws Exception {
+        RunContext runContext = runContextFactory.of();
+        String folderId = "FOLDER";
+
+        FileCreatedTrigger trigger = FileCreatedTrigger.builder()
+            .id("query-default-" + IdUtils.create())
+            .type(FileCreatedTrigger.class.getName())
+            .serviceAccount(Property.ofValue("{\"type\":\"service_account\",\"project_id\":\"test\"}"))
+            .folderId(Property.ofValue(folderId))
+            .interval(Duration.ofMinutes(1))
+            .build();
+
+        Drive drive = mock(Drive.class);
+        String query = trigger.buildQuery(runContext, "2026-01-01T00:00:00.000Z", drive);
+
+        assertThat(query, containsString("'FOLDER' in parents"));
+        assertThat(query, not(containsString(" or ")));
+        assertThat(query, containsString("trashed = false"));
+        assertThat(query, containsString("createdTime > '2026-01-01T00:00:00.000Z'"));
+    }
+
+    @Test
+    void buildQuery_includeSubfoldersFalse_onlyDirectParent() throws Exception {
+        RunContext runContext = runContextFactory.of();
+        String folderId = "FOLDER";
+
+        FileCreatedTrigger trigger = FileCreatedTrigger.builder()
+            .id("query-false-" + IdUtils.create())
+            .type(FileCreatedTrigger.class.getName())
+            .serviceAccount(Property.ofValue("{\"type\":\"service_account\",\"project_id\":\"test\"}"))
+            .folderId(Property.ofValue(folderId))
+            .includeSubfolders(Property.ofValue(false))
+            .interval(Duration.ofMinutes(1))
+            .build();
+
+        Drive drive = mock(Drive.class);
+        String query = trigger.buildQuery(runContext, "2026-01-01T00:00:00.000Z", drive);
+
+        assertThat(query, containsString("'FOLDER' in parents"));
+        // No OR-joined multi-folder parents clause for descendants
+        assertThat(query, not(containsString(" or '")));
+        assertThat(query, not(containsString("('FOLDER' in parents or")));
+    }
+
+    @Test
+    void buildQuery_includeSubfoldersTrue_orJoinsRootAndDescendants() throws Exception {
+        RunContext runContext = runContextFactory.of();
+        String rootId = "folderA";
+        String childId = "folderB";
+
+        FileCreatedTrigger trigger = FileCreatedTrigger.builder()
+            .id("query-true-" + IdUtils.create())
+            .type(FileCreatedTrigger.class.getName())
+            .serviceAccount(Property.ofValue("{\"type\":\"service_account\",\"project_id\":\"test\"}"))
+            .folderId(Property.ofValue(rootId))
+            .includeSubfolders(Property.ofValue(true))
+            .interval(Duration.ofMinutes(1))
+            .build();
+
+        Drive drive = mockDriveWithChildFolder(rootId, childId);
+        String query = trigger.buildQuery(runContext, "2026-01-01T00:00:00.000Z", drive);
+
+        assertThat(query, containsString("'folderA' in parents"));
+        assertThat(query, containsString("'folderB' in parents"));
+        assertThat(query, containsString(" or "));
+        assertThat(query, containsString("('folderA' in parents or 'folderB' in parents)"));
+        assertThat(query, containsString("trashed = false"));
+    }
+
+    @Test
+    void buildQuery_noFolderId_noParentFilter() throws Exception {
+        RunContext runContext = runContextFactory.of();
+
+        FileCreatedTrigger trigger = FileCreatedTrigger.builder()
+            .id("query-nofolder-" + IdUtils.create())
+            .type(FileCreatedTrigger.class.getName())
+            .serviceAccount(Property.ofValue("{\"type\":\"service_account\",\"project_id\":\"test\"}"))
+            .includeSubfolders(Property.ofValue(true))
+            .interval(Duration.ofMinutes(1))
+            .build();
+
+        Drive drive = mock(Drive.class);
+        String query = trigger.buildQuery(runContext, "2026-01-01T00:00:00.000Z", drive);
+
+        assertThat(query, not(containsString("in parents")));
+        assertThat(query, containsString("trashed = false"));
+    }
+
+    private Drive mockDriveWithChildFolder(String rootId, String childId) throws Exception {
+        Drive drive = mock(Drive.class);
+        Drive.Files files = mock(Drive.Files.class);
+        Drive.Files.List list = mock(Drive.Files.List.class);
+
+        when(drive.files()).thenReturn(files);
+        when(files.list()).thenReturn(list);
+        when(list.setQ(anyString())).thenReturn(list);
+        when(list.setFields(anyString())).thenReturn(list);
+        when(list.setPageToken(anyString())).thenReturn(list);
+
+        File childFolder = new File().setId(childId).setMimeType("application/vnd.google-apps.folder");
+        FileList rootChildren = new FileList().setFiles(List.of(childFolder)).setNextPageToken(null);
+        // Child has no further folder children
+        FileList emptyChildren = new FileList().setFiles(List.of()).setNextPageToken(null);
+
+        when(list.execute()).thenReturn(rootChildren, emptyChildren);
+
+        return drive;
     }
 
     private File createMockFile(String fileId, String fileName, String mimeType, Long size, String folderId) {
