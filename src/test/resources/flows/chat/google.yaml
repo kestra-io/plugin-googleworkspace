@@ -11,6 +11,10 @@ tasks:
     type: io.kestra.plugin.googleworkspace.chat.GoogleChatExecution
     url: "{{ inputs.url }}/webhook-unit-test"
     executionId: "{{trigger.executionId}}"
+    customMessage: "Custom failure message for Google Chat"
+    customFields:
+      environment: "production"
+      team: "sre-core"
 
 triggers:
   - id: on_failure

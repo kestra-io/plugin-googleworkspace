@@ -51,6 +51,9 @@ public class GoogleChatExecutionTest extends AbstractChatTest {
         assertThat(receivedData, containsString("Failed on task `failed`"));
         assertThat(receivedData, containsString("Final task ID failed"));
         assertThat(receivedData, containsString("Kestra Google notification"));
+        assertThat(receivedData, containsString("Custom failure message for Google Chat"));
+        assertThat(receivedData, containsString("environment: production"));
+        assertThat(receivedData, containsString("team: sre-core"));
     }
 
     @Test
