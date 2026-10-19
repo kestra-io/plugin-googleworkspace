@@ -51,6 +51,9 @@ public class GoogleChatExecutionTest extends AbstractChatTest {
         assertThat(receivedData, containsString("Failed on task `failed`"));
         assertThat(receivedData, containsString("Final task ID failed"));
         assertThat(receivedData, containsString("Kestra Google notification"));
+        assertThat(receivedData, containsString("Custom failure message for Google Chat"));
+        assertThat(receivedData, containsString("environment: production"));
+        assertThat(receivedData, containsString("team: sre-core"));
     }
 
     @Test
@@ -70,25 +73,4 @@ public class GoogleChatExecutionTest extends AbstractChatTest {
         // this flow points at the Chat API path, so the templated payload must survive the typed Message round trip
         assertThat(FakeWebhookController.headers, hasKey("x-goog-api-client"));
     }
-
-    @Test
-    void flowWithCustomMessageAndFields() throws Exception {
-        var failedExecution = runAndCaptureExecution(
-            "main-flow-that-fails-custom",
-            "google-custom"
-        );
-
-
-        String receivedData = waitForWebhookData(() -> FakeWebhookController.data, 5000);
-
-        assertThat(receivedData, containsString("https://mysuperhost.com/kestra/ui"));
-        assertThat(receivedData, containsString(failedExecution.getId()));
-        assertThat(receivedData, containsString("Failed on task `failed`"));
-        assertThat(receivedData, containsString("Final task ID failed"));
-        assertThat(receivedData, containsString("Kestra Google notification"));
-        assertThat(receivedData, containsString("Custom failure message for Google Chat"));
-        assertThat(receivedData, containsString("environment: production"));
-        assertThat(receivedData, containsString("team: sre-core"));
-    }
 }
-
