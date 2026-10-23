@@ -125,7 +125,7 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
 
     @Schema(
         title = "Folder ID to monitor",
-        description = "Google Drive folder ID; monitors entire Drive if omitted"
+        description = "Google Drive folder ID; monitors entire Drive if omitted. includeSubfolders only applies when this is set."
     )
     @PluginProperty(group = "advanced")
     protected Property<String> folderId;
@@ -146,7 +146,7 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
 
     @Schema(
         title = "Include subfolders",
-        description = "When true, query is recursive through subfolders; default false"
+        description = "When true and folderId is set, also match files in descendant subfolders; ignored when folderId is unset. Default false."
     )
     @Builder.Default
     @PluginProperty(group = "advanced")
@@ -180,7 +180,7 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
             : Instant.now().minus((TemporalAmount) this.interval);
         ;
 
-        String query = buildQuery(runContext, String.valueOf(lastCreatedTime));
+        String query = buildQuery(runContext, String.valueOf(lastCreatedTime), driveService);
         logger.debug("Executing Drive query: {}", query);
 
         FileList result = driveService.files().list()
@@ -256,15 +256,30 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
         return Optional.of(execution);
     }
 
-    private String buildQuery(RunContext runContext, String lastCreatedTime) throws Exception {
+    /**
+     * Build the Drive files.list query. Package-private for unit tests.
+     */
+    String buildQuery(RunContext runContext, String lastCreatedTime, Drive drive) throws Exception {
         List<String> queryParts = new ArrayList<>();
 
         // Exclude trashed files
         queryParts.add("trashed = false");
 
-        // Filter by folder
+        // Filter by folder (optionally including descendant subfolders)
         var renderedFolderId = runContext.render(folderId).as(String.class);
-        renderedFolderId.ifPresent(s -> queryParts.add("'" + s + "' in parents"));
+        if (renderedFolderId.isPresent()) {
+            String rootFolderId = renderedFolderId.get();
+            boolean recursive = runContext.render(includeSubfolders).as(Boolean.class).orElse(false);
+            if (recursive) {
+                List<String> folderIds = collectFolderIds(drive, rootFolderId);
+                String parentClause = folderIds.stream()
+                    .map(id -> "'" + id + "' in parents")
+                    .collect(Collectors.joining(" or "));
+                queryParts.add("(" + parentClause + ")");
+            } else {
+                queryParts.add("'" + rootFolderId + "' in parents");
+            }
+        }
 
         // Filter by MIME type
         var renderedMimeTypes = runContext.render(mimeTypes).asList(String.class);
@@ -291,6 +306,41 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
         }
 
         return String.join(" and ", queryParts);
+    }
+
+    /**
+     * Breadth-first collect root folder ID plus all descendant folder IDs.
+     */
+    List<String> collectFolderIds(Drive drive, String rootFolderId) throws Exception {
+        List<String> all = new ArrayList<>();
+        all.add(rootFolderId);
+
+        Queue<String> queue = new ArrayDeque<>();
+        queue.add(rootFolderId);
+
+        while (!queue.isEmpty()) {
+            String parentId = queue.poll();
+            String pageToken = null;
+            do {
+                Drive.Files.List request = drive.files().list()
+                    .setQ("mimeType = 'application/vnd.google-apps.folder' and '" + parentId + "' in parents and trashed = false")
+                    .setFields("nextPageToken, files(id)");
+                if (pageToken != null) {
+                    request.setPageToken(pageToken);
+                }
+                FileList result = request.execute();
+                List<File> folders = result.getFiles();
+                if (folders != null) {
+                    for (File folder : folders) {
+                        all.add(folder.getId());
+                        queue.add(folder.getId());
+                    }
+                }
+                pageToken = result.getNextPageToken();
+            } while (pageToken != null);
+        }
+
+        return all;
     }
 
     private ZonedDateTime parseDateTime(com.google.api.client.util.DateTime dateTime) {
