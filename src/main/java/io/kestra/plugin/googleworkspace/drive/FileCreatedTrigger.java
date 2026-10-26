@@ -294,7 +294,6 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
 
         var query = String.join(" and ", queryParts);
 
-        // Filter by folder, optionally including every descendant subfolder
         var rFolderId = runContext.render(folderId).as(String.class);
         if (rFolderId.isEmpty()) {
             return List.of(query);

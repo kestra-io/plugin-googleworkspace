@@ -422,7 +422,7 @@ class FileCreatedTriggerTest {
     }
 
     private static String folderQuery(String parentId) {
-        return "mimeType = 'application/vnd.google-apps.folder' and '%s' in parents and trashed = false".formatted(parentId);
+        return "%s and '%s' in parents and trashed = false".formatted(FOLDER_QUERY_PREFIX, parentId);
     }
 
     private File newFile(String id, long createdTime, String... parents) {
