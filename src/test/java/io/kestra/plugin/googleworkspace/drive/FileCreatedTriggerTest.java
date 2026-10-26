@@ -23,6 +23,7 @@ import com.google.api.services.drive.model.FileList;
 import com.google.api.services.drive.model.User;
 
 import io.kestra.core.junit.annotations.KestraTest;
+import io.kestra.core.models.executions.Execution;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.utils.IdUtils;
@@ -37,14 +38,12 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @KestraTest
 class FileCreatedTriggerTest {
     private static final Logger logger = LoggerFactory.getLogger(FileCreatedTriggerTest.class);
     private static final String SERVICE_ACCOUNT = "{\"type\":\"service_account\",\"project_id\":\"test\"}";
-    private static final String LAST_CREATED_TIME = "2026-01-01T00:00:00.000Z";
     private static final String FOLDER_QUERY_PREFIX = "mimeType = 'application/vnd.google-apps.folder'";
     private static final Pattern PARENT_ID = Pattern.compile("'([^']+)' in parents");
 
@@ -204,118 +203,78 @@ class FileCreatedTriggerTest {
     }
 
     @Test
-    void buildQueries_defaultIncludeSubfolders_onlyDirectParent() throws Exception {
-        var runContext = runContextFactory.of();
-
-        var trigger = FileCreatedTrigger.builder()
-            .id("query-default-%s".formatted(IdUtils.create()))
-            .type(FileCreatedTrigger.class.getName())
-            .serviceAccount(Property.ofValue(SERVICE_ACCOUNT))
+    void evaluate_defaultIncludeSubfolders_onlyDirectParent() throws Exception {
+        var trigger = trigger("query-default")
             .folderId(Property.ofValue("FOLDER"))
-            .interval(Duration.ofMinutes(1))
             .build();
 
-        var drive = mock(Drive.class);
-        var queries = trigger.buildQueries(runContext, LAST_CREATED_TIME, drive);
+        var mockedDrive = mockDrive(Map.of(), 1000, List.of());
+        evaluate(trigger, mockedDrive);
 
-        assertThat(queries, contains("trashed = false and createdTime > '2026-01-01T00:00:00.000Z' and 'FOLDER' in parents"));
-        verifyNoInteractions(drive);
+        assertThat(mockedDrive.q().getAllValues(), contains(matchesPattern("trashed = false and createdTime > '[^']+' and 'FOLDER' in parents")));
     }
 
     @Test
-    void buildQueries_includeSubfoldersFalse_onlyDirectParent() throws Exception {
-        var runContext = runContextFactory.of();
-
-        var trigger = FileCreatedTrigger.builder()
-            .id("query-false-%s".formatted(IdUtils.create()))
-            .type(FileCreatedTrigger.class.getName())
-            .serviceAccount(Property.ofValue(SERVICE_ACCOUNT))
+    void evaluate_includeSubfoldersFalse_onlyDirectParent() throws Exception {
+        var trigger = trigger("query-false")
             .folderId(Property.ofValue("FOLDER"))
             .includeSubfolders(Property.ofValue(false))
-            .interval(Duration.ofMinutes(1))
             .build();
 
-        var drive = mock(Drive.class);
-        var queries = trigger.buildQueries(runContext, LAST_CREATED_TIME, drive);
+        var mockedDrive = mockDrive(Map.of(), 1000, List.of());
+        evaluate(trigger, mockedDrive);
 
-        assertThat(queries, contains("trashed = false and createdTime > '2026-01-01T00:00:00.000Z' and 'FOLDER' in parents"));
-        verifyNoInteractions(drive);
+        assertThat(mockedDrive.q().getAllValues(), contains(matchesPattern("trashed = false and createdTime > '[^']+' and 'FOLDER' in parents")));
     }
 
     @Test
-    void buildQueries_includeSubfoldersTrue_orJoinsRootAndDescendants() throws Exception {
-        var runContext = runContextFactory.of();
-
-        var trigger = FileCreatedTrigger.builder()
-            .id("query-true-%s".formatted(IdUtils.create()))
-            .type(FileCreatedTrigger.class.getName())
-            .serviceAccount(Property.ofValue(SERVICE_ACCOUNT))
+    void evaluate_includeSubfoldersTrue_orJoinsRootAndDescendants() throws Exception {
+        var trigger = trigger("query-true")
             .folderId(Property.ofValue("folderA"))
             .includeSubfolders(Property.ofValue(true))
-            .interval(Duration.ofMinutes(1))
             .build();
 
         var mockedDrive = mockDrive(Map.of("folderA", List.of("folderB"), "folderB", List.of("folderC")), 1000, List.of());
-        var queries = trigger.buildQueries(runContext, LAST_CREATED_TIME, mockedDrive.drive());
+        evaluate(trigger, mockedDrive);
 
-        assertThat(queries, contains("trashed = false and createdTime > '2026-01-01T00:00:00.000Z' and ('folderA' in parents or 'folderB' in parents or 'folderC' in parents)"));
-        // Each folder is listed by its own parent id
-        assertThat(mockedDrive.q().getAllValues(), contains(folderQuery("folderA"), folderQuery("folderB"), folderQuery("folderC")));
+        assertThat(mockedDrive.fileQueries(), contains(endsWith(" and ('folderA' in parents or 'folderB' in parents or 'folderC' in parents)")));
+        assertThat(mockedDrive.folderQueries(), contains(folderQuery("folderA"), folderQuery("folderB"), folderQuery("folderC")));
     }
 
     @Test
-    void buildQueries_noFolderId_noParentFilter() throws Exception {
-        var runContext = runContextFactory.of();
-
-        var trigger = FileCreatedTrigger.builder()
-            .id("query-nofolder-%s".formatted(IdUtils.create()))
-            .type(FileCreatedTrigger.class.getName())
-            .serviceAccount(Property.ofValue(SERVICE_ACCOUNT))
+    void evaluate_noFolderId_noParentFilter() throws Exception {
+        var trigger = trigger("query-nofolder")
             .includeSubfolders(Property.ofValue(true))
-            .interval(Duration.ofMinutes(1))
             .build();
 
-        var drive = mock(Drive.class);
-        var queries = trigger.buildQueries(runContext, LAST_CREATED_TIME, drive);
+        var mockedDrive = mockDrive(Map.of(), 1000, List.of());
+        evaluate(trigger, mockedDrive);
 
-        assertThat(queries, contains("trashed = false and createdTime > '2026-01-01T00:00:00.000Z'"));
-        verifyNoInteractions(drive);
+        assertThat(mockedDrive.q().getAllValues(), contains(matchesPattern("trashed = false and createdTime > '[^']+'")));
     }
 
     @Test
-    void buildQueries_subfoldersOnSeveralPages_followsNextPageToken() throws Exception {
-        var runContext = runContextFactory.of();
-
-        var trigger = FileCreatedTrigger.builder()
-            .id("query-pages-%s".formatted(IdUtils.create()))
-            .type(FileCreatedTrigger.class.getName())
-            .serviceAccount(Property.ofValue(SERVICE_ACCOUNT))
+    void evaluate_subfoldersOnSeveralPages_followsNextPageToken() throws Exception {
+        var trigger = trigger("query-pages")
             .folderId(Property.ofValue("root"))
             .includeSubfolders(Property.ofValue(true))
-            .interval(Duration.ofMinutes(1))
             .build();
 
         // Drive answers two folders per page, so the three subfolders of root take two pages
         var mockedDrive = mockDrive(Map.of("root", List.of("b", "c", "d")), 2, List.of());
-        var queries = trigger.buildQueries(runContext, LAST_CREATED_TIME, mockedDrive.drive());
+        evaluate(trigger, mockedDrive);
 
-        assertThat(queries, contains(endsWith(" and ('root' in parents or 'b' in parents or 'c' in parents or 'd' in parents)")));
-        assertThat(mockedDrive.q().getAllValues(), contains(folderQuery("root"), folderQuery("root"), folderQuery("b"), folderQuery("c"), folderQuery("d")));
+        assertThat(mockedDrive.fileQueries(), contains(endsWith(" and ('root' in parents or 'b' in parents or 'c' in parents or 'd' in parents)")));
+        assertThat(mockedDrive.folderQueries(), contains(folderQuery("root"), folderQuery("root"), folderQuery("b"), folderQuery("c"), folderQuery("d")));
         assertThat(mockedDrive.pageToken().getAllValues(), is(Arrays.asList(null, "2", null, null, null)));
-        assertThat(mockedDrive.pageSize().getAllValues(), contains(1000, 1000, 1000, 1000, 1000));
+        assertThat(mockedDrive.pageSize().getAllValues().subList(0, 5), contains(1000, 1000, 1000, 1000, 1000));
     }
 
     @Test
-    void buildQueries_folderWithTwoParents_listedOnce() throws Exception {
-        var runContext = runContextFactory.of();
-
-        var trigger = FileCreatedTrigger.builder()
-            .id("query-two-parents-%s".formatted(IdUtils.create()))
-            .type(FileCreatedTrigger.class.getName())
-            .serviceAccount(Property.ofValue(SERVICE_ACCOUNT))
+    void evaluate_folderWithTwoParents_listedOnce() throws Exception {
+        var trigger = trigger("query-two-parents")
             .folderId(Property.ofValue("root"))
             .includeSubfolders(Property.ofValue(true))
-            .interval(Duration.ofMinutes(1))
             .build();
 
         // shared is in both b and c, so the walk reaches it twice
@@ -329,32 +288,24 @@ class FileCreatedTriggerTest {
             1000,
             List.of()
         );
-        var queries = trigger.buildQueries(runContext, LAST_CREATED_TIME, mockedDrive.drive());
+        evaluate(trigger, mockedDrive);
 
-        assertThat(queries, contains(endsWith(" and ('root' in parents or 'b' in parents or 'c' in parents or 'shared' in parents or 'leaf' in parents)")));
-        assertThat(mockedDrive.q().getAllValues(), contains(folderQuery("root"), folderQuery("b"), folderQuery("c"), folderQuery("shared"), folderQuery("leaf")));
+        assertThat(mockedDrive.fileQueries(), contains(endsWith(" and ('root' in parents or 'b' in parents or 'c' in parents or 'shared' in parents or 'leaf' in parents)")));
+        assertThat(mockedDrive.folderQueries(), contains(folderQuery("root"), folderQuery("b"), folderQuery("c"), folderQuery("shared"), folderQuery("leaf")));
     }
 
     @Test
     @SuppressWarnings("unchecked")
     void evaluate_includeSubfolders_triggersOnFileInSubfolder() throws Exception {
-        var trigger = FileCreatedTrigger.builder()
-            .id("evaluate-subfolder-%s".formatted(IdUtils.create()))
-            .type(FileCreatedTrigger.class.getName())
-            .serviceAccount(Property.ofValue(SERVICE_ACCOUNT))
+        var trigger = trigger("evaluate-subfolder")
             .folderId(Property.ofValue("root"))
             .includeSubfolders(Property.ofValue(true))
-            .interval(Duration.ofMinutes(1))
             .build();
 
         var file = newFile("file-in-sub", System.currentTimeMillis() - 10_000, "sub");
         var mockedDrive = mockDrive(Map.of("root", List.of("sub")), 1000, List.of(file));
 
-        var context = TestsUtils.mockTrigger(runContextFactory, trigger);
-        var spiedTrigger = spy(trigger);
-        doReturn(mockedDrive.drive()).when(spiedTrigger).from(any());
-
-        var execution = spiedTrigger.evaluate(context.getKey(), context.getValue());
+        var execution = evaluate(trigger, mockedDrive);
 
         assertThat(mockedDrive.fileQueries(), contains(endsWith(" and ('root' in parents or 'sub' in parents)")));
         assertThat(execution.isPresent(), is(true));
@@ -368,14 +319,10 @@ class FileCreatedTriggerTest {
     @Test
     @SuppressWarnings("unchecked")
     void evaluate_manySubfolders_queriesEachChunkAndMergesUpToMaxFilesPerPoll() throws Exception {
-        var trigger = FileCreatedTrigger.builder()
-            .id("evaluate-chunks-%s".formatted(IdUtils.create()))
-            .type(FileCreatedTrigger.class.getName())
-            .serviceAccount(Property.ofValue(SERVICE_ACCOUNT))
+        var trigger = trigger("evaluate-chunks")
             .folderId(Property.ofValue("root"))
             .includeSubfolders(Property.ofValue(true))
             .maxFilesPerPoll(Property.ofValue(3))
-            .interval(Duration.ofMinutes(1))
             .build();
 
         // root and its 200 subfolders make 201 ids, queried in chunks of 50, 50, 50, 50 and 1
@@ -389,11 +336,7 @@ class FileCreatedTriggerTest {
         );
         var mockedDrive = mockDrive(Map.of("root", subfolderIds), 1000, files);
 
-        var context = TestsUtils.mockTrigger(runContextFactory, trigger);
-        var spiedTrigger = spy(trigger);
-        doReturn(mockedDrive.drive()).when(spiedTrigger).from(any());
-
-        var execution = spiedTrigger.evaluate(context.getKey(), context.getValue());
+        var execution = evaluate(trigger, mockedDrive);
 
         // One file query per chunk, each folder id in exactly one of them
         var parentIdsPerQuery = mockedDrive.fileQueries().stream().map(FileCreatedTriggerTest::parentIds).toList();
@@ -411,10 +354,13 @@ class FileCreatedTriggerTest {
         List<String> fileQueries() {
             return q.getAllValues().stream().filter(query -> !query.startsWith(FOLDER_QUERY_PREFIX)).toList();
         }
+
+        List<String> folderQueries() {
+            return q.getAllValues().stream().filter(query -> query.startsWith(FOLDER_QUERY_PREFIX)).toList();
+        }
     }
 
-    // Mock Drive answering each files.list call from its captured q: a folder query gets the subfolders of its parent,
-    // folderPageSize at a time, and a file query gets the oldest files under any parent it names, pageSize at most
+    // Answers folder queries with subfolders (paged) and file queries with the oldest matching files
     private MockedDrive mockDrive(Map<String, List<String>> subfolders, int folderPageSize, List<File> files) throws Exception {
         var q = ArgumentCaptor.forClass(String.class);
         var pageSize = ArgumentCaptor.forClass(Integer.class);
@@ -454,6 +400,21 @@ class FileCreatedTriggerTest {
         when(get.executeMediaAsInputStream()).thenAnswer(invocation -> new ByteArrayInputStream("content".getBytes(StandardCharsets.UTF_8)));
 
         return new MockedDrive(drive, q, pageSize, pageToken);
+    }
+
+    private static FileCreatedTrigger.FileCreatedTriggerBuilder<?, ?> trigger(String idPrefix) {
+        return FileCreatedTrigger.builder()
+            .id("%s-%s".formatted(idPrefix, IdUtils.create()))
+            .type(FileCreatedTrigger.class.getName())
+            .serviceAccount(Property.ofValue(SERVICE_ACCOUNT))
+            .interval(Duration.ofMinutes(1));
+    }
+
+    private Optional<Execution> evaluate(FileCreatedTrigger trigger, MockedDrive mockedDrive) throws Exception {
+        var context = TestsUtils.mockTrigger(runContextFactory, trigger);
+        var spiedTrigger = spy(trigger);
+        doReturn(mockedDrive.drive()).when(spiedTrigger).from(any());
+        return spiedTrigger.evaluate(context.getKey(), context.getValue());
     }
 
     private static List<String> parentIds(String query) {

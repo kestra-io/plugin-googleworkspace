@@ -18,6 +18,7 @@ import com.google.common.collect.Lists;
 
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
+import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.conditions.ConditionContext;
 import io.kestra.core.models.executions.Execution;
 import io.kestra.core.models.property.Property;
@@ -27,7 +28,6 @@ import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -150,7 +150,7 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
         title = "Include subfolders",
         description = """
             When true, files created in any subfolder of `folderId`, at any depth, also trigger an execution. Ignored when `folderId` is not set.
-            Each poll lists every subfolder, so a large tree costs one Drive call per folder per poll. Default false.
+            Each poll lists every subfolder, so a large tree costs one Drive call per folder, plus one file query per 50 folders, on every poll. Default false.
             """
     )
     @Builder.Default
@@ -216,17 +216,6 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
 
         logger.info("Found {} new file(s)", files.size());
 
-        // Update state with the latest createdTime
-        var newLastCreatedTime = files.stream()
-            .map(File::getCreatedTime)
-            .filter(Objects::nonNull)
-            .map(DateTime::toStringRfc3339)
-            .max(String::compareTo)
-            .orElse(String.valueOf(lastCreatedTime));
-
-        var newState = new HashMap<String, Object>();
-        newState.put("lastCreatedTime", newLastCreatedTime);
-
         // Process first file and create execution
         var outputFiles = new ArrayList<Output.FileMetadata>();
 
@@ -273,8 +262,7 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
         return Optional.of(execution);
     }
 
-    // Package-private so the queries can be tested without a Drive account
-    List<String> buildQueries(RunContext runContext, String lastCreatedTime, Drive drive) throws Exception {
+    private List<String> buildQueries(RunContext runContext, String lastCreatedTime, Drive drive) throws Exception {
         var queryParts = new ArrayList<String>();
 
         // Exclude trashed files
@@ -315,14 +303,15 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
         var rIncludeSubfolders = runContext.render(includeSubfolders).as(Boolean.class).orElse(false);
         var folderIds = rIncludeSubfolders ? collectFolderIds(drive, rFolderId.get()) : List.of(rFolderId.get());
 
-        var queries = new ArrayList<String>();
-        for (var chunk : Lists.partition(folderIds, MAX_FOLDERS_PER_QUERY)) {
-            var parentClause = chunk.stream()
-                .map("'%s' in parents"::formatted)
-                .collect(Collectors.joining(" or "));
-            queries.add("%s and %s".formatted(query, chunk.size() > 1 ? "(%s)".formatted(parentClause) : parentClause));
-        }
-        return queries;
+        return Lists.partition(folderIds, MAX_FOLDERS_PER_QUERY).stream()
+            .map(chunk ->
+            {
+                var parentClause = chunk.stream()
+                    .map("'%s' in parents"::formatted)
+                    .collect(Collectors.joining(" or "));
+                return "%s and %s".formatted(query, chunk.size() > 1 ? "(%s)".formatted(parentClause) : parentClause);
+            })
+            .toList();
     }
 
     // Breadth-first walk returning the root folder id and every descendant folder id, each once
