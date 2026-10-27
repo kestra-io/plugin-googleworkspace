@@ -7,6 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIf;
+import org.mockito.Mockito;
+
+import com.google.api.services.sheets.v4.Sheets;
+import com.google.api.services.sheets.v4.model.ValueRange;
 
 import io.kestra.core.junit.annotations.KestraTest;
 import io.kestra.core.models.property.Property;
@@ -21,6 +26,7 @@ import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 @KestraTest
 class ReadRangeTest {
@@ -32,6 +38,10 @@ class ReadRangeTest {
 
     @SuppressWarnings("unchecked")
     @Test
+    @DisabledIf(
+        value = "isServiceAccountNotExists",
+        disabledReason = "Disabled without GCP credentials"
+    )
     void rangeFetch() throws Exception {
         ReadRange task = ReadRange.builder()
             .id(ReadRangeTest.class.getSimpleName())
@@ -50,6 +60,10 @@ class ReadRangeTest {
 
     @SuppressWarnings("unchecked")
     @Test
+    @DisabledIf(
+        value = "isServiceAccountNotExists",
+        disabledReason = "Disabled without GCP credentials"
+    )
     void rangeStore() throws Exception {
         ReadRange task = ReadRange.builder()
             .id(ReadRangeTest.class.getSimpleName())
@@ -68,5 +82,48 @@ class ReadRangeTest {
 
         assertThat(((Map<String, Object>) result.get(0)).get("Student Name"), is("Alexandra"));
         assertThat(((Map<String, Object>) result.get(0)).get("Formula"), is("Female"));
+    }
+
+    @Test
+    void emptyRange() throws Exception {
+        Sheets sheets = Mockito.mock(Sheets.class);
+        Sheets.Spreadsheets spreadsheets = Mockito.mock(Sheets.Spreadsheets.class);
+        Sheets.Spreadsheets.Values values = Mockito.mock(Sheets.Spreadsheets.Values.class);
+        Sheets.Spreadsheets.Values.Get get = Mockito.mock(Sheets.Spreadsheets.Values.Get.class);
+
+        Mockito.when(sheets.spreadsheets()).thenReturn(spreadsheets);
+        Mockito.when(spreadsheets.values()).thenReturn(values);
+        Mockito.when(values.get(Mockito.anyString(), Mockito.any())).thenReturn(get);
+        Mockito.when(get.set(Mockito.anyString(), Mockito.any())).thenReturn(get);
+
+        ValueRange valueRange = new ValueRange()
+            .setRange("EmptySheet!A1:Z50")
+            .setValues(null);
+
+        Mockito.when(get.execute()).thenReturn(valueRange);
+
+        ReadRange task = Mockito.spy(
+            ReadRange.builder()
+                .id(ReadRangeTest.class.getSimpleName())
+                .type(ReadRange.class.getName())
+                .spreadsheetId(Property.ofValue("mockSpreadsheetId"))
+                .range(Property.ofValue("EmptySheet!A1:Z50"))
+                .fetch(Property.ofValue(true))
+                .build()
+        );
+
+        Mockito.doReturn(sheets).when(task).connection(Mockito.any());
+
+        var run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));
+
+        assertThat(run, notNullValue());
+        assertThat(run.getSize(), is(0));
+        assertThat(run.getRows().isEmpty(), is(true));
+    }
+
+    private static boolean isServiceAccountNotExists() {
+        return UtilsTest.class
+            .getClassLoader()
+            .getResource(".gcp-service-account.json") == null;
     }
 }

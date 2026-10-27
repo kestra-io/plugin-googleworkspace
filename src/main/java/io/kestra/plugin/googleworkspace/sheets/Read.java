@@ -25,8 +25,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import static io.kestra.core.utils.Rethrow.throwFunction;
-
 @SuperBuilder
 @ToString
 @EqualsAndHashCode
@@ -85,10 +83,7 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
             .get(runContext.render(spreadsheetId).as(String.class).orElseThrow())
             .execute();
 
-        List<String> includedSheetsTitle = runContext.render(this.selectedSheetsTitle).asList(String.class)
-            .stream()
-            .map(throwFunction(runContext::render))
-            .collect(Collectors.toList());
+        List<String> includedSheetsTitle = runContext.render(this.selectedSheetsTitle).asList(String.class);
 
         List<Sheet> selectedSheets = spreadsheet
             .getSheets()
@@ -125,8 +120,9 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
             ValueRange valueRange = batchGet.getValueRanges().get(index);
             Sheet sheet = selectedSheets.get(index);
 
-            logger.info("Fetch {} rows from range '{}'", valueRange.getValues().size(), valueRange.getRange());
-            rowsCount.addAndGet(valueRange.getValues().size());
+            int count = valueRange.getValues() == null ? 0 : valueRange.getValues().size();
+            logger.info("Fetch {} rows from range '{}'", count, valueRange.getRange());
+            rowsCount.addAndGet(count);
 
             List<Object> values = this.transform(valueRange.getValues(), runContext);
 
