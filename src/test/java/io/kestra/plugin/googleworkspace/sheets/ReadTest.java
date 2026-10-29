@@ -18,6 +18,7 @@ import com.google.api.services.sheets.v4.model.ValueRange;
 import io.kestra.core.junit.annotations.KestraTest;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContextFactory;
+import io.kestra.core.utils.IdUtils;
 import io.kestra.core.utils.TestsUtils;
 import io.kestra.plugin.googleworkspace.UtilsTest;
 
@@ -86,7 +87,7 @@ class ReadTest {
 
     @Test
     void emptySheet() throws Exception {
-        Spreadsheet spreadsheet = new Spreadsheet()
+        var spreadsheet = new Spreadsheet()
             .setSheets(
                 List.of(
                     new Sheet().setProperties(
@@ -97,32 +98,18 @@ class ReadTest {
                 )
             );
 
-        Sheets sheets = Mockito.mock(Sheets.class);
-        Sheets.Spreadsheets spreadsheets = Mockito.mock(Sheets.Spreadsheets.class);
-        Sheets.Spreadsheets.Get get = Mockito.mock(Sheets.Spreadsheets.Get.class);
-        Sheets.Spreadsheets.Values values = Mockito.mock(Sheets.Spreadsheets.Values.class);
-        Sheets.Spreadsheets.Values.BatchGet batchGet = Mockito.mock(Sheets.Spreadsheets.Values.BatchGet.class);
-
-        Mockito.when(sheets.spreadsheets()).thenReturn(spreadsheets);
-        Mockito.when(spreadsheets.get(Mockito.anyString())).thenReturn(get);
-        Mockito.when(get.execute()).thenReturn(spreadsheet);
-
-        BatchGetValuesResponse batchResponse = new BatchGetValuesResponse()
+        var batchResponse = new BatchGetValuesResponse()
             .setValueRanges(
                 List.of(
                     new ValueRange().setRange("EmptySheet!R1C1:R10C5").setValues(null)
                 )
             );
 
-        Mockito.when(spreadsheets.values()).thenReturn(values);
-        Mockito.when(values.batchGet(Mockito.anyString())).thenReturn(batchGet);
-        Mockito.when(batchGet.setRanges(Mockito.anyList())).thenReturn(batchGet);
-        Mockito.when(batchGet.set(Mockito.anyString(), Mockito.any())).thenReturn(batchGet);
-        Mockito.when(batchGet.execute()).thenReturn(batchResponse);
+        var sheets = mockSheets(spreadsheet, batchResponse);
 
-        Read task = Mockito.spy(
+        var task = Mockito.spy(
             Read.builder()
-                .id(ReadTest.class.getSimpleName())
+                .id(IdUtils.create())
                 .type(Read.class.getName())
                 .spreadsheetId(Property.ofValue("mockSpreadsheetId"))
                 .fetch(Property.ofValue(true))
@@ -141,33 +128,56 @@ class ReadTest {
 
     @Test
     void noDoubleRenderingOfSheetTitles() throws Exception {
-        Spreadsheet spreadsheet = new Spreadsheet()
+        var spreadsheet = new Spreadsheet()
             .setSheets(
                 List.of(
                     new Sheet().setProperties(
                         new SheetProperties()
-                            .setTitle("Sheet_{2026}")
+                            .setTitle("Sheet {{ x }}")
                             .setGridProperties(new GridProperties().setRowCount(5).setColumnCount(2))
                     )
                 )
             );
 
-        Sheets sheets = Mockito.mock(Sheets.class);
-        Sheets.Spreadsheets spreadsheets = Mockito.mock(Sheets.Spreadsheets.class);
-        Sheets.Spreadsheets.Get get = Mockito.mock(Sheets.Spreadsheets.Get.class);
-        Sheets.Spreadsheets.Values values = Mockito.mock(Sheets.Spreadsheets.Values.class);
-        Sheets.Spreadsheets.Values.BatchGet batchGet = Mockito.mock(Sheets.Spreadsheets.Values.BatchGet.class);
+        var batchResponse = new BatchGetValuesResponse()
+            .setValueRanges(
+                List.of(
+                    new ValueRange().setRange("Sheet {{ x }}!R1C1:R5C2").setValues(null)
+                )
+            );
+
+        var sheets = mockSheets(spreadsheet, batchResponse);
+
+        var task = Mockito.spy(
+            Read.builder()
+                .id(IdUtils.create())
+                .type(Read.class.getName())
+                .spreadsheetId(Property.ofValue("mockSpreadsheetId"))
+                .selectedSheetsTitle(Property.ofExpression("{{ titles }}"))
+                .fetch(Property.ofValue(true))
+                .build()
+        );
+
+        Mockito.doReturn(sheets).when(task).connection(Mockito.any());
+
+        var runContext = runContextFactory.of(Map.of("titles", List.of("Sheet {{ x }}")));
+        var run = task.run(runContext);
+
+        assertThat(run, notNullValue());
+        assertThat(run.getSize(), is(0));
+        assertThat(run.getRows().containsKey("Sheet {{ x }}"), is(true));
+    }
+
+    private Sheets mockSheets(Spreadsheet spreadsheet, BatchGetValuesResponse batchResponse) throws Exception {
+        var sheets = Mockito.mock(Sheets.class);
+        var spreadsheets = Mockito.mock(Sheets.Spreadsheets.class);
+        var get = Mockito.mock(Sheets.Spreadsheets.Get.class);
+        var values = Mockito.mock(Sheets.Spreadsheets.Values.class);
+        var batchGet = Mockito.mock(Sheets.Spreadsheets.Values.BatchGet.class);
 
         Mockito.when(sheets.spreadsheets()).thenReturn(spreadsheets);
         Mockito.when(spreadsheets.get(Mockito.anyString())).thenReturn(get);
         Mockito.when(get.execute()).thenReturn(spreadsheet);
-
-        BatchGetValuesResponse batchResponse = new BatchGetValuesResponse()
-            .setValueRanges(
-                List.of(
-                    new ValueRange().setRange("Sheet_{2026}!R1C1:R5C2").setValues(null)
-                )
-            );
 
         Mockito.when(spreadsheets.values()).thenReturn(values);
         Mockito.when(values.batchGet(Mockito.anyString())).thenReturn(batchGet);
@@ -175,23 +185,7 @@ class ReadTest {
         Mockito.when(batchGet.set(Mockito.anyString(), Mockito.any())).thenReturn(batchGet);
         Mockito.when(batchGet.execute()).thenReturn(batchResponse);
 
-        Read task = Mockito.spy(
-            Read.builder()
-                .id(ReadTest.class.getSimpleName())
-                .type(Read.class.getName())
-                .spreadsheetId(Property.ofValue("mockSpreadsheetId"))
-                .selectedSheetsTitle(Property.ofValue(List.of("Sheet_{2026}")))
-                .fetch(Property.ofValue(true))
-                .build()
-        );
-
-        Mockito.doReturn(sheets).when(task).connection(Mockito.any());
-
-        var run = task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));
-
-        assertThat(run, notNullValue());
-        assertThat(run.getSize(), is(0));
-        assertThat(run.getRows().containsKey("Sheet_{2026}"), is(true));
+        return sheets;
     }
 
     private static boolean isServiceAccountNotExists() {

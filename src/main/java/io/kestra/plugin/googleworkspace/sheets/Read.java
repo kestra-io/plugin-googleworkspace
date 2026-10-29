@@ -83,12 +83,12 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
             .get(runContext.render(spreadsheetId).as(String.class).orElseThrow())
             .execute();
 
-        List<String> includedSheetsTitle = runContext.render(this.selectedSheetsTitle).asList(String.class);
+        var rIncludedSheetsTitle = runContext.render(this.selectedSheetsTitle).asList(String.class);
 
         List<Sheet> selectedSheets = spreadsheet
             .getSheets()
             .stream()
-            .filter(sheet -> includedSheetsTitle.size() == 0 || includedSheetsTitle.contains(sheet.getProperties().getTitle()))
+            .filter(sheet -> rIncludedSheetsTitle.isEmpty() || rIncludedSheetsTitle.contains(sheet.getProperties().getTitle()))
             .collect(Collectors.toList());
 
         runContext.metric(Counter.of("sheets", spreadsheet.getSheets().size()));
@@ -120,7 +120,7 @@ public class Read extends AbstractRead implements RunnableTask<Read.Output> {
             ValueRange valueRange = batchGet.getValueRanges().get(index);
             Sheet sheet = selectedSheets.get(index);
 
-            int count = valueRange.getValues() == null ? 0 : valueRange.getValues().size();
+            var count = valueRange.getValues() == null ? 0 : valueRange.getValues().size();
             logger.info("Fetch {} rows from range '{}'", count, valueRange.getRange());
             rowsCount.addAndGet(count);
 

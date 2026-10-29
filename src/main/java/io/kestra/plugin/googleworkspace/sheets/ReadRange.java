@@ -80,10 +80,9 @@ public class ReadRange extends AbstractRead implements RunnableTask<ReadRange.Ou
             .set("dateTimeRenderOption", runContext.render(this.dateTimeRender).as(DateTimeRender.class).orElseThrow().name())
             .execute();
 
-        int count = response.getValues() == null ? 0 : response.getValues().size();
-        logger.info("Fetch {} rows from range '{}'", count, response.getRange());
-
         List<Object> values = this.transform(response.getValues(), runContext);
+
+        logger.info("Fetch {} rows from range '{}'", values.size(), response.getRange());
 
         Output.OutputBuilder builder = Output.builder()
             .size(values.size());

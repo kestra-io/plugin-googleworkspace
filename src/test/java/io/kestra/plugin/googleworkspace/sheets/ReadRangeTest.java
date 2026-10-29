@@ -19,6 +19,7 @@ import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.serializers.FileSerde;
 import io.kestra.core.storages.StorageInterface;
 import io.kestra.core.tenant.TenantService;
+import io.kestra.core.utils.IdUtils;
 import io.kestra.core.utils.TestsUtils;
 import io.kestra.plugin.googleworkspace.UtilsTest;
 
@@ -86,25 +87,25 @@ class ReadRangeTest {
 
     @Test
     void emptyRange() throws Exception {
-        Sheets sheets = Mockito.mock(Sheets.class);
-        Sheets.Spreadsheets spreadsheets = Mockito.mock(Sheets.Spreadsheets.class);
-        Sheets.Spreadsheets.Values values = Mockito.mock(Sheets.Spreadsheets.Values.class);
-        Sheets.Spreadsheets.Values.Get get = Mockito.mock(Sheets.Spreadsheets.Values.Get.class);
+        var sheets = Mockito.mock(Sheets.class);
+        var spreadsheets = Mockito.mock(Sheets.Spreadsheets.class);
+        var values = Mockito.mock(Sheets.Spreadsheets.Values.class);
+        var get = Mockito.mock(Sheets.Spreadsheets.Values.Get.class);
 
         Mockito.when(sheets.spreadsheets()).thenReturn(spreadsheets);
         Mockito.when(spreadsheets.values()).thenReturn(values);
         Mockito.when(values.get(Mockito.anyString(), Mockito.any())).thenReturn(get);
         Mockito.when(get.set(Mockito.anyString(), Mockito.any())).thenReturn(get);
 
-        ValueRange valueRange = new ValueRange()
+        var valueRange = new ValueRange()
             .setRange("EmptySheet!A1:Z50")
             .setValues(null);
 
         Mockito.when(get.execute()).thenReturn(valueRange);
 
-        ReadRange task = Mockito.spy(
+        var task = Mockito.spy(
             ReadRange.builder()
-                .id(ReadRangeTest.class.getSimpleName())
+                .id(IdUtils.create())
                 .type(ReadRange.class.getName())
                 .spreadsheetId(Property.ofValue("mockSpreadsheetId"))
                 .range(Property.ofValue("EmptySheet!A1:Z50"))
