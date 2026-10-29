@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIf;
 import org.mockito.Mockito;
 
 import com.google.api.services.sheets.v4.Sheets;
@@ -36,10 +35,6 @@ class ReadTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    @DisabledIf(
-        value = "isServiceAccountNotExists",
-        disabledReason = "Disabled without GCP credentials"
-    )
     void run() throws Exception {
         Read task = Read.builder()
             .id(ReadTest.class.getSimpleName())
@@ -63,10 +58,6 @@ class ReadTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    @DisabledIf(
-        value = "isServiceAccountNotExists",
-        disabledReason = "Disabled without GCP credentials"
-    )
     void selected() throws Exception {
         Read task = Read.builder()
             .id(ReadTest.class.getSimpleName())
@@ -186,11 +177,5 @@ class ReadTest {
         Mockito.when(batchGet.execute()).thenReturn(batchResponse);
 
         return sheets;
-    }
-
-    private static boolean isServiceAccountNotExists() {
-        return UtilsTest.class
-            .getClassLoader()
-            .getResource(".gcp-service-account.json") == null;
     }
 }

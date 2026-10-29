@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIf;
 import org.mockito.Mockito;
 
 import com.google.api.services.sheets.v4.Sheets;
@@ -39,10 +38,6 @@ class ReadRangeTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    @DisabledIf(
-        value = "isServiceAccountNotExists",
-        disabledReason = "Disabled without GCP credentials"
-    )
     void rangeFetch() throws Exception {
         ReadRange task = ReadRange.builder()
             .id(ReadRangeTest.class.getSimpleName())
@@ -61,10 +56,6 @@ class ReadRangeTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    @DisabledIf(
-        value = "isServiceAccountNotExists",
-        disabledReason = "Disabled without GCP credentials"
-    )
     void rangeStore() throws Exception {
         ReadRange task = ReadRange.builder()
             .id(ReadRangeTest.class.getSimpleName())
@@ -120,11 +111,5 @@ class ReadRangeTest {
         assertThat(run, notNullValue());
         assertThat(run.getSize(), is(0));
         assertThat(run.getRows().isEmpty(), is(true));
-    }
-
-    private static boolean isServiceAccountNotExists() {
-        return UtilsTest.class
-            .getClassLoader()
-            .getResource(".gcp-service-account.json") == null;
     }
 }
