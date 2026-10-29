@@ -97,20 +97,26 @@ public abstract class AbstractChatConnection extends Task implements RunnableTas
         @PluginProperty(group = "execution")
         private final Property<Duration> readIdleTimeout = Property.ofValue(Duration.of(5, ChronoUnit.MINUTES));
 
+        @Deprecated
         @Schema(
             title = "Connection pool idle timeout",
-            description = "How long an idle connection stays in the pool; default PT0S"
+            description = """
+                Deprecated, this option has no effect: neither Kestra's HTTP client nor the Google Chat client supports a connection pool idle timeout.
+                """
         )
         @Builder.Default
-        @PluginProperty(group = "execution")
+        @PluginProperty(group = "deprecated")
         private final Property<Duration> connectionPoolIdleTimeout = Property.ofValue(Duration.ofSeconds(0));
 
+        @Deprecated
         @Schema(
             title = "Maximum response body size",
-            description = "Maximum response body length; default 10MB"
+            description = """
+                Deprecated, this option has no effect: neither Kestra's HTTP client nor the Google Chat client limits the response size.
+                """
         )
         @Builder.Default
-        @PluginProperty(group = "execution")
+        @PluginProperty(group = "deprecated")
         private final Property<Integer> maxContentLength = Property.ofValue(1024 * 1024 * 10);
 
         @Schema(
