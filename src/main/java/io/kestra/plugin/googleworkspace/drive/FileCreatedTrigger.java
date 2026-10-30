@@ -1,6 +1,5 @@
 package io.kestra.plugin.googleworkspace.drive;
 
-import java.io.InputStream;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
@@ -11,16 +10,15 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-
 import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
-import com.google.api.services.drive.model.FileList;
 import com.google.api.services.drive.model.User;
+import com.google.common.collect.Lists;
 
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
+import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.conditions.ConditionContext;
 import io.kestra.core.models.executions.Execution;
 import io.kestra.core.models.property.Property;
@@ -30,7 +28,6 @@ import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -115,6 +112,9 @@ import io.kestra.core.models.annotations.PluginProperty;
 )
 public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingTriggerInterface, TriggerOutput<FileCreatedTrigger.Output> {
 
+    // Drive can reject long OR chains as "query is too complex", so each file query covers at most this many folders
+    private static final int MAX_FOLDERS_PER_QUERY = 50;
+
     @Schema(
         title = "OAuth scopes",
         description = "Drive scopes to request; default metadata read-only"
@@ -125,7 +125,9 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
 
     @Schema(
         title = "Folder ID to monitor",
-        description = "Google Drive folder ID; monitors entire Drive if omitted"
+        description = """
+            Google Drive folder ID. The entire Drive is monitored if omitted.
+            """
     )
     @PluginProperty(group = "advanced")
     protected Property<String> folderId;
@@ -146,7 +148,10 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
 
     @Schema(
         title = "Include subfolders",
-        description = "When true, query is recursive through subfolders; default false"
+        description = """
+            When true, files created in any subfolder of `folderId`, at any depth, also trigger an execution. Ignored when `folderId` is not set.
+            Each poll lists every subfolder, so a large tree costs one Drive call per folder, plus one file query per 50 folders, on every poll. Default false.
+            """
     )
     @Builder.Default
     @PluginProperty(group = "advanced")
@@ -170,53 +175,54 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
 
     @Override
     public Optional<Execution> evaluate(ConditionContext conditionContext, TriggerContext context) throws Exception {
-        RunContext runContext = conditionContext.getRunContext();
-        Logger logger = runContext.logger();
+        var runContext = conditionContext.getRunContext();
+        var logger = runContext.logger();
 
-        Drive driveService = from(runContext);
+        var driveService = from(runContext);
 
-        Instant lastCreatedTime = context.getNextExecutionDate() != null
+        var lastCreatedTime = context.getNextExecutionDate() != null
             ? context.getNextExecutionDate().toInstant().minus((TemporalAmount) this.interval)
             : Instant.now().minus((TemporalAmount) this.interval);
-        ;
 
-        String query = buildQuery(runContext, String.valueOf(lastCreatedTime));
-        logger.debug("Executing Drive query: {}", query);
+        var rMaxFilesPerPoll = runContext.render(maxFilesPerPoll).as(Integer.class).orElse(100);
 
-        FileList result = driveService.files().list()
-            .setQ(query)
-            .setPageSize(runContext.render(maxFilesPerPoll).as(Integer.class).orElse(100))
-            .setOrderBy("createdTime")
-            .setFields("files(id,name,mimeType,createdTime,modifiedTime,owners,parents,size,webViewLink,iconLink,thumbnailLink)")
-            .execute();
+        // A file with parents in two chunks comes back from both queries, so results are merged by id
+        var filesById = new LinkedHashMap<String, File>();
+        for (var query : buildQueries(runContext, String.valueOf(lastCreatedTime), driveService)) {
+            logger.debug("Executing Drive query: {}", query);
 
-        List<File> files = result.getFiles();
+            var result = driveService.files().list()
+                .setQ(query)
+                .setPageSize(rMaxFilesPerPoll)
+                .setOrderBy("createdTime")
+                .setFields("files(id,name,mimeType,createdTime,modifiedTime,owners,parents,size,webViewLink,iconLink,thumbnailLink)")
+                .execute();
 
-        if (files == null || files.isEmpty()) {
+            if (result.getFiles() != null) {
+                result.getFiles().forEach(file -> filesById.putIfAbsent(file.getId(), file));
+            }
+        }
+
+        // Each query returns its own oldest files, so the merged files are sorted again before applying maxFilesPerPoll
+        var files = filesById.values().stream()
+            .sorted(Comparator.comparing(File::getCreatedTime, Comparator.nullsLast(Comparator.comparingLong(DateTime::getValue))))
+            .limit(rMaxFilesPerPoll)
+            .toList();
+
+        if (files.isEmpty()) {
             logger.debug("No new files found");
             return Optional.empty();
         }
 
         logger.info("Found {} new file(s)", files.size());
 
-        // Update state with the latest createdTime
-        String newLastCreatedTime = files.stream()
-            .map(File::getCreatedTime)
-            .filter(Objects::nonNull)
-            .map(DateTime::toStringRfc3339)
-            .max(String::compareTo)
-            .orElse(String.valueOf(lastCreatedTime));
-
-        Map<String, Object> newState = new HashMap<>();
-        newState.put("lastCreatedTime", newLastCreatedTime);
-
         // Process first file and create execution
-        List<Output.FileMetadata> outputFiles = new ArrayList<>();
+        var outputFiles = new ArrayList<Output.FileMetadata>();
 
-        for (File file : files) {
+        for (var file : files) {
             URI kestraUri = null;
             try {
-                InputStream fileContent = driveService.files()
+                var fileContent = driveService.files()
                     .get(file.getId())
                     .executeMediaAsInputStream();
                 kestraUri = runContext.storage().putFile(fileContent, file.getName());
@@ -245,52 +251,99 @@ public class FileCreatedTrigger extends AbstractDriveTrigger implements PollingT
             );
         }
 
-        Output output = Output.builder()
+        var output = Output.builder()
             .files(outputFiles)
             .build();
 
-        Execution execution = TriggerService.generateExecution(this, conditionContext, context, output);
+        var execution = TriggerService.generateExecution(this, conditionContext, context, output);
 
         logger.info("Triggering execution with {} new files", outputFiles.size());
 
         return Optional.of(execution);
     }
 
-    private String buildQuery(RunContext runContext, String lastCreatedTime) throws Exception {
-        List<String> queryParts = new ArrayList<>();
+    private List<String> buildQueries(RunContext runContext, String lastCreatedTime, Drive drive) throws Exception {
+        var queryParts = new ArrayList<String>();
 
         // Exclude trashed files
         queryParts.add("trashed = false");
 
-        // Filter by folder
-        var renderedFolderId = runContext.render(folderId).as(String.class);
-        renderedFolderId.ifPresent(s -> queryParts.add("'" + s + "' in parents"));
-
         // Filter by MIME type
-        var renderedMimeTypes = runContext.render(mimeTypes).asList(String.class);
-        if (!renderedMimeTypes.isEmpty()) {
-            String mimeTypeQuery = renderedMimeTypes.stream()
-                .map(mt -> "mimeType = '" + mt + "'")
+        var rMimeTypes = runContext.render(mimeTypes).asList(String.class);
+        if (!rMimeTypes.isEmpty()) {
+            var mimeTypeQuery = rMimeTypes.stream()
+                .map("mimeType = '%s'"::formatted)
                 .collect(Collectors.joining(" or "));
-            queryParts.add("(" + mimeTypeQuery + ")");
+            queryParts.add("(%s)".formatted(mimeTypeQuery));
         }
 
         // Filter by owner
-        var renderedOwnerEmail = runContext.render(ownerEmail).as(String.class);
-        if (renderedOwnerEmail.isPresent()) {
-            String email = renderedOwnerEmail.get();
+        var rOwnerEmail = runContext.render(ownerEmail).as(String.class);
+        if (rOwnerEmail.isPresent()) {
+            var email = rOwnerEmail.get();
             if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
-                throw new IllegalArgumentException("Invalid ownerEmail: " + email);
+                throw new IllegalArgumentException("Invalid ownerEmail: %s".formatted(email));
             }
-            queryParts.add("'" + email + "' in owners");
+            queryParts.add("'%s' in owners".formatted(email));
         }
 
         // Filter by creation time (only get files created after last check)
         if (lastCreatedTime != null) {
-            queryParts.add("createdTime > '" + lastCreatedTime + "'");
+            queryParts.add("createdTime > '%s'".formatted(lastCreatedTime));
         }
 
-        return String.join(" and ", queryParts);
+        var query = String.join(" and ", queryParts);
+
+        var rFolderId = runContext.render(folderId).as(String.class);
+        if (rFolderId.isEmpty()) {
+            return List.of(query);
+        }
+
+        var rIncludeSubfolders = runContext.render(includeSubfolders).as(Boolean.class).orElse(false);
+        var folderIds = rIncludeSubfolders ? collectFolderIds(drive, rFolderId.get()) : List.of(rFolderId.get());
+
+        return Lists.partition(folderIds, MAX_FOLDERS_PER_QUERY).stream()
+            .map(chunk ->
+            {
+                var parentClause = chunk.stream()
+                    .map("'%s' in parents"::formatted)
+                    .collect(Collectors.joining(" or "));
+                return "%s and %s".formatted(query, chunk.size() > 1 ? "(%s)".formatted(parentClause) : parentClause);
+            })
+            .toList();
+    }
+
+    // Breadth-first walk returning the root folder id and every descendant folder id, each once
+    private List<String> collectFolderIds(Drive drive, String rootFolderId) throws Exception {
+        var visited = new LinkedHashSet<String>();
+        visited.add(rootFolderId);
+
+        var queue = new ArrayDeque<String>();
+        queue.add(rootFolderId);
+
+        while (!queue.isEmpty()) {
+            var parentId = queue.poll();
+            String pageToken = null;
+            do {
+                var result = drive.files().list()
+                    .setQ("mimeType = 'application/vnd.google-apps.folder' and '%s' in parents and trashed = false".formatted(parentId))
+                    .setFields("nextPageToken, files(id)")
+                    .setPageSize(1000)
+                    .setPageToken(pageToken)
+                    .execute();
+                if (result.getFiles() != null) {
+                    for (var folder : result.getFiles()) {
+                        // A folder with several parents is listed under each of them, so it is only queued the first time
+                        if (visited.add(folder.getId())) {
+                            queue.add(folder.getId());
+                        }
+                    }
+                }
+                pageToken = result.getNextPageToken();
+            } while (pageToken != null);
+        }
+
+        return List.copyOf(visited);
     }
 
     private ZonedDateTime parseDateTime(com.google.api.client.util.DateTime dateTime) {
