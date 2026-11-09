@@ -1,7 +1,7 @@
 package io.kestra.plugin.googleworkspace.chat;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
@@ -13,15 +13,14 @@ import io.micronaut.http.annotation.Post;
 
 @Controller
 public class FakeWebhookController {
-    public static String data;
-    public static Map<String, String> headers = new HashMap<>();
-    public static Map<String, String> queryParameters = new HashMap<>();
+    public static volatile String data;
+    public static Map<String, String> headers = new ConcurrentHashMap<>();
+    public static Map<String, String> queryParameters = new ConcurrentHashMap<>();
 
     /** Stubs the real spaces.messages.create path the Chat SDK builds from a webhook URL. */
     @Post("/v1/spaces/{space}/messages")
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED })
     public HttpResponse<String> createMessage(HttpRequest<?> request, String space, @Body String data) {
-        FakeWebhookController.data = data;
         request.getHeaders().forEach((name, values) ->
         {
             if (!values.isEmpty()) {
@@ -34,6 +33,8 @@ public class FakeWebhookController {
                 queryParameters.put(name, values.get(0));
             }
         });
+        // Publish data last: tests wait on it, so headers/queryParameters must already be filled.
+        FakeWebhookController.data = data;
 
         return HttpResponse.ok("{\"name\":\"" + space + "/messages/unit-test\"}")
             .contentType(MediaType.APPLICATION_JSON);
@@ -59,14 +60,13 @@ public class FakeWebhookController {
     @Post("/webhook-unit-test/with-headers")
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED })
     public HttpResponse<String> postWithHeaders(HttpRequest<?> request, @Body String data) {
-
-        FakeWebhookController.data = data;
         request.getHeaders().forEach((name, values) ->
         {
             if (!values.isEmpty()) {
                 headers.put(name, values.get(0));
             }
         });
+        FakeWebhookController.data = data;
 
         return HttpResponse.ok("ok");
     }
