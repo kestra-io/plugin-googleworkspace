@@ -76,9 +76,9 @@ import io.kestra.core.models.annotations.PluginProperty;
                 namespace: company.team
 
                 tasks:
-                  - id: process_changes
-                    type: io.kestra.plugin.core.debug.Return
-                    format: |
+                  - id: log_changes
+                    type: io.kestra.plugin.core.log.Log
+                    message: |
                       {% if trigger.count > 0 %}
                       Changes detected in sheet:
                       - Modified at: {{ trigger.modifications[0].modifiedTime }}
