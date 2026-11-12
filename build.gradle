@@ -41,6 +41,9 @@ tasks.withType(JavaCompile) {
 configurations.all {
     // SEC-0369: platform BOM pins guava 33.4.8-jre, remove once it ships >= 33.7.2.
     resolutionStrategy.force "com.google.guava:guava:33.7.2-jre"
+
+    // SEC-2095: lz4-java < 1.11.4 is vulnerable (CVE-2026-106451, CVE-2026-106450, CVE-2026-106449), pulled transitively.
+    resolutionStrategy.force "at.yawk.lz4:lz4-java:1.11.4"
 }
 
 dependencies {
