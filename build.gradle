@@ -41,6 +41,8 @@ tasks.withType(JavaCompile) {
 configurations.all {
     // SEC-0369: platform BOM pins guava 33.4.8-jre, remove once it ships >= 33.7.2.
     resolutionStrategy.force "com.google.guava:guava:33.7.2-jre"
+    // SEC-0370: snappy-java < 1.1.10.9 allows DoS via unbounded memory allocation, remove once the platform ships >= 1.1.10.9.
+    resolutionStrategy.force "org.xerial.snappy:snappy-java:1.1.10.9"
 }
 
 dependencies {
