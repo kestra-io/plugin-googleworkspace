@@ -43,6 +43,8 @@ configurations.all {
     resolutionStrategy.force "com.google.guava:guava:33.7.2-jre"
     // SEC-0370: snappy-java < 1.1.10.9 allows DoS via unbounded memory allocation, remove once the platform ships >= 1.1.10.9.
     resolutionStrategy.force "org.xerial.snappy:snappy-java:1.1.10.9"
+    // SEC-0139: lz4-java < 1.11.4 is vulnerable (pulled in by orc-core 2.3.1, latest release), remove once orc-core ships >= 1.11.4.
+    resolutionStrategy.force "at.yawk.lz4:lz4-java:1.11.4"
 }
 
 dependencies {
