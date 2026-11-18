@@ -225,6 +225,11 @@ shadowJar {
     archiveClassifier.set(null)
     mergeServiceFiles()
     zip64 true
+    // SEC-2390: hadoop-client-runtime (3.4.3 and latest 3.5.0) bundles a relocated jetty 9.4.57/9.4.58 (jetty-http < 9.4.60),
+    // which cannot be pinned. It only backs Hadoop's embedded HTTP server, unused for Parquet/ORC parsing. Remove once hadoop ships jetty >= 9.4.60.
+    exclude 'org/apache/hadoop/shaded/org/eclipse/jetty/**'
+    exclude 'META-INF/maven/org.eclipse.jetty*/**'
+    exclude 'META-INF/services/org.apache.hadoop.shaded.org.eclipse.jetty.*'
 }
 
 
