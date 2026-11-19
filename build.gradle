@@ -230,6 +230,10 @@ shadowJar {
     exclude 'org/apache/hadoop/shaded/org/eclipse/jetty/**'
     exclude 'META-INF/maven/org.eclipse.jetty*/**'
     exclude 'META-INF/services/org.apache.hadoop.shaded.org.eclipse.jetty.*'
+    // SEC-2111: hadoop-client-runtime also shades jline 3.9.0 (jline-remote-telnet, CVE-2026-56740/56741), only used by
+    // Hadoop's interactive shell and unused here. Remove once hadoop ships jline >= 3.30.14.
+    exclude 'org/apache/hadoop/shaded/org/jline/builtins/telnet/**'
+    exclude 'META-INF/maven/org.jline/jline-remote-telnet/**'
 }
 
 
