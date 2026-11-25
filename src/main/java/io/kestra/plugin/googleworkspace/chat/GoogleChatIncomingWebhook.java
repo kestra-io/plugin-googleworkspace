@@ -139,7 +139,12 @@ public class GoogleChatIncomingWebhook extends AbstractChatConnection {
         URI uri = URI.create(rUrl);
         Matcher matcher = WEBHOOK_PATH.matcher(uri.getPath() == null ? "" : uri.getPath());
 
-        Message message = matcher.matches() ? message(rPayload, logger) : null;
+        var hasProxy = this.options != null
+            && this.options.getProxy() != null
+            && runContext.render(this.options.getProxy().getAddress()).as(String.class).filter(a -> !a.isBlank()).isPresent();
+
+        // The Google transport cannot authenticate to a proxy, Kestra's HttpClient can
+        var message = !hasProxy && matcher.matches() ? message(rPayload, logger) : null;
 
         if (message == null) {
             // Google treats the webhook URL as opaque, so anything we cannot read stays a verbatim POST

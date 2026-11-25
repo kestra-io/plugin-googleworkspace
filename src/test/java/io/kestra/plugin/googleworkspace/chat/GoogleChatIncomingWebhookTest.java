@@ -1,15 +1,21 @@
 package io.kestra.plugin.googleworkspace.chat;
 
 import java.io.File;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Base64;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 
 import com.google.common.io.Files;
+import com.sun.net.httpserver.HttpServer;
 
+import io.kestra.core.http.client.configurations.ProxyConfiguration;
 import io.kestra.core.junit.annotations.KestraTest;
 import io.kestra.core.models.flows.Flow;
 import io.kestra.core.models.property.Property;
@@ -143,6 +149,56 @@ public class GoogleChatIncomingWebhookTest {
         assertThat(FakeWebhookController.headers.get("x-custom-header"), is("kestra"));
     }
 
+    @Test
+    void sendsThroughAnAuthenticatedProxy() throws Exception {
+        var expected = "Basic %s".formatted(Base64.getEncoder().encodeToString("kestra:s3cret".getBytes(StandardCharsets.UTF_8)));
+        var seenUri = new AtomicReference<String>();
+        var seenBody = new AtomicReference<String>();
+
+        var proxy = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        proxy.createContext("/", exchange ->
+        {
+            var auth = exchange.getRequestHeaders().getFirst("Proxy-Authorization");
+            if (!expected.equals(auth)) {
+                exchange.getResponseHeaders().add("Proxy-Authenticate", "Basic realm=\"x\"");
+                exchange.sendResponseHeaders(407, -1);
+            } else {
+                seenUri.set(exchange.getRequestURI().toString());
+                seenBody.set(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+                exchange.sendResponseHeaders(200, -1);
+            }
+            exchange.close();
+        });
+        proxy.start();
+
+        try {
+            var task = GoogleChatIncomingWebhook.builder()
+                .url("http://chat.example.test/v1/spaces/AAAA/messages?key=k&token=t")
+                .payload(Property.ofValue("{\"text\":\"hi\"}"))
+                .options(
+                    AbstractChatConnection.RequestOptions.builder()
+                        .proxy(
+                            ProxyConfiguration.builder()
+                                .type(Property.ofValue(Proxy.Type.HTTP))
+                                .address(Property.ofValue("127.0.0.1"))
+                                .port(Property.ofValue(proxy.getAddress().getPort()))
+                                .username(Property.ofValue("kestra"))
+                                .password(Property.ofValue("s3cret"))
+                                .build()
+                        )
+                        .build()
+                )
+                .build();
+
+            task.run(runContextFactory.of(Map.of()));
+
+            assertThat(seenUri.get(), is("http://chat.example.test/v1/spaces/AAAA/messages?key=k&token=t"));
+            assertThat(seenBody.get(), is("{\"text\":\"hi\"}"));
+        } finally {
+            proxy.stop(0);
+        }
+    }
+
     /** A payload the Chat model cannot read must still be posted unchanged, as it was before the SDK. */
     @Test
     void postsAnUnparseablePayloadVerbatim() throws Exception {
@@ -155,7 +211,7 @@ public class GoogleChatIncomingWebhookTest {
             FakeWebhookController.data = null;
             FakeWebhookController.headers.clear();
 
-            GoogleChatIncomingWebhook task = GoogleChatIncomingWebhook.builder()
+            var task = GoogleChatIncomingWebhook.builder()
                 .url(embeddedServer.getURI() + "/v1/spaces/AAAAtest/messages?key=k&token=t")
                 .payload(Property.ofValue(payload))
                 .build();

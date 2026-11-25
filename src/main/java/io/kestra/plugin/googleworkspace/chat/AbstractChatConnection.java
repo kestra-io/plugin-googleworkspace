@@ -9,6 +9,7 @@ import java.util.Map;
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.http.HttpRequest;
 import io.kestra.core.http.client.configurations.HttpConfiguration;
+import io.kestra.core.http.client.configurations.ProxyConfiguration;
 import io.kestra.core.http.client.configurations.TimeoutConfiguration;
 import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.property.Property;
@@ -32,7 +33,7 @@ public abstract class AbstractChatConnection extends Task implements RunnableTas
 
     @Schema(
         title = "Configure HTTP client options",
-        description = "Optional HTTP settings (timeouts, charset, headers) applied to webhook calls"
+        description = "Optional HTTP settings (timeouts, charset, headers, proxy) applied to webhook calls"
     )
     @PluginProperty(dynamic = true, group = "advanced")
     protected RequestOptions options;
@@ -49,7 +50,8 @@ public abstract class AbstractChatConnection extends Task implements RunnableTas
                         .readIdleTimeout(this.options.getReadIdleTimeout())
                         .build()
                 )
-                .defaultCharset(this.options.getDefaultCharset());
+                .defaultCharset(this.options.getDefaultCharset())
+                .proxy(this.options.getProxy());
         }
 
         return configuration.build();
@@ -133,5 +135,15 @@ public abstract class AbstractChatConnection extends Task implements RunnableTas
         )
         @PluginProperty(group = "advanced")
         public Property<Map<String, String>> headers;
+
+        @Schema(
+            title = "Proxy",
+            description = """
+                Proxy for every send. Set `type: HTTP`, `address` and `port`, plus `username` and `password` for basic authentication.
+                When set, the message is sent as a plain HTTP POST to the webhook URL.
+                """
+        )
+        @PluginProperty(group = "advanced")
+        private final ProxyConfiguration proxy;
     }
 }
