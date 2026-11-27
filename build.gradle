@@ -235,6 +235,39 @@ shadowJar {
     exclude 'org/apache/hadoop/shaded/org/jline/**'
     exclude 'META-INF/maven/org.jline/**'
     exclude 'META-INF/services/org.apache.hadoop.shaded.org.jline.*'
+    // SEC-2093: hadoop-client-runtime (3.4.3 and latest 3.5.0) also shades jackson 2.12.7 (jackson-core CVE-2026-89425,
+    // jackson-databind 2.12.7.1), which cannot be pinned by the BOM. Hadoop only uses it for JSON dumps, KMS/WebHDFS/YARN
+    // clients and metrics, unused for local Parquet/ORC parsing. Remove once hadoop ships jackson >= 2.21.7.
+    exclude 'org/apache/hadoop/shaded/com/fasterxml/jackson/**'
+    // hadoop-client-runtime (2.12.7 jackson) and parquet-jackson (relocated jackson 2.22.x) are added back below without the
+    // Maven metadata of artifacts that are also bundled as real jars (jackson, guava, ...). Their stale/relocated pom.properties
+    // would otherwise win over the real BOM-managed ones, hiding the real versions from SCA scanners. Hadoop-only artifacts keep
+    // their metadata. This does not depend on the jar order.
+    dependencies {
+        exclude(dependency('org.apache.hadoop:hadoop-client-runtime'))
+        exclude(dependency('org.apache.parquet:parquet-jackson'))
+    }
+    from({
+        def jars = project.configurations.runtimeClasspath.files
+        def shadedJars = jars.findAll { it.name.startsWith('hadoop-client-runtime-') || it.name.startsWith('parquet-jackson-') }
+        def realMetadata = new HashSet<String>()
+        jars.findAll { !shadedJars.contains(it) && it.name.endsWith('.jar') }.each { jar ->
+            new java.util.zip.ZipFile(jar).withCloseable { zip ->
+                zip.entries().each { e ->
+                    def m = (e.name =~ /^META-INF\/maven\/([^\/]+\/[^\/]+)\/pom\.properties$/)
+                    if (m.matches()) realMetadata.add(m.group(1))
+                }
+            }
+        }
+        shadedJars.collect {
+            zipTree(it).matching {
+                realMetadata.each { ga -> exclude "META-INF/maven/${ga}/**" }
+                // jackson artifacts only shaded by hadoop, whose classes are excluded above
+                exclude 'META-INF/maven/com.fasterxml.jackson.jaxrs/**'
+                exclude 'META-INF/maven/com.fasterxml.jackson.module/**'
+            }
+        }
+    })
 }
 
 
