@@ -235,6 +235,14 @@ shadowJar {
     exclude 'org/apache/hadoop/shaded/org/jline/**'
     exclude 'META-INF/maven/org.jline/**'
     exclude 'META-INF/services/org.apache.hadoop.shaded.org.jline.*'
+    // SEC-2093: hadoop-client-runtime (3.4.3 and latest 3.5.0) also shades jackson 2.12.7 (jackson-core CVE-2026-89425,
+    // jackson-databind 2.12.7.1), which cannot be pinned by the BOM. Hadoop only uses it for JSON dumps, KMS/WebHDFS/YARN
+    // clients and metrics, unused for local Parquet/ORC parsing. Remove once hadoop ships jackson >= 2.21.7.
+    exclude 'org/apache/hadoop/shaded/com/fasterxml/jackson/**'
+    exclude 'META-INF/maven/com.fasterxml.jackson.jaxrs/**'
+    exclude 'META-INF/maven/com.fasterxml.jackson.module/**'
+    // hadoop-client-runtime's stale jackson pom.properties/pom.xml (2.12.7) would otherwise win over the BOM-managed 2.21.7 copy
+    exclude 'META-INF/maven/com.fasterxml.jackson.core/**'
 }
 
 
